@@ -1,6 +1,0 @@
-#If true, the controller checks that a velocity reference arrives before 500ms. If not, the arm is stopped
-bool securityStopEnabled
----
-bool success
-
-
