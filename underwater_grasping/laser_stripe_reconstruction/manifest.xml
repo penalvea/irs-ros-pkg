@@ -1,0 +1,20 @@
+<package>
+  <description brief="laser_stripe_reconstruction">
+
+     laser_stripe_reconstruction
+
+  </description>
+  <author>mprats</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/laser_stripe_reconstruction</url>
+
+  <depend package="roscpp"/>
+  <depend package="mar_perception"/>
+  <depend package="mar_action"/>
+  <depend package="mar_robot_arm5e"/>
+  <depend package="mar_ros_bridge"/>
+
+</package>
+
+

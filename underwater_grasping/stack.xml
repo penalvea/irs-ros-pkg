@@ -1,0 +1,10 @@
+<stack>
+  <description brief="underwater_grasping">underwater_grasping</description>
+  <author>Maintained by mprats</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/underwater_grasping</url>
+  <depend stack="ros" />
+  <depend stack="mar" />
+
+</stack>

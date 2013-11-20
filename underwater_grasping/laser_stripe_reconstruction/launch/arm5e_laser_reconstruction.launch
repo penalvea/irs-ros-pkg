@@ -1,0 +1,19 @@
+<launch>
+        <rosparam command="load" file="$(find laser_stripe_reconstruction)/launch/arm5e_laser_reconstruction.yaml" />
+
+        <arg name="image_topic" default="/uwsim/camera1" />
+        <arg name="camera_info_topic" default="/uwsim/camera1_info" />
+        <arg name="output_basename" default="output" />
+	<param name="image_topic" value="$(arg image_topic)" />
+	<param name="camera_info_topic" value="$(arg camera_info_topic)" />
+	<param name="output_basename" value="$(find laser_stripe_reconstruction)/data/$(arg output_basename)" />
+
+	<arg name="offline" default="true" />
+	<arg name="fixed" default="false" />
+	<param name="offline" value="$(arg offline)" />
+	<param name="fixed" value="$(arg fixed)" />
+
+        <node name="arm5e_laser_reconstruction" pkg="laser_stripe_reconstruction" type="laser_stripe_reconstruction" output="screen" respawn="false"/>
+</launch>
+
+
