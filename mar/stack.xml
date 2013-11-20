@@ -1,0 +1,9 @@
+<stack>
+  <description brief="mar">mar</description>
+  <author>Maintained by mprats</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/mar</url>
+  <depend stack="ros" />
+
+</stack>

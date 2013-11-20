@@ -1,0 +1,29 @@
+<package>
+  <description brief="mar_perception">
+
+     mar_perception
+
+  </description>
+  <author>mprats</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/mar_perception</url>
+
+  <depend package="roscpp"/>
+  <depend package="image_transport"/>
+  <depend package="visp"/>
+  <depend package="pcl"/>
+  <depend package="mar_core"/>
+  <depend package="mar_ros_bridge"/>
+  <depend package="mar_msgs"/>
+  <depend package="esm_tracking"/>
+  <depend package="opencv2"/>
+
+  <export>
+        <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lmar_perception"/>
+  </export>
+
+
+</package>
+
+

@@ -1,0 +1,18 @@
+<package>
+  <description brief="mar_msgs">
+
+     mar_msgs
+
+  </description>
+  <author>mprats</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/mar_msgs</url>
+
+  <export>
+  	<cpp cflags="-I${prefix}/msg_gen/cpp/include/"/>
+  </export>
+
+</package>
+
+

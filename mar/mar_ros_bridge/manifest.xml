@@ -1,0 +1,25 @@
+<package>
+  <description brief="mar_ros_bridge">
+
+     mar_ros_bridge
+
+  </description>
+  <author>mprats</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/mar_ros_bridge</url>
+
+  <depend package="roscpp"/>
+  <depend package="visp"/>
+  <depend package="nav_msgs"/>
+  <depend package="geometry_msgs"/>
+  <depend package="tf"/>
+  <depend package="kdl"/>
+
+  <export>
+    <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lmar_ros_bridge" />
+  </export>
+
+</package>
+
+

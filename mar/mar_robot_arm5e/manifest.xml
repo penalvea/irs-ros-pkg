@@ -1,0 +1,27 @@
+<package>
+  <description brief="mar_robot_arm5e">
+
+     mar_robot_arm5e
+
+  </description>
+  <author>mprats</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/mar_robot_arm5e</url>
+
+  <depend package="roscpp"/>
+  <depend package="geometry_msgs"/>
+  <depend package="kdl"/>
+  <depend package="visp"/>
+  <depend package="ARM5Controller"/>
+  <depend package="mar_core"/>
+  <depend package="mar_robot"/>
+  <depend package="tf" />
+
+  <export>
+    <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lmar_robot_arm5e"/>
+  </export>
+
+</package>
+
+
