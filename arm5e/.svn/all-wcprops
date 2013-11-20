@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/uji-ros-pkg/!svn/ver/40/trunk/irs-ros-pkg/arm5e
+END
+stack.xml
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/uji-ros-pkg/!svn/ver/40/trunk/irs-ros-pkg/arm5e/stack.xml
+END
+CMakeLists.txt
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/uji-ros-pkg/!svn/ver/40/trunk/irs-ros-pkg/arm5e/CMakeLists.txt
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/uji-ros-pkg/!svn/ver/40/trunk/irs-ros-pkg/arm5e/Makefile
+END

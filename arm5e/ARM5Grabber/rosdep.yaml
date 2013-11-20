@@ -1,0 +1,2 @@
+ieee1394libraries:
+  ubuntu: libdv4 libdv4-dev libraw1394-dev libraw1394-11 libiec61883-dev libiec61883-0 libavc1394-0 libavc1394-dev

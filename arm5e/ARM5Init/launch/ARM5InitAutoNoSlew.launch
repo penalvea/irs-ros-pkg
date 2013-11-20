@@ -1,0 +1,27 @@
+<!-- %Tag(FULL)%-->
+<launch>
+    <param name="initAuto" value="true" type="bool"/>
+
+     <param name="SlewDir" value="-1" type="int"/>
+     <param name="ShoulderDir" value="-1" type="int"/>
+     <param name="ElbowDir" value="-1" type="int"/>
+     <param name="WristDir" value="-1" type="int"/>
+     <param name="JawDir" value="-1" type="int"/>
+     <param name="scale" value="1500" type="double"/>
+
+    <param name="initSlew" value="false" type="bool"/>
+    <param name="initSlewThreshold" value="1" type="double"/>
+    <param name="initShoulder" value="true" type="bool"/>
+    <param name="initShoulderThreshold" value="1" type="double"/>
+    <param name="initElbow" value="true" type="bool"/>
+    <param name="initElbowThreshold" value="1" type="double"/>
+    <param name="initWrist" value="false" type="bool"/>
+    <param name="initWristThreshold" value="1" type="double"/>
+    <param name="initJaw" value="false" type="bool"/>
+    <param name="initJawThreshold" value="1" type="double"/>
+
+  <!-- joy-csiparm-initialization control node -->
+  <node pkg="ARM5Init" type="ARM5Init" name="ARM5Init"/>
+
+</launch>
+<!-- %EndTag(FULL)%-->

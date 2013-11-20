@@ -1,0 +1,11 @@
+<!-- %Tag(FULL)%-->
+<launch>
+  <param name="subsample" value="1" type="int"/>
+  
+  <!-- ARM5Grabber  -->
+  <node pkg="ARM5Grabber" type="ARM5Grabber" name="ARM5Grabber">
+    <remap from="/arm5e/camera" to="/arm5e/image_raw"/>
+  </node>
+
+</launch>
+<!-- %EndTag(FULL)%-->

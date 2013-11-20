@@ -1,0 +1,21 @@
+<!-- %Tag(FULL)%-->
+<launch>
+  
+  <!-- ARM5Grabber  -->
+  <node pkg="usb_cam" type="usb_cam_node" name="usb_cam">
+        <param name="pixel_format" value="yuyv" type="string"/>
+        <rosparam param="D">[-0.36999, 0.17395, -0.00155, 0.00287, 0.0]</rosparam>
+        <rosparam param="K">[626.07863, 0.0, 368.93077, 0.0, 682.77891, 284.82611, 0.0, 0.0, 1.0]</rosparam>
+        <rosparam param="R">[1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]</rosparam>
+        <rosparam param="P">[626.07863, 0.0, 368.93077, 0.0, 0.0, 682.77891, 284.82611, 0.0, 0.0, 0.0, 1.0, 0.0]</rosparam>
+  </node>
+  
+
+  <!-- node for image undistorting -->
+  <node ns="usb_cam" pkg="image_proc" type="image_proc"
+          name="image_proc">
+        <param name="subsample" value="2" type="int"/>
+  </node>
+
+</launch>
+<!-- %EndTag(FULL)%-->
