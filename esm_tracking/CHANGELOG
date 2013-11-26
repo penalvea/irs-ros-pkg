@@ -1,0 +1,13 @@
+ESM Visual Tracking and Control Kit for Linux
+
+Version 0.4: 06/09/2005
+
+- Fixed problem when drawing the tracked rectangular area on the current image
+
+Version 0.3: 06/09/2005
+
+- Fixed problem when the target partially gets out of the image
+
+Version 0.2: 26/08/2005
+
+- Standardization of Linux and Windows libraries

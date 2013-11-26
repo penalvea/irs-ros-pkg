@@ -1,0 +1,60 @@
+-------------------------------------------
+Demo code for ESM real-time visual tracking
+-------------------------------------------
+
+INRIA Sophia-Antipolis
+
+Authors: Selim BENHIMANE (Selim.Benhimane@sophia.inria.fr)
+	 Ezio  MALIS 	 (Ezio.Malis@sophia.inria.fr) 
+
+Version 0.1, April, 2005
+
+This directory contains a compiled library for performing real-time
+visual tracking, a sample program showing the use of the ESM tracking
+library and a 10 images test sequence.
+
+A longer test sequence with 200 images can be downloaded from the ftp
+site:
+
+	ftp://ftp-sop.inria.fr/icare/malis/software/ESM/seq.tar.gz
+
+See the web page at:
+
+	http://www-sop.inria.fr/icare/WEB/English/Software/ESM.html
+
+for references to the relevant papers describing the ESM approach.
+
+----------------------------------------
+Compiling and testing the sample program
+----------------------------------------
+
+The example program is named "src/ESMexample.c".
+
+To compile the example code under Linux, type in the current directory:
+
+% make 
+
+This will create a program called "ESMexample" in the bin/ directory.
+
+It should run under most versions of Linux on Intel compatible processors.
+
+To execute the program, do in this directory:
+
+% bin/ESMexample
+
+This program tracks a rectangular area of interest (defined in
+ESMexample.c) selected in the first image (seq/im000.pgm). The program
+reads the PGM images from the directory seq/ and saves new PGM images
+in the directory res/ with a rectangle overlayed indicating the
+location of the area of interest in the current image. You can use any
+tool (xv, gqview, gimp, ...) that displays the common PGM image format
+to inspect the result.  With few modification, you can use the library
+in a real-time application where the images are acquired on-line with
+your favorite camera.
+
+--------------------
+Licensing conditions
+--------------------
+
+This software is being made available for research purposes only.  
+See the file LICENSE in this directory for conditions of use.
