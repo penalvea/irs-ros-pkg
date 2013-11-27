@@ -30,5 +30,5 @@ rosbuild_gensrv()
 #target_link_libraries(example ${PROJECT_NAME})
 
 rosbuild_add_executable(ARM5Control src/ARM5Control.cpp src/ARM5Coms.cpp)
-rosbuild_add_executable(ARM5UJIONEControl src/ARM5UJIONEControl.cpp src/ARM5UJIONEComs.cpp)
+#rosbuild_add_executable(ARM5UJIONEControl src/ARM5UJIONEControl.cpp src/ARM5UJIONEComs.cpp)
 
