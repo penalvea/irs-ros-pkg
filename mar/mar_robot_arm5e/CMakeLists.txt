@@ -1,39 +1,36 @@
-cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+cmake_minimum_required(VERSION 2.8.3)
+project(mar_robot_arm5e)
 
-# Set the build type.  Options are:
-#  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
-#  Debug          : w/ debug symbols, w/o optimization
-#  Release        : w/o debug symbols, w/ optimization
-#  RelWithDebInfo : w/ debug symbols, w/ optimization
-#  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-#set(ROS_BUILD_TYPE RelWithDebInfo)
+find_package(Eigen REQUIRED)
+find_package(catkin REQUIRED COMPONENTS
+  kdl_conversions
+  roscpp
+  geometry_msgs
+)
 
-rosbuild_init()
+catkin_package(
+  INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME}
+  CATKIN_DEPENDS
+    kdl_conversions
+    geometry_msgs
+    roscpp
+  DEPENDS
+    boost
+)
 
-#set the default path for built executables to the "bin" directory
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-#set the default path for built libraries to the "lib" directory
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+include_directories(${PROJECT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
-if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    set( LIBRARY_TYPE STATIC )
-else( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    set( LIBRARY_TYPE SHARED )
-endif( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-
-#uncomment if you have defined messages
-#rosbuild_genmsg()
-#uncomment if you have defined services
-#rosbuild_gensrv()
+link_directories(${Boost_LIBRARY_DIRS})
+link_directories(${catkin_LIBRARY_DIRS})
 
 #common commands for building c++ executables and libraries
-rosbuild_add_library(${PROJECT_NAME} ${LIBRARY_TYPE}
+add_library(${PROJECT_NAME} 
 src/ARM5Solvers.cpp
 src/ARM5Arm.cpp
 )
-#target_link_libraries(${PROJECT_NAME} another_library)
-#rosbuild_add_boost_directories()
-#rosbuild_link_boost(${PROJECT_NAME} thread)
-#rosbuild_add_executable(example examples/example.cpp)
-#target_link_libraries(example ${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME} mar_robot ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+#add_dependencies(${MOVEIT_LIB_NAME} ${catkin_EXPORTED_TARGETS})
+
+install(DIRECTORY include/${PROJECT_NAME}
+   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
