@@ -16,10 +16,6 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <run_depend>mar_core</run_depend>
-  <run_depend>mar_robot</run_depend>
-  <run_depend>mar_msgs</run_depend>
-  <run_depend>mar_robot_arm5e</run_depend>
-  <run_depend>mar_ros_bridge</run_depend>
 
   <export>
     <metapackage/>
