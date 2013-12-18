@@ -1,36 +1,41 @@
-cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+cmake_minimum_required(VERSION 2.8.3)
+project(mar_perception)
 
-# Set the build type.  Options are:
-#  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
-#  Debug          : w/ debug symbols, w/o optimization
-#  Release        : w/o debug symbols, w/ optimization
-#  RelWithDebInfo : w/ debug symbols, w/ optimization
-#  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-#set(ROS_BUILD_TYPE RelWithDebInfo)
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  geometry_msgs
+  image_transport
+  pcl_ros
+)
+find_package(VISP REQUIRED)
+find_package(PCL REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(orocos_kdl REQUIRED)
 
-rosbuild_init()
 
-#set the default path for built executables to the "bin" directory
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-#set the default path for built libraries to the "lib" directory
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+catkin_package(
+  INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME}
+  CATKIN_DEPENDS    
+    geometry_msgs
+    roscpp
+    geometry_msgs
+    image_transport
+    mar_msgs
+    mar_core
+    mar_ros_bridge
+  DEPENDS
+    orocos_kdl
+    VISP
+    PCL
+    OpenCV
+)
 
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
+add_definitions(${VISP_DEFINITIONS})
+link_directories(${VISP_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${VISP_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
 
-if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    set( LIBRARY_TYPE STATIC )
-else( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    set( LIBRARY_TYPE SHARED )
-endif( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-
-#uncomment if you have defined messages
-#rosbuild_genmsg()
-#uncomment if you have defined services
-#rosbuild_gensrv()
-
-#common commands for building c++ executables and libraries
-rosbuild_add_library(${PROJECT_NAME} ${LIBRARY_TYPE}
+add_library(${PROJECT_NAME} ${LIBRARY_TYPE}
 src/ESMTracking.cpp
 src/ESMMRTracking.cpp
 src/VirtualImage.cpp
@@ -40,7 +45,8 @@ src/PCGraspPlanning.cpp
 src/MotionEstimator.cpp
 src/PlanarDetector.cpp
 )
-#target_link_libraries(${PROJECT_NAME} another_library)
-#rosbuild_add_boost_directories()
-#rosbuild_link_boost(${PROJECT_NAME} thread)
+target_link_libraries(${PROJECT_NAME} ${PCL_LIBRARIES} ${OpenCV_INCLUDE_DIRS})
+
+install(DIRECTORY include/${PROJECT_NAME}
+   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 

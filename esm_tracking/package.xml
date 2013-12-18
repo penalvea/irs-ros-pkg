@@ -1,7 +1,8 @@
 <package>
-  <name>mar</name>
+
+  <name>esm_tracking</name>
   <version>0.5.0</version>
-  <description> MAR </description>
+  <description> ROS wrapper around the ESM tracking library developed at INRIA Sophia-Antipolis by Selim Benhimane and Ezio Malis </description>
   <author email="marioprats@gmail.com">Mario Prats</author>
   
   <maintainer email="penalvea@uji.es">Toni Peñalver</maintainer>
@@ -15,17 +16,10 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <run_depend>mar_core</run_depend>
-  <run_depend>mar_msgs</run_depend>
-  <run_depend>mar_robot</run_depend>
-  <run_depend>mar_ros_bridge</run_depend>
-  <run_depend>mar_robot_arm5e</run_depend>
-  <run_depend>mar_preception</run_depend>
-  <run_depend>mar_action</run_depend>
-  <run_depend>mar_examples</run_depend>
-
   <export>
-    <metapackage/>
+      <cpp cflags="-I${prefix}/inc`getconf LONG_BIT`" lflags="-L${prefix}/lib`getconf LONG_BIT` -lESMlib"/>
   </export>
 
 </package>
+
+

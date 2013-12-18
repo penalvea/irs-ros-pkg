@@ -10,12 +10,18 @@
   <license>BSD</license>
 
   <url type="website">http://www.irs.uji.es</url>
-  <url type="bugtracker">https://github.com/penalvea/irs-ros-pkg//issues</url>
+  <url type="bugtracker">https://github.com/penalvea/irs-ros-pkg/issues</url>
   <url type="repository">https://github.com/penalvea/irs-ros-pkg/</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
   <run_depend>mar_core</run_depend>
+  <run_depend>mar_msgs</run_depend>
+  <run_depend>mar_robot</run_depend>
+  <run_depend>mar_ros_bridge</run_depend>
+  <run_depend>mar_robot_arm5e</run_depend>
+  <run_depend>mar_preception</run_depend>
+  <run_depend>mar_action</run_depend>
 
   <export>
     <metapackage/>
