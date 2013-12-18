@@ -1,0 +1,37 @@
+<package>
+  <description>
+
+     mar_robot
+
+  </description>
+  
+  <name>mar_robot</name>
+  <version>0.1.0</version>
+
+  <author>Mario Prats</author>
+  <maintainer email="penalvea@uji.es">Toni Peñalver</maintainer>
+  <maintainer email="dfornas@uji.es">David Fornas</maintainer>
+  <license>BSD</license>
+  <url>http://ros.org/wiki/mar_robot</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+ 
+  <build_depend>roscpp</build_depend>
+  <build_depend>visp</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>mar_core</build_depend>
+  <build_depend>kdl_conversions</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>visp</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>mar_core</run_depend>
+  <run_depend>kdl_conversions</run_depend>
+
+  <!--<export>
+  	<cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lmar_robot"/>
+  </export>-->
+</package>
+
+
