@@ -1,0 +1,24 @@
+<package>
+  <name>mar</name>
+  <version>0.5.0</version>
+  <description> MAR </description>
+  <author email="marioprats@gmail.com">Mario Prats</author>
+  
+  <maintainer email="penalvea@uji.es">Toni Peñalver</maintainer>
+  <maintainer email="dfornas@uji.es">David Fornas</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://www.irs.uji.es</url>
+  <url type="bugtracker">https://github.com/penalvea/irs-ros-pkg//issues</url>
+  <url type="repository">https://github.com/penalvea/irs-ros-pkg/</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>mar_core</run_depend>
+
+  <export>
+    <metapackage/>
+  </export>
+
+</package>
