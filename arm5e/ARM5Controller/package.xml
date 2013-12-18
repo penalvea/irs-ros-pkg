@@ -1,0 +1,31 @@
+<package>
+  <description>
+
+     ARM5Controller
+
+  </description>
+  
+  <name>ARM5Controller</name>
+  <version>0.1.0</version>
+
+  <author>Mario</author>
+  <license>BSD</license>
+  <maintainer email="dfornas@uji.es">David Fornas</maintainer>
+
+  <url>http://ros.org/wiki/ARM5Controller</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+ 
+  <build_depend>roscpp</build_depend>
+  <build_depend>visp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>message_generation</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>visp</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>message_runtime</run_depend>
+
+</package>
+
+
