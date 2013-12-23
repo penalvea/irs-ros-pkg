@@ -1,9 +1,0 @@
-<stack>
-  <description brief="arm5e">arm5e</description>
-  <author>Maintained by mprats</author>
-  <license>BSD</license>  
-  <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/arm5e</url>
-  <depend stack="ros" />
-
-</stack>
