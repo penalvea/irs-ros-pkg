@@ -1,33 +1,29 @@
+cmake_minimum_required(VERSION 2.8.3)
+project(ARM5PowerControl)
 
-cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+find_package(catkin REQUIRED COMPONENTS message_generation roscpp std_msgs)
 
-# Set the build type.  Options are:
-#  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
-#  Debug          : w/ debug symbols, w/o optimization
-#  Release        : w/o debug symbols, w/ optimization
-#  RelWithDebInfo : w/ debug symbols, w/ optimization
-#  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-#set(ROS_BUILD_TYPE RelWithDebInfo)
+add_service_files(
+  DIRECTORY srv
+  FILES
+  onOff.srv
+)
 
-rosbuild_init()
+generate_messages(DEPENDENCIES std_msgs)
 
-#set the default path for built executables to the "bin" directory
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-#set the default path for built libraries to the "lib" directory
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+catkin_package(
+  CATKIN_DEPENDS
+    roscpp
+    std_msgs
+    message_runtime
+)
+#target_link_libraries(ARM5Control ${catkin_LIBRARIES})
 
-#uncomment if you have defined messages
-rosbuild_genmsg()
-#uncomment if you have defined services
-rosbuild_gensrv()
+add_executable(powerServer src/powerServer.cpp)
+add_executable(powerClient src/powerClient.cpp)
 
-#common commands for building c++ executables and libraries
-#rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
-#target_link_libraries(${PROJECT_NAME} another_library)
-#rosbuild_add_boost_directories()
-#rosbuild_link_boost(${PROJECT_NAME} thread)
-#rosbuild_add_executable(example examples/example.cpp)
-#target_link_libraries(example ${PROJECT_NAME})
-rosbuild_add_executable(powerServer src/powerServer.cpp)
-rosbuild_add_executable(powerClient src/powerClient.cpp)
+target_link_libraries(powerServer ${catkin_LIBRARIES})
+target_link_libraries(powerClient ${catkin_LIBRARIES})
+
+add_dependencies(powerServer ${ARM5PowerControl_EXPORTED_TARGETS})
+add_dependencies(powerClient ${ARM5PowerControl_EXPORTED_TARGETS})

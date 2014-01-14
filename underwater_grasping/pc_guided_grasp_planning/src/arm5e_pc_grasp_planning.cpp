@@ -4,7 +4,7 @@
  *  Created on: 20/06/2012
  *      Author: mprats
  */
-#include <ConfigXMLParser.h>
+#include <uwsim/ConfigXMLParser.h>
 
 #include <mar_perception/PCGraspPlanning.h>
 #include <mar_ros_bridge/mar_params.h>
@@ -12,10 +12,10 @@
 #include <visp/vpDisplayX.h>
 #include <visp/vpImageIo.h>
 
-#include <SceneBuilder.h>
-#include <ViewBuilder.h>
-#include <UWSimUtils.h>
-#include <osgPCDLoader.h>
+#include <uwsim/SceneBuilder.h>
+#include <uwsim/ViewBuilder.h>
+#include <uwsim/UWSimUtils.h>
+#include <uwsim/osgPCDLoader.h>
 #include <osgGA/TrackballManipulator>
 
 /** Plans a grasp on a point cloud and visualizes it using UWSim

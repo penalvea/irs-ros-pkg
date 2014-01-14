@@ -16,10 +16,6 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <export>
-      <cpp cflags="-I${prefix}/inc`getconf LONG_BIT`" lflags="-L${prefix}/lib`getconf LONG_BIT` -lESMlib"/>
-  </export>
-
 </package>
 
 

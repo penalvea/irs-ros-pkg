@@ -8,7 +8,6 @@ add_message_files(
   TemplateTrack.msg
 )
 
-#uncomment if you have defined messages
 generate_messages()
 
 catkin_package(

@@ -4,15 +4,13 @@ project(mar_robot)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   geometry_msgs
-  kdl_conversions
-  
+  kdl_conversions 
 )
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS
-    mar_core
     geometry_msgs
     roscpp    
     kdl_conversions
@@ -21,15 +19,17 @@ catkin_package(
 )
 
 include_directories(${PROJECT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+link_directories(${catkin_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})
 
-link_directories(${Boost_LIBRARY_DIRS})
-link_directories(${catkin_LIBRARY_DIRS})
+
 
 #common commands for building c++ executables and libraries
 add_library(${PROJECT_NAME} 
 src/robot_utils.cpp
 )
 target_link_libraries(${PROJECT_NAME} mar_core ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
+
 
 install(DIRECTORY include/${PROJECT_NAME}
    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})

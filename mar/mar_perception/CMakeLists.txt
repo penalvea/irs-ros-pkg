@@ -5,13 +5,15 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   geometry_msgs
   image_transport
-  pcl_ros
+  mar_core
+  mar_msgs
+  mar_ros_bridge
+  esm_tracking
 )
 find_package(VISP REQUIRED)
 find_package(PCL REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(orocos_kdl REQUIRED)
-
 
 catkin_package(
   INCLUDE_DIRS include
@@ -24,28 +26,30 @@ catkin_package(
     mar_msgs
     mar_core
     mar_ros_bridge
+    esm_tracking
   DEPENDS
     orocos_kdl
     VISP
     PCL
     OpenCV
 )
-
 add_definitions(${VISP_DEFINITIONS})
-link_directories(${VISP_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})
+link_directories(${VISP_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${catkin_LIBRARY_DIRS})
 include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${VISP_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
 
-add_library(${PROJECT_NAME} ${LIBRARY_TYPE}
+add_library(${PROJECT_NAME} 
 src/ESMTracking.cpp
 src/ESMMRTracking.cpp
 src/VirtualImage.cpp
 src/LaserPeakDetector.cpp
 src/Reconstruction3D.cpp
 src/PCGraspPlanning.cpp
+src/PCAutonomousGraspPlanning.cpp
 src/MotionEstimator.cpp
 src/PlanarDetector.cpp
 )
-target_link_libraries(${PROJECT_NAME} ${PCL_LIBRARIES} ${OpenCV_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_INCLUDE_DIRS})
+
 
 install(DIRECTORY include/${PROJECT_NAME}
    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})

@@ -1,40 +1,24 @@
-cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+cmake_minimum_required(VERSION 2.8.3)
+project(mar_action)
 
-# Set the build type.  Options are:
-#  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
-#  Debug          : w/ debug symbols, w/o optimization
-#  Release        : w/o debug symbols, w/ optimization
-#  RelWithDebInfo : w/ debug symbols, w/ optimization
-#  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-#set(ROS_BUILD_TYPE RelWithDebInfo)
+find_package(catkin REQUIRED COMPONENTS mar_core mar_perception)
+find_package(VISP REQUIRED)
 
-rosbuild_init()
-
-#set the default path for built executables to the "bin" directory
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-#set the default path for built libraries to the "lib" directory
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
-
-include_directories(${PROJECT_SOURCE_DIR}/include)
-
-if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    set( LIBRARY_TYPE STATIC )
-else( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    set( LIBRARY_TYPE SHARED )
-endif( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-
-#uncomment if you have defined messages
-#rosbuild_genmsg()
-#uncomment if you have defined services
-#rosbuild_gensrv()
-
-#common commands for building c++ executables and libraries
-rosbuild_add_library(${PROJECT_NAME} ${LIBRARY_TYPE}
-src/Reconstruction3DAction.cpp
+catkin_package(
+  INCLUDE_DIRS include  
+  LIBRARIES ${PROJECT_NAME}
+  CATKIN_DEPENDS
+    mar_core
+    mar_perception  
+  DEPENDS
+    VISP
+    
 )
-#target_link_libraries(${PROJECT_NAME} another_library)
-#rosbuild_add_boost_directories()
-#rosbuild_link_boost(${PROJECT_NAME} thread)
-#rosbuild_add_executable(example examples/example.cpp)
-#target_link_libraries(example ${PROJECT_NAME})
+add_definitions(${VISP_DEFINITIONS})
+link_directories(${VISP_LIBRARY_DIRS})
+include_directories(${PROJECT_SOURCE_DIR}/include ${catkin_INCLUDE_DIRS} ${VISP_INCLUDE_DIRS})
+
+add_library(${PROJECT_NAME} src/Reconstruction3DAction.cpp
+)
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+
