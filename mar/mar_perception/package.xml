@@ -4,10 +4,8 @@
   <version>0.5.0</version>
   <description> mar_perception </description>
   <author email="marioprats@gmail.com">Mario Prats</author>
-  
   <maintainer email="penalvea@uji.es">Toni Peñalver</maintainer>
   <maintainer email="dfornas@uji.es">David Fornas</maintainer>
-
   <license>BSD</license>
 
   <url type="website">http://www.irs.uji.es</url>
@@ -31,7 +29,6 @@
   <run_depend>mar_msgs</run_depend>
   <run_depend>mar_ros_bridge</run_depend>
   <run_depend>esm_tracking</run_depend>
-
 
 </package>
 

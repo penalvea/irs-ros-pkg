@@ -7,8 +7,7 @@
   
   <name>mar_robot</name>
   <version>0.1.0</version>
-
-  <author>Mario Prats</author>
+  <author email="marioprats@gmail.com">Mario Prats</author>
   <maintainer email="penalvea@uji.es">Toni Peñalver</maintainer>
   <maintainer email="dfornas@uji.es">David Fornas</maintainer>
   <license>BSD</license>
@@ -29,9 +28,6 @@
   <run_depend>mar_core</run_depend>
   <run_depend>kdl_conversions</run_depend>
 
-  <!--<export>
-  	<cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lmar_robot"/>
-  </export>-->
 </package>
 
 

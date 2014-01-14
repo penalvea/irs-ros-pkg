@@ -18,7 +18,17 @@ add_definitions(${VISP_DEFINITIONS})
 link_directories(${VISP_LIBRARY_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/include ${catkin_INCLUDE_DIRS} ${VISP_INCLUDE_DIRS})
 
-add_library(${PROJECT_NAME} src/Reconstruction3DAction.cpp
-)
+add_library(${PROJECT_NAME} src/Reconstruction3DAction.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+
+install(
+  TARGETS
+    ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(DIRECTORY include/${PROJECT_NAME}
+   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 

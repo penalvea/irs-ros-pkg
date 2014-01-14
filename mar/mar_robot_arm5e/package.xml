@@ -7,8 +7,7 @@
   
   <name>mar_robot_arm5e</name>
   <version>0.1.0</version>
-
-  <author>Mario Prats</author>  
+  <author email="marioprats@gmail.com">Mario Prats</author>
   <maintainer email="penalvea@uji.es">Toni Peñalver</maintainer>
   <maintainer email="dfornas@uji.es">David Fornas</maintainer>
   <license>BSD</license>
