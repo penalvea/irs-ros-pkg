@@ -1,0 +1,63 @@
+<package>
+
+  <name>pc_guided_grasp_planning</name>
+  <version>0.5.0</version>
+  <description> pc_guided_grasp_planning </description>
+  <author email="marioprats@gmail.com">Mario Prats</author>
+  
+  <maintainer email="penalvea@uji.es">Toni Peñalver</maintainer>
+  <maintainer email="dfornas@uji.es">David Fornas</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://www.irs.uji.es</url>
+  <url type="bugtracker">https://github.com/penalvea/irs-ros-pkg/issues</url>
+  <url type="repository">https://github.com/penalvea/irs-ros-pkg/</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>visp</build_depend>
+  <build_depend>mar_ros_bridge</build_depend>
+  <build_depend>mar_core</build_depend>  
+  <build_depend>mar_perception</build_depend>  
+  <build_depend>uwsim_osgocean</build_depend>
+  <build_depend>uwsim_bullet</build_depend>
+  <build_depend>uwsim_osgbullet</build_depend>
+  <build_depend>uwsim_osgworks</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>tf_conversions</build_depend>  
+  <build_depend>libxml++-2.6</build_depend>  
+  <build_depend>uwsim</build_depend>  
+  
+  <build_depend>pcl_conversions</build_depend>
+  <build_depend>pcl_ros</build_depend>
+  <build_depend>libpcl-all-dev</build_depend>
+
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>sensor_msgs</run_depend>  
+  <run_depend>visp</run_depend>
+  <run_depend>uwsim_osgocean</run_depend>
+  <run_depend>uwsim_bullet</run_depend>
+  <run_depend>uwsim_osgbullet</run_depend>
+  <run_depend>uwsim_osgworks</run_depend>
+  <run_depend>nav_msgs</run_depend>
+  <run_depend>mar_ros_bridge</run_depend>
+  <run_depend>mar_core</run_depend>  
+  <run_depend>mar_perception</run_depend>
+  
+  <run_depend>tf</run_depend>
+  <run_depend>tf_conversions</run_depend>
+  <run_depend>libxml++-2.6</run_depend>  
+  <run_depend>uwsim</run_depend>
+  <run_depend>pcl_conversions</run_depend>
+  <run_depend>pcl_ros</run_depend> 
+  <run_depend>libpcl-all</run_depend>
+
+
+</package>
+
+

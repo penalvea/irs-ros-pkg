@@ -1,0 +1,31 @@
+<package>
+  <description>
+
+     ARM5Grabber
+
+  </description>
+  
+  <name>ARM5Grabber</name>
+  <version>0.1.0</version>
+
+  <author>Mario</author>
+  <license>BSD</license>
+  <maintainer email="dfornas@uji.es">David Fornas</maintainer>
+
+  <url>http://ros.org/wiki/ARM5Grabber</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+ 
+  <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>  
+  <build_depend>image_transport</build_depend>
+  <build_depend>ieee1394libraries</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>sensor_msgs</run_depend>  
+  <run_depend>image_transport</run_depend>
+  <run_depend>ieee1394libraries</run_depend>
+
+</package>
+
+

@@ -1,0 +1,29 @@
+<package>
+  <description>
+
+     ARM5Init
+
+  </description>
+  
+  <name>ARM5Init</name>
+  <version>0.1.0</version>
+
+  <author>Mario</author>
+  <license>BSD</license>
+  <maintainer email="dfornas@uji.es">David Fornas</maintainer>
+
+  <url>http://ros.org/wiki/ARM5Init</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+ 
+  <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>  
+  <build_depend>ARM5Controller</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>sensor_msgs</run_depend>  
+  <run_depend>ARM5Controller</run_depend>
+
+</package>
+
+
