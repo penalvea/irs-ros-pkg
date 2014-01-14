@@ -21,3 +21,12 @@ add_executable(ARM5JoyCartesianControl src/arm5_joy_cartesian_control.cpp)
 
 target_link_libraries(ARM5JoyControl ${catkin_LIBRARIES})
 target_link_libraries(ARM5JoyCartesianControl ${catkin_LIBRARIES})
+
+install(
+  TARGETS
+    ARM5JoyControl
+    ARM5JoyCartesianControl
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)

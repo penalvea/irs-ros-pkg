@@ -27,3 +27,10 @@ include_directories(${catkin_INCLUDE_DIRS} ${VISP_INCLUDE_DIRS})
 add_executable(laser_stripe_reconstruction src/laser_stripe_reconstruction.cpp)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
+install(
+  TARGETS
+    laser_stripe_reconstruction
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)

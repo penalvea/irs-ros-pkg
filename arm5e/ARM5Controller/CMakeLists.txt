@@ -27,8 +27,14 @@ add_definitions(${VISP_DEFINITIONS})
 link_directories(${VISP_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})
 include_directories(include ${catkin_INCLUDE_DIRS} ${VISP_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
-
-
 add_executable(ARM5Control src/ARM5Control.cpp src/ARM5Coms.cpp)
 target_link_libraries(ARM5Control ${catkin_LIBRARIES} ${VISP_LIBRARIES} ${Boost_LIBRARIES})
 add_dependencies(ARM5Control ${ARM5Controller_EXPORTED_TARGETS})
+
+install(
+  TARGETS
+    ARM5Control
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)

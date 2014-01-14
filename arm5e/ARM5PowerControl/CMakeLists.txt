@@ -27,3 +27,12 @@ target_link_libraries(powerClient ${catkin_LIBRARIES})
 
 add_dependencies(powerServer ${ARM5PowerControl_EXPORTED_TARGETS})
 add_dependencies(powerClient ${ARM5PowerControl_EXPORTED_TARGETS})
+
+install(
+  TARGETS
+    powerServer
+    powerClient
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)

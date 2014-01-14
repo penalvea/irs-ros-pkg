@@ -8,10 +8,10 @@
   <name>ARM5PowerControl</name>
   <version>0.1.0</version>
 
-  <author>Antonio Peñalver</author>
+  <author email="penalvea@uji.es">Toni Peñalver</author>
+  <maintainer email="penalvea@uji.es">Toni Peñalver</maintainer>
   <license>BSD</license>
-  <maintainer email="dfornas@uji.es">David Fornas</maintainer>
-
+  
   <url>http://ros.org/wiki/ARM5PowerControl</url>
 
   <buildtool_depend>catkin</buildtool_depend>

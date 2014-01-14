@@ -9,7 +9,6 @@ if(CMAKE_SIZEOF_VOID_P EQUAL 8)
 endif()
 
 find_package(catkin REQUIRED)
-
 ### Find external pre-built libraries
 #foreach(lib gflags gtest json linear)
   #find_library(${lib}_lib NAMES ${lib} PATHS libs/${bitness})
@@ -18,21 +17,13 @@ find_package(catkin REQUIRED)
   #INCLUDE_DIRS include src
   #LIBRARIES rl_pursuit ${gflags_lib} ${gtest_lib} ${json_lib} ${linear_lib}
 #)
-
 find_library(esm_lib NAMES "ESMlib" PATHS "lib${bitness}")
 
 catkin_package(
   INCLUDE_DIRS inc${bitness}
   LIBRARIES ${esm_lib}
 )
-
-include_directories(
-  inc${bitness}
-)
-
-#add_library(libESMlib
-#lib/ESMlib.a
-#)
+include_directories(inc${bitness})
 
 install( DIRECTORY inc${bitness}/
    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})

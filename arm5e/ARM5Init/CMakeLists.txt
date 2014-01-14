@@ -14,3 +14,11 @@ include_directories(${PROJECT_SOURCE_DIR}/include ${catkin_INCLUDE_DIRS})
 
 add_executable(ARM5Init src/arm5_init.cpp)
 target_link_libraries(ARM5Init ${catkin_LIBRARIES})
+
+install(
+  TARGETS
+    ARM5Init
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
