@@ -9,7 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   mar_robot
   mar_core
-  ARM5Controller
+  arm5_controller
 )
 catkin_package(
   INCLUDE_DIRS include
@@ -20,6 +20,7 @@ catkin_package(
     roscpp
     mar_robot
     mar_core
+    arm5_controller
   DEPENDS
     boost
     orocos_kdl

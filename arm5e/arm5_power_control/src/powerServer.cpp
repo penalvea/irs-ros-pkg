@@ -1,5 +1,5 @@
 #include "ros/ros.h"
-#include "ARM5PowerControl/onOff.h"
+#include "arm5_power_control/onOff.h"
 #include "stdio.h"
 #include "string.h"
 #include <fcntl.h>
@@ -8,7 +8,7 @@
 
 int fd;
 
-bool onOffFunction(ARM5PowerControl::onOff::Request &req, ARM5PowerControl::onOff::Response &res){
+bool onOffFunction(arm5_power_control::onOff::Request &req, arm5_power_control::onOff::Response &res){
   int iout;
   char b[1];
   iout=write(fd, &req.onOff, 1);

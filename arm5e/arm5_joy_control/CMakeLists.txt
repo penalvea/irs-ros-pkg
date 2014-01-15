@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(ARM5JoyControl)
+project(arm5_joy_control)
 
 find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs mar_robot_arm5e)
 find_package(VISP REQUIRED)
@@ -16,16 +16,16 @@ add_definitions(${VISP_DEFINITIONS})
 link_directories(${VISP_LIBRARY_DIRS})
 include_directories(include ${catkin_INCLUDE_DIRS} ${VISP_INCLUDE_DIRS})
 
-add_executable(ARM5JoyControl src/arm5_joy_control.cpp)
-add_executable(ARM5JoyCartesianControl src/arm5_joy_cartesian_control.cpp)
+add_executable(arm5_joy_control src/arm5_joy_control.cpp)
+add_executable(arm5_joy_cartesian_control src/arm5_joy_cartesian_control.cpp)
 
-target_link_libraries(ARM5JoyControl ${catkin_LIBRARIES})
-target_link_libraries(ARM5JoyCartesianControl ${catkin_LIBRARIES})
+target_link_libraries(arm5_joy_control ${catkin_LIBRARIES})
+target_link_libraries(arm5_joy_cartesian_control ${catkin_LIBRARIES})
 
 install(
   TARGETS
-    ARM5JoyControl
-    ARM5JoyCartesianControl
+    arm5_joy_control
+    arm5_joy_cartesian_control
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

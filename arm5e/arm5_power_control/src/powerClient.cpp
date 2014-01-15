@@ -1,5 +1,5 @@
 #include "ros/ros.h"
-#include "ARM5PowerControl/onOff.h"
+#include "arm5_power_control/onOff.h"
 #include <cstdlib>
 
 int main(int argc, char **argv)
@@ -12,8 +12,8 @@ int main(int argc, char **argv)
   }
 
   ros::NodeHandle n;
-  ros::ServiceClient client = n.serviceClient<ARM5PowerControl::onOff>("powerServer");
-  ARM5PowerControl::onOff srv;
+  ros::ServiceClient client = n.serviceClient<arm5_power_control::onOff>("powerServer");
+  arm5_power_control::onOff srv;
   srv.request.onOff = atoll(argv[1]);
   if (client.call(srv))
   {

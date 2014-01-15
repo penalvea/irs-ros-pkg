@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(ARM5Controller)
+project(arm5_controller)
 
 find_package(catkin REQUIRED COMPONENTS message_generation roscpp sensor_msgs)
 find_package(VISP REQUIRED)
@@ -27,13 +27,13 @@ add_definitions(${VISP_DEFINITIONS})
 link_directories(${VISP_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})
 include_directories(include ${catkin_INCLUDE_DIRS} ${VISP_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
-add_executable(ARM5Control src/ARM5Control.cpp src/ARM5Coms.cpp)
-target_link_libraries(ARM5Control ${catkin_LIBRARIES} ${VISP_LIBRARIES} ${Boost_LIBRARIES})
-add_dependencies(ARM5Control ${ARM5Controller_EXPORTED_TARGETS})
+add_executable(arm5_control src/ARM5Control.cpp src/ARM5Coms.cpp)
+target_link_libraries(arm5_control ${catkin_LIBRARIES} ${VISP_LIBRARIES} ${Boost_LIBRARIES})
+add_dependencies(arm5_control ${arm5_controller_EXPORTED_TARGETS})
 
 install(
   TARGETS
-    ARM5Control
+    arm5_control
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

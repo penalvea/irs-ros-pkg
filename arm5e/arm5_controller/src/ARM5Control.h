@@ -14,9 +14,9 @@
 //ROS
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
-#include "ARM5Controller/setZero.h"
-#include "ARM5Controller/setPID.h"
-//#include "ARM5Controller/setParams.h"
+#include "arm5_controller/setZero.h"
+#include "arm5_controller/setPID.h"
+//#include "arm5_controller/setParams.h"
 
 #include "ARM5Coms.h"
 
@@ -77,12 +77,12 @@ public:
   ~ARM5Control() {if (coms!=NULL) delete coms;}
 
 private:
-  bool setZero(ARM5Controller::setZero::Request  &req, ARM5Controller::setZero::Response &res);
+  bool setZero(arm5_controller::setZero::Request  &req, arm5_controller::setZero::Response &res);
   void commandTicks(const sensor_msgs::JointState::ConstPtr& js);
   void commandlength(const sensor_msgs::JointState::ConstPtr& js);
   void commandAngle(const sensor_msgs::JointState::ConstPtr& js);
-  bool setPID_callback(ARM5Controller::setPID::Request  &req, ARM5Controller::setPID::Response &res );
-  //bool setParams_callback(ARM5Controller::setParams::Request  &req, ARM5Controller::setParams::Response &res);
+  bool setPID_callback(arm5_controller::setPID::Request  &req, arm5_controller::setPID::Response &res );
+  //bool setParams_callback(arm5_controller::setParams::Request  &req, arm5_controller::setParams::Response &res);
 
   ARM5Coms *coms;		//Pointer to the communications object
   int coms_fd;			//File descriptor for communications

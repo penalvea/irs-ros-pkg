@@ -94,8 +94,8 @@ ARM5Control::ARM5Control()
   setTicksVelocity(0,0,0,0,0);
 }
 
-bool ARM5Control::setPID_callback(ARM5Controller::setPID::Request  &req,
-	ARM5Controller::setPID::Response &res )
+bool ARM5Control::setPID_callback(arm5_controller::setPID::Request  &req,
+	arm5_controller::setPID::Response &res )
 {
   coms->Channel2.ValuePID(0,0,0,req.PID[0],req.PID[1],req.PID[2]);
   coms->Channel2.pidupdate();
@@ -113,8 +113,8 @@ bool ARM5Control::setPID_callback(ARM5Controller::setPID::Request  &req,
 }
 
 /*
-bool ARM5Control::setParams_callback(ARM5Controller::setParams::Request  &req,
-	ARM5Controller::setParams::Response &res )
+bool ARM5Control::setParams_callback(arm5_controller::setParams::Request  &req,
+	arm5_controller::setParams::Response &res )
 {
 	this->securityStopEnabled=req.securityStopEnabled;
 	res.success=true;
@@ -220,8 +220,8 @@ void ARM5Control::setTicksPosition(double q0, double q1, double q2, double q3, d
 */
 
 
-bool ARM5Control::setZero(ARM5Controller::setZero::Request  &req,
-			  ARM5Controller::setZero::Response &res )
+bool ARM5Control::setZero(arm5_controller::setZero::Request  &req,
+			  arm5_controller::setZero::Response &res )
 {
 	if (req.zeroOffsets.size()==5) {
 		for (int i=0; i<5; i++) tick_offsets[i]=req.zeroOffsets[i];

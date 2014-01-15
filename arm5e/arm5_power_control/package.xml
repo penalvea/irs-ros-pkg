@@ -1,18 +1,18 @@
 <package>
   <description>
 
-     ARM5PowerControl
+     arm5_power_control
 
   </description>
   
-  <name>ARM5PowerControl</name>
+  <name>arm5_power_control</name>
   <version>0.1.0</version>
 
   <author email="penalvea@uji.es">Toni Peñalver</author>
   <maintainer email="penalvea@uji.es">Toni Peñalver</maintainer>
   <license>BSD</license>
   
-  <url>http://ros.org/wiki/ARM5PowerControl</url>
+  <url>http://ros.org/wiki/arm5_power_control</url>
 
   <buildtool_depend>catkin</buildtool_depend>
  

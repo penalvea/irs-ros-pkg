@@ -5,7 +5,7 @@
 #include <sensor_msgs/JointState.h>
 
 
-#include <ARM5Controller/setZero.h>
+#include <arm5_controller/setZero.h>
 
 //TODO: calibrate
 double manualZeroAbsTicks[5]={10841,0,0,0,0};
@@ -109,7 +109,7 @@ InitCSIP::InitCSIP()
   //if (!initAuto)
   	//joy_sub_ = nh_.subscribe<joy::Joy>("joy", 1, &InitCSIP::joyCallback, this);
   //service
-  setZeroClient = nh_.serviceClient<ARM5Controller::setZero>("setZero");
+  setZeroClient = nh_.serviceClient<arm5_controller::setZero>("setZero");
 }
 
 
@@ -200,7 +200,7 @@ void InitCSIP::autoInitVel()
 
 
 int InitCSIP::callSetZeroService() {
-	ARM5Controller::setZero srv;
+	arm5_controller::setZero srv;
 
 	for (int i=0; i<5; i++)
 		srv.request.zeroOffsets.push_back(limitPosition[i]);

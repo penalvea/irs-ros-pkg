@@ -11,7 +11,7 @@
 #include <kdl/chainiksolverpos_nr.hpp>
 
 #include <ros/ros.h>
-#include <ARM5Controller/setZero.h>
+#include <arm5_controller/setZero.h>
 
 void ARM5Arm::initKinematicSolvers() {
 	chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( 0.08052,  M_PI_2,  0.0    , 0.0     )));
@@ -581,7 +581,7 @@ InitCSIP::InitCSIP(ros::NodeHandle &nh, bool q1, bool q2, bool q3, bool q4, bool
 	//subscribe to obtain joint feedback
 	js_sub_ = nh.subscribe<sensor_msgs::JointState>("/arm5e/joint_state_rticks", 1, &InitCSIP::stateCallback, this);
 	//service
-	setZeroClient = nh.serviceClient<ARM5Controller::setZero>("setZero");
+	setZeroClient = nh.serviceClient<arm5_controller::setZero>("setZero");
 }
 
 void InitCSIP::stateCallback(const sensor_msgs::JointState::ConstPtr& state)
@@ -639,7 +639,7 @@ void InitCSIP::autoInitVel()
 
 
 int InitCSIP::callSetZeroService() {
-	ARM5Controller::setZero srv;
+	arm5_controller::setZero srv;
 
 	for (int i=0; i<5; i++)
 		srv.request.zeroOffsets.push_back(limitPosition[i]);

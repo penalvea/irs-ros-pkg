@@ -15,11 +15,11 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <run_depend>ARM5Controller</run_depend>
-  <run_depend>ARM5Grabber</run_depend>
-  <run_depend>ARM5Init</run_depend>
-  <run_depend>ARM5JoyControl</run_depend>
-  <run_depend>ARM5PowerControl</run_depend>
+  <run_depend>arm5_controller</run_depend>
+  <run_depend>arm5_grabber</run_depend>
+  <run_depend>arm5_init</run_depend>
+  <run_depend>arm5_joy_control</run_depend>
+  <run_depend>arm5_power_control</run_depend>
 
   <export>
     <metapackage/>
