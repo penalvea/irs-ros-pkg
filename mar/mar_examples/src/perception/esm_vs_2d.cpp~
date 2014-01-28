@@ -1,0 +1,77 @@
+#include <visp/vpImage.h>
+#include <visp/vpDisplayX.h>
+#include <mar_perception/ESMTracking.h>
+#include <mar_perception/VirtualImage.h>
+
+#include <geometry_msgs/Twist.h>
+
+#define SAT	35
+
+int main(int argc, char **argv){
+
+  if (argc!=5) {
+  	std::cerr << "Usage: " << argv[0] << " <image_topic> <image_info_topic> <output_topic> <gain>" << std::endl;
+	exit(0);
+  }
+
+  std::string image_topic(argv[1]);
+  std::string image_info_topic(argv[2]);
+  std::string output_topic(argv[3]);
+  double GAIN=atof(argv[4]);
+
+  ros::init(argc, argv, "esm_vs_2d");
+  ros::NodeHandle nh;
+ 
+  ros::Publisher pub=nh.advertise<geometry_msgs::Twist>(output_topic, 1);
+
+  vpImage<vpRGB> Ic; // Color image
+
+  // Declare a framegrabber able to read ROS images
+  VirtualImage g(nh,image_topic,image_info_topic);
+  while (!g.ready() && ros::ok()) {ros::spinOnce();}
+
+  // Open the framegrabber by loading the first image of the sequence
+  g.open(Ic) ;
+  g.acquire(Ic);
+  vpDisplayX window(Ic);
+  vpDisplay::display(Ic);
+  vpDisplay::flush(Ic);
+  
+  ESMTracking esm(&Ic);
+  while(ros::ok())
+  {
+    //std::cerr << "ros spin" << std::endl;
+    ros::spinOnce();
+
+    g.acquire(Ic);
+    esm.perceive();
+
+    vpDisplay::display(Ic);
+    esm.draw(Ic);
+
+    //Compute control law and send output
+    geometry_msgs::Twist msg;
+    vpImagePoint ip=esm.getCentroid();
+
+    double angle=atan2(esm.pEnd[4]-esm.pEnd[2],esm.pEnd[5]-esm.pEnd[3]);
+
+    double errorx=(Ic.getRows()/2.0-ip.get_v());
+    double errory=(Ic.getCols()/2.0-ip.get_u());
+
+    if (errorx>SAT) errorx=SAT; else if (errorx<-SAT) errorx=-SAT;
+    if (errory>SAT) errory=SAT; else if (errory<-SAT) errory=-SAT;
+
+    msg.linear.x=errorx;
+    msg.linear.y=-errory;
+
+    msg.linear.z=0;
+    msg.angular.x=0;
+    msg.angular.y=0;
+    msg.angular.z=angle;
+    pub.publish(msg);
+
+    vpDisplay::flush(Ic);
+  }
+
+}
+

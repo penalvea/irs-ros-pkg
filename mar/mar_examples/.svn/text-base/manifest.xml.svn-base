@@ -1,0 +1,19 @@
+<package>
+  <description brief="mar_examples">
+
+     mar_examples
+
+  </description>
+  <author>mprats</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/mar_examples</url>
+
+  <depend package="roscpp"/>
+  <depend package="mar_core"/>
+  <depend package="mar_perception"/>
+  <depend package="mar_robot_arm5e"/>
+  <depend package="mar_action"/>
+</package>
+
+
