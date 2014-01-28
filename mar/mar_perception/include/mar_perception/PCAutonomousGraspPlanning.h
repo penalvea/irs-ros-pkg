@@ -5,7 +5,6 @@
  *      Author: mprats
  *      Mod: dfornas 23/01/2013
  */
-
 #ifndef PCAUTONOMOUSGRASPPLANNING_H_
 #define PCAUTONOMOUSGRASPPLANNING_H_
 
@@ -31,75 +30,69 @@ typedef pcl::PointXYZRGB PointT;
 /** Grasp planning taking as input a point cloud, a pair of grasp point in cloud coordinates. */
 class PCAutonomousGraspPlanning : public CPerception {
 
-	//Coeficientes del plano y cilindro.
-	
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_;
+  // Grasp 3D points
+  vpPoint g1_, g2_;
+  //Grasping params (to allow different grasps and radious (for grasp penetration)).
+  double angle_, rad_, along_;
 
-	//pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_;
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_;
-		
-        //vpImage<vpRGBa> I_;
+  //Now unused
+  double hand_width_, grasp_penetration_;
+  //Punto central del cilindro y la direccion.
+  PointT axis_point_g; tf::Vector3 normal_g;
+  bool aligned_grasp_;
+  public:
+  vpHomogeneousMatrix cMg, base_cMg; //< Grasp frame with respect to the camera after planning
 
-	// DF 3D point
-        vpPoint g1_, g2_;
-	//vpCameraParameters k_;
-	//Grasping angle (to allow different grasps and radious (for grasp penetration).
-	double angle_, rad_, along_;
+  //With integuers to use trackbars
+  int iangle, irad, ialong, ialigned_grasp;
 
-        //Now unused
-	double hand_width_, grasp_penetration_;
-	//Punto central del cilindro y la direccion.
-	PointT axis_point_g; tf::Vector3 normal_g;
-	bool aligned_grasp_;
-public:
-	vpHomogeneousMatrix cMg, base_cMg;	///< Grasp frame with respect to the camera after planning
+  public:
+  /** Constructor.
+   * @param angle,rad
+   * @param pointcloud A PCL point cloud pointer
+   * */
+  PCAutonomousGraspPlanning( double angle, double rad, double along, double aligned_grasp, pcl::PointCloud<PointT>::Ptr pointcloud): cloud_(pointcloud) {
+    angle_=angle;iangle=angle*360.0/(2.0*M_PI);
+    rad_=rad;irad=rad*100;
+    along_=along;ialong=along*100;
+    setHandWidth(DEFAULT_HAND_WIDTH);
+    setAlignedGrasp(aligned_grasp);ialigned_grasp=aligned_grasp?1:0;
+    setGraspPenetration(DEFAULT_GRASP_PENETRATION);
+  }
 
+  void perceive();
 
-	//With integuers to use trackbars
-	int iangle, irad, ialong, ialigned_grasp;
+  /** Set the dimensions of the gripper (in meters) */
+  void setHandWidth(double w) {hand_width_=w;}
 
-public:
-	/** Constructor.
-	 * @param angle,rad
-	 * @param pointcloud A PCL point cloud pointer
-	 * */
-	PCAutonomousGraspPlanning( double angle, double rad, double along, double aligned_grasp, pcl::PointCloud<PointT>::Ptr pointcloud): cloud_(pointcloud) {
-		//I_=I;
-		angle_=angle;iangle=angle*360.0/(2.0*M_PI);
-		rad_=rad;irad=rad*100;
-		along_=along;ialong=along*100;
-		//k_=k;
-		setHandWidth(DEFAULT_HAND_WIDTH);
-		setAlignedGrasp(aligned_grasp);ialigned_grasp=aligned_grasp?1:0;
-		setGraspPenetration(DEFAULT_GRASP_PENETRATION);
-	}
+  /** Set whether to perform a grasp aligned with the cylinder axis or not **/
+  void setAlignedGrasp(bool a) {aligned_grasp_=a;}
 
-	void perceive();
+  /** Set the max penetration of the grasp around the object (in meters) */
+  void setGraspPenetration(double p) {grasp_penetration_=p;}
 
-	/** Set the dimensions of the gripper (in meters) */
-	void setHandWidth(double w) {hand_width_=w;}
+  /** Get the grasp frame with respect to the camera frame */
+  vpHomogeneousMatrix get_cMg() {return cMg;}
 
-	/** Set whether to perform a grasp aligned with the cylinder axis or not **/
-	void setAlignedGrasp(bool a) {aligned_grasp_=a;}
+  void recalculate_cMg();	
 
-	/** Set the max penetration of the grasp around the object (in meters) */
-	void setGraspPenetration(double p) {grasp_penetration_=p;}
+  /** Get the grasp frame pose with respect to an arbitrary frame 'b', given as input relative to the camera frame
+   * @param bMc an homogeneous matrix with the camera frame given wrt the frame 'b'
+   * @returns an homogeneous matrix with the grasp frame given wrt the frame 'b'
+   */
+  vpHomogeneousMatrix get_bMg(vpHomogeneousMatrix bMc) {return bMc*cMg;}
 
-	/** Get the grasp frame with respect to the camera frame */
-	vpHomogeneousMatrix get_cMg() {return cMg;}
+  ~PCAutonomousGraspPlanning() {}
 
-	void recalculate_cMg();	
+  private:
 
-	/** Get the grasp frame pose with respect to an arbitrary frame 'b', given as input relative to the camera frame
-	 * @param bMc an homogeneous matrix with the camera frame given wrt the frame 'b'
-	 * @returns an homogeneous matrix with the grasp frame given wrt the frame 'b'
-	 */
-	vpHomogeneousMatrix get_bMg(vpHomogeneousMatrix bMc) {return bMc*cMg;}
+  bool sortFunction(const PointT& d1, const PointT& d2);
 
-	~PCAutonomousGraspPlanning() {}
-private:
-	bool sortFunction(const PointT& d1, const PointT& d2);
-	void getMinMax3DAlongAxis(const pcl::PointCloud<PointT>::ConstPtr& cloud, PointT * max_pt, PointT * min_pt, PointT axis_point, tf::Vector3 * normal);
-	void intToConfig();
+  void getMinMax3DAlongAxis(const pcl::PointCloud<PointT>::ConstPtr& cloud, PointT * max_pt, PointT * min_pt, PointT axis_point, tf::Vector3 * normal);
+
+  void intToConfig();
+
 };
 
 #endif /* PCAUTONOMOUSGRASPPLANNING_H_ */

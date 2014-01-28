@@ -20,7 +20,6 @@
   <build_depend>nav_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>arm5_controller</build_depend>
-  <build_depend>kdl_conversions</build_depend>
   <build_depend>mar_robot</build_depend>  
   <build_depend>mar_core</build_depend>
 

@@ -12,7 +12,6 @@
 #include <visp/vpPixelMeterConversion.h>
 #include <visp/vpHomogeneousMatrix.h>
 #include <visp/vpPoint.h>
-//#include <osg/Vec3d>
 
 //Includes del reconstruction, algunos pueden sobrar...
 #include <pcl/ModelCoefficients.h>
@@ -31,10 +30,7 @@
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/surface/convex_hull.h>
 
-
-
 #include <tf/transform_datatypes.h>
-
 #include <boost/bind.hpp>
 
 #include <vector>
@@ -42,33 +38,26 @@
 
 void PCAutonomousGraspPlanning::perceive() {
 
-  // All the objects needed
-  ///pcl::PCDReader reader;
   pcl::PassThrough<PointT> pass;
   pcl::NormalEstimation<PointT, pcl::Normal> ne;
   pcl::SACSegmentationFromNormals<PointT, pcl::Normal> seg; 
   pcl::PCDWriter writer;
   pcl::ExtractIndices<PointT> extract;
   pcl::ExtractIndices<pcl::Normal> extract_normals;
-  ///pcl::KdTreeFLANN<PointT>::Ptr tree (new pcl::KdTreeFLANN<PointT> ()); PCL1.1 version
   pcl::search::KdTree<PointT>::Ptr tree (new pcl::search::KdTree<PointT> ());
 
-
   // Datasets
-  ///pcl::PointCloud<PointT>::Ptr cloud (new pcl::PointCloud<PointT>);
   pcl::PointCloud<PointT>::Ptr cloud_filtered (new pcl::PointCloud<PointT>);
   pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
   pcl::PointCloud<PointT>::Ptr cloud_filtered2 (new pcl::PointCloud<PointT>);
   pcl::PointCloud<pcl::Normal>::Ptr cloud_normals2 (new pcl::PointCloud<pcl::Normal>);
 
   pcl::PointIndices::Ptr inliers_plane (new pcl::PointIndices), inliers_cylinder (new  pcl::PointIndices);
-
   pcl::ModelCoefficients::Ptr coefficients_plane (new pcl::ModelCoefficients), coefficients_cylinder (new pcl::ModelCoefficients);
-//Nubes del plano y cilindro.
-pcl::PointCloud<PointT>::Ptr cloud_plane (new pcl::PointCloud<PointT> ()),  cloud_cylinder (new pcl::PointCloud<PointT> ());
+  //Nubes del plano y cilindro.
+  pcl::PointCloud<PointT>::Ptr cloud_plane (new pcl::PointCloud<PointT> ()),  cloud_cylinder (new pcl::PointCloud<PointT> ());
 
   // Read in the cloud data
-  ///reader.read (point_cloud_file, *cloud);
   std::cerr << "PointCloud has: " << cloud_->points.size () << " data points." << std::endl;
 
   // Build a passthrough filter to remove spurious NaNs
@@ -91,7 +80,7 @@ pcl::PointCloud<PointT>::Ptr cloud_plane (new pcl::PointCloud<PointT> ()),  clou
   seg.setNormalDistanceWeight (0.1);
   seg.setMethodType (pcl::SAC_RANSAC);
   seg.setMaxIterations (100);
-  seg.setDistanceThreshold (0.03);//Was 0.03
+  seg.setDistanceThreshold (0.03);
   seg.setInputCloud (cloud_filtered);
   seg.setInputNormals (cloud_normals);
   // Obtain the plane inliers and coefficients
@@ -143,13 +132,12 @@ pcl::PointCloud<PointT>::Ptr cloud_plane (new pcl::PointCloud<PointT> ()),  clou
     std::cerr << *coefficients_cylinder << std::endl;
   }
 
+  //Caulculate CYLINDER SHAPE
 
-	///CALC CYLINDER SHAPE
+  //Puntos de agarre
+  PointT mean,mean2;
 
-//Puntos de agarre
-PointT mean,mean2;
-
-	PointT max, min;  //Puntos que definiran el cilindro.
+  PointT max, min;  //Puntos que definiran el cilindro.
   PointT axis_point;
   //Punto de origen y dirección del cilindro.
   axis_point.x=coefficients_cylinder->values[0];
@@ -176,8 +164,6 @@ PointT mean,mean2;
   mean.x+=coefficients_perpendicular->values[3]*coefficients_perpendicular->values[6];
   mean.y+=coefficients_perpendicular->values[4]*coefficients_perpendicular->values[6];
   mean.z+=coefficients_perpendicular->values[5]*coefficients_perpendicular->values[6];
-  ///std::cerr<<"MiddleX:"<<middle.x<<std::endl;
-  ///std::cerr<<"MeanY:"<<mean.y<<std::endl;
 
   //Girar ese punto un determinado ángulo TODO Revisar o probar con quaternios
   //Sea P = (3, 4, 5) un punto arbitrario del espacio que queremos girar theta = pi/8 radianes respecto al eje AB dado por los puntos A = (9, 2, 6) y B = (7, 0, 1)
@@ -211,8 +197,6 @@ PointT mean,mean2;
   //mean2 es el otro punto calculado como Pdot + (Pdot-A)[distancia de Pdot a A] Es decir 
   // simétrico con respecto al eje.
 
-///DFFFFF
-
 
   mean2.x=mean.x+2*(middle.x-mean.x);
   mean2.y=mean.y+2*(middle.y-mean.y);
@@ -222,44 +206,43 @@ PointT mean,mean2;
   g1.set_X(mean.x);g1.set_Y(mean.y);g1.set_Z(mean.z);
   g2.set_X(mean2.x);g2.set_Y(mean2.y);g2.set_Z(mean2.z);
 
-  	/*ROS_INFO_STREAM( "Grasping points are: " << std::endl 
+  /*ROS_INFO_STREAM( "Grasping points are: " << std::endl 
     << "x:" << g1.get_X() << "y:" << g1.get_Y()  << "z:" << g1.get_Z()
     << "x:" << g2.get_X() << "y:" << g2.get_Y()  << "z:" << g2.get_Z()  << std::endl);
-	*/
+   */
 
-        //DF: Two grasp points version.*/
-        vpColVector ip1m(3), ip2m(3), middle_point(3),b(3);
-	ip1m[0]=g1.get_X();ip1m[1]=g1.get_Y();ip1m[2]=g1.get_Z();
-        ip2m[0]=g2.get_X();ip2m[1]=g2.get_Y();ip2m[2]=g2.get_Z();
-       
-	middle_point=0.5*(ip1m+ip2m);
+  //DF: Two grasp points version.*/
+  vpColVector ip1m(3), ip2m(3), middle_point(3),b(3);
+  ip1m[0]=g1.get_X();ip1m[1]=g1.get_Y();ip1m[2]=g1.get_Z();
+  ip2m[0]=g2.get_X();ip2m[1]=g2.get_Y();ip2m[2]=g2.get_Z();
 
-//middle_point=middle;
-
-        // Ahora mismo lo hace respecto del centro faltaría alejarlo R(radio)
-        //Es decir, ahora mismo el end-efector cae dentro del cilindro en vez de en superfície.
-        //Esto está relativamente bien pero no tenemos en cuenta la penetración. Sin emargo, la 
-        //tenemos en cuenta luego al separanos el radio así que no hay problema en realidad. 
-	base_cMg[0][3]=middle_point[0];
-	base_cMg[1][3]=middle_point[1];
-	base_cMg[2][3]=middle_point[2];//cloud_downsampled->points[minzPoint].z+gf_penetration;
-	vpColVector n(3),o(3),a(3);
+  middle_point=0.5*(ip1m+ip2m);
 
 
-	//Este es el vector que el utiliza como la Z de la cámara. Si queremos rotar antes habría que cambiar este pero es más sencillo rotar luego.
-	a[0]=0; a[1]=0; a[2]=1;
-	n=(ip1m-ip2m).normalize();
-        /*ROS_INFO_STREAM("Dot product is...: " << std::endl << vpColVector::dotProd(a,n) << std::endl);
-        ROS_INFO_STREAM("N is...: " << std::endl << n << std::endl);
-	ROS_INFO_STREAM("diff is...: " << std::endl << ip1m-ip2m << std::endl);
-	ROS_INFO_STREAM("ip1m is...: " << std::endl << ip1m << std::endl);*/
-	
-	o=vpColVector::cross(a,n);
-	base_cMg[0][0]=n[0]; base_cMg[0][1]=o[0]; base_cMg[0][2]=a[0];
-	base_cMg[1][0]=n[1]; base_cMg[1][1]=o[1]; base_cMg[1][2]=a[1];
-	base_cMg[2][0]=n[2]; base_cMg[2][1]=o[2]; base_cMg[2][2]=a[2];
-        ///ROS_INFO_STREAM("cMg is before rotate is...: " << std::endl << cMg);
-        recalculate_cMg();
+  // Ahora mismo lo hace respecto del centro faltaría alejarlo R(radio)
+  //Es decir, ahora mismo el end-efector cae dentro del cilindro en vez de en superfície.
+  //Esto está relativamente bien pero no tenemos en cuenta la penetración. Sin emargo, la 
+  //tenemos en cuenta luego al separanos el radio así que no hay problema en realidad. 
+  base_cMg[0][3]=middle_point[0];
+  base_cMg[1][3]=middle_point[1];
+  base_cMg[2][3]=middle_point[2];//cloud_downsampled->points[minzPoint].z+gf_penetration;
+  vpColVector n(3),o(3),a(3);
+
+
+  //Este es el vector que el utiliza como la Z de la cámara. Si queremos rotar antes habría que cambiar este pero es más sencillo rotar luego.
+  a[0]=0; a[1]=0; a[2]=1;
+  n=(ip1m-ip2m).normalize();
+  /*ROS_INFO_STREAM("Dot product is...: " << std::endl << vpColVector::dotProd(a,n) << std::endl);
+    ROS_INFO_STREAM("N is...: " << std::endl << n << std::endl);
+    ROS_INFO_STREAM("diff is...: " << std::endl << ip1m-ip2m << std::endl);
+    ROS_INFO_STREAM("ip1m is...: " << std::endl << ip1m << std::endl);*/
+
+  o=vpColVector::cross(a,n);
+  base_cMg[0][0]=n[0]; base_cMg[0][1]=o[0]; base_cMg[0][2]=a[0];
+  base_cMg[1][0]=n[1]; base_cMg[1][1]=o[1]; base_cMg[1][2]=a[1];
+  base_cMg[2][0]=n[2]; base_cMg[2][1]=o[2]; base_cMg[2][2]=a[2];
+  //ROS_INFO_STREAM("cMg is before rotate is...: " << std::endl << cMg);
+  recalculate_cMg();
 
 
 }
@@ -267,59 +250,57 @@ PointT mean,mean2;
 //Calculate cMg
 void PCAutonomousGraspPlanning::recalculate_cMg(){
 
-	intToConfig();
-        //Añado esto para coincidir con el urdf
-        //vpHomogeneousMatrix test(0,0,0,M_PI/2,0,0); //vpHomogeneousMatrix test(0,0,0,0,M_PI/2,0);
-	if(aligned_grasp_){
-		//aplicamos una rotación y traslación para posicionar la garra mejor
-		vpHomogeneousMatrix grMgt0(0,along_,0,0,0,0);
-		vpHomogeneousMatrix gMgrZ(0,0,0,0,0,1.57);
-		vpHomogeneousMatrix gMgrX(0,0,0,1.57,0,0);		
-		vpHomogeneousMatrix gMgrY(0,0,0,0,0,angle_);		
-		vpHomogeneousMatrix grMgt(rad_,0,0,0,0,0);//-0.6
-		vpHomogeneousMatrix cMgt;
-		cMgt = grMgt0 * gMgrZ * gMgrX * gMgrY * grMgt;
+  intToConfig();
+  //Añado esto para coincidir con el urdf
+  //vpHomogeneousMatrix test(0,0,0,M_PI/2,0,0); //vpHomogeneousMatrix test(0,0,0,0,M_PI/2,0);
+  if(aligned_grasp_){
+    //aplicamos una rotación y traslación para posicionar la garra mejor
+    vpHomogeneousMatrix grMgt0(0,along_,0,0,0,0);
+    vpHomogeneousMatrix gMgrZ(0,0,0,0,0,1.57);
+    vpHomogeneousMatrix gMgrX(0,0,0,1.57,0,0);		
+    vpHomogeneousMatrix gMgrY(0,0,0,0,0,angle_);		
+    vpHomogeneousMatrix grMgt(rad_,0,0,0,0,0);//-0.6
+    vpHomogeneousMatrix cMgt;
+    cMgt = grMgt0 * gMgrZ * gMgrX * gMgrY * grMgt;
 
-		cMg = base_cMg * cMgt ;// * test;
-		//ROS_INFO_STREAM("cMg1 is after rotate is...: " << std::endl << cMg);
+    cMg = base_cMg * cMgt ;// * test;
+    //ROS_INFO_STREAM("cMg1 is after rotate is...: " << std::endl << cMg);
 
-	}else{
-		//aplicamos una rotación y traslación para posicionar la garra mejor
-		vpHomogeneousMatrix gMgr(0,0,0,0,angle_,0);
-		vpHomogeneousMatrix grMgt0(rad_,0,0,0,0,0);
-		vpHomogeneousMatrix grMgt1(0,along_,0,0,0,0);
-		vpHomogeneousMatrix cMgt;
-		cMgt = gMgr * grMgt0 * grMgt1;
+  }else{
+    //aplicamos una rotación y traslación para posicionar la garra mejor
+    vpHomogeneousMatrix gMgr(0,0,0,0,angle_,0);
+    vpHomogeneousMatrix grMgt0(rad_,0,0,0,0,0);
+    vpHomogeneousMatrix grMgt1(0,along_,0,0,0,0);
+    vpHomogeneousMatrix cMgt;
+    cMgt = gMgr * grMgt0 * grMgt1;
 
-		cMg = base_cMg  * cMgt ;// * test;
-		//ROS_INFO_STREAM("cMg2 is after rotate is...: " << std::endl << cMg);
-	}
-	//Compute bMg and plan a grasp on bMg
-	//vpHomogeneousMatrix bMg=bMc*cMg;
-	//std::cerr << "bMg is: " << std::endl << bMg << std::endl;
+    cMg = base_cMg  * cMgt ;// * test;
+    //ROS_INFO_STREAM("cMg2 is after rotate is...: " << std::endl << cMg);
+  }
+  //Compute bMg and plan a grasp on bMg
+  //vpHomogeneousMatrix bMg=bMc*cMg;
+  //std::cerr << "bMg is: " << std::endl << bMg << std::endl;
 
 }
 
 //COnf
 void PCAutonomousGraspPlanning::intToConfig(){
-bool old=aligned_grasp_;
-aligned_grasp_=ialigned_grasp==1?true:false;
+  bool old=aligned_grasp_;
+  aligned_grasp_=ialigned_grasp==1?true:false;
 
-//TODO: DEFAULTS AQUI?
-if(old!=aligned_grasp_){
-if(aligned_grasp_){iangle=45;irad=48;ialong=11;}
-else{ iangle=226;irad=50;ialong=0;}
+  //TODO: DEFAULTS AQUI?
+  if(old!=aligned_grasp_){
+    if(aligned_grasp_){iangle=45;irad=48;ialong=11;}
+    else{ iangle=226;irad=50;ialong=0;}
+  }
+
+
+  angle_=iangle*(2.0*M_PI/360.0);ROS_INFO_STREAM("ANGLE is...: " << std::endl << angle_);
+
+  rad_=-irad/100.0;
+  along_=ialong/100.0;
+
 }
-
-
-angle_=iangle*(2.0*M_PI/360.0);ROS_INFO_STREAM("ANGLE is...: " << std::endl << angle_);
-
-rad_=-irad/100.0;
-along_=ialong/100.0;
-
-}
-
-
 
 //Ordenar en función de la proyección del punto sobre el eje definido 
 //por axis_point_g y normal_g (globales)
