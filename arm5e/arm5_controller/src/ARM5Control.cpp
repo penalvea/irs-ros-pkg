@@ -456,6 +456,15 @@ int main(int argc, char** argv)
 			js_length.effort.push_back(csipcontrol.masterCurrent);
 			js_angle.effort.push_back(csipcontrol.masterCurrent);
 		}
+
+		js_rawticks.header.stamp=ros::Time::now();
+		js_rticks.header.stamp=ros::Time::now();
+		js_ticks.header.stamp=ros::Time::now();
+		js_length.header.stamp=ros::Time::now();
+		js_angle.header.stamp=ros::Time::now();
+
+
+
 		csipcontrol.js_rawticks_pub.publish(js_rawticks);
 		csipcontrol.js_rticks_pub.publish(js_rticks);
 		if (csipcontrol.offsets_defined) {
