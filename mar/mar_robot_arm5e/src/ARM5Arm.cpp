@@ -9,6 +9,7 @@
 
 #include <kdl/chainjnttojacsolver.hpp>
 #include <kdl/chainiksolverpos_nr.hpp>
+#include <kdl/chainiksolverpos_nr_jl.hpp>
 
 #include <ros/ros.h>
 #include <arm5_controller/setZero.h>
@@ -16,9 +17,16 @@
 void ARM5Arm::initKinematicSolvers() {
 	chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( 0.08052,  M_PI_2,  0.0    , 0.0     )));
 	chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( 0.44278, 0.0 ,  0.0    , 5.0*M_PI/180     )));
-	//chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( -0.11852,  M_PI_2,  0.0    , 115*M_PI/180     )));
-	chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( -0.083 /* gripper pos. changed */,  M_PI_2,  0.0    , 115*M_PI/180     )));
+	chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( -0.083 ,  M_PI_2,  0.0    , 115*M_PI/180     )));
 	chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( 0.0, 0,  0.49938    , 0.0     )));
+
+	/*chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( 0.0911,  M_PI_2,  0.0    , 0.0     )));
+	chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( 0.4650, 0.0 ,  0.0    , 0.1119     )));
+	
+	chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( -0.5094,  M_PI_2,  0.0    , 3.5158     )));
+	chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( 0.0, 0,  0.0525    , 0.0     )));*/
+
+
 
 	fksolver = new KDL::ChainFkSolverPos_recursive(chain);
 
@@ -159,6 +167,7 @@ int ARM5Arm::setJointValues(vpColVector &q, bool blocking, double tol) {
 		js.name.push_back(std::string("JawOpening"));
 		js.position.push_back(q[4]);
 
+		js.header.stamp=ros::Time::now();
 		velocity_pub.publish(js);
 		if (blocking) ros::spinOnce();
 	} while(blocking && ros::ok() && (this->q-q).euclideanNorm()>tol);
@@ -205,6 +214,7 @@ int ARM5Arm::setJointVelocity(vpColVector qdot) {
 	js.name.push_back(std::string("JawOpening"));
 	js.velocity.push_back(qsat[4]);
 
+	js.header.stamp=ros::Time::now();
 	velocity_pub.publish(js);
 	return true;
 }
@@ -316,6 +326,7 @@ vpColVector ARM5Arm::armIK(vpHomogeneousMatrix &wMe) {
 	KDL::ChainIkSolverVel_pinv_red iksolverv(chain);//Custom Inverse velocity solver (grasp redundancy)
 	iksolverv.setBaseJacobian(true);
 	KDL::ChainIkSolverPos_NR iksolver(chain,fksolver,iksolverv,100,1e-6);//Maximum 100 iterations, stop at accuracy 1e-6
+	//KDL::ChainIkSolverPos_NR_JL iksolver(chain, qmin, qmax, fksolver,iksolverv,100,1e-6);//Maximum 100 iterations, stop at accuracy 1e-6
 
 	//Initial guess
 	q_init(0)=0;
@@ -634,6 +645,7 @@ void InitCSIP::autoInitVel()
 	if (activeAxis<5 && initAxis[activeAxis] && !initAxisDone[activeAxis]) {
 		js.velocity[activeAxis]=AxisDir[4]*scale_;
 	}
+	js.header.stamp=ros::Time::now();
 	vel_pub_.publish(js);
 }
 
