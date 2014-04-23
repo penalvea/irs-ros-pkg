@@ -110,6 +110,7 @@ InitCSIP::InitCSIP()
   	//joy_sub_ = nh_.subscribe<joy::Joy>("joy", 1, &InitCSIP::joyCallback, this);
   //service
   setZeroClient = nh_.serviceClient<arm5_controller::setZero>("setZero");
+
 }
 
 
@@ -180,7 +181,7 @@ void InitCSIP::stateCallback(const sensor_msgs::JointState::ConstPtr& state)
   }
   vel_pub_.publish(js);
 }
-
+*/
 void InitCSIP::autoInitVel()
 { 
   sensor_msgs::JointState js;
@@ -196,7 +197,7 @@ void InitCSIP::autoInitVel()
   	js.velocity[activeAxis]=AxisDir[4]*scale_;
   }
   vel_pub_.publish(js);
-}*/
+}
 
 
 int InitCSIP::callSetZeroService() {
@@ -229,8 +230,8 @@ int main(int argc, char** argv)
  
   while (ros::ok()) {
   	ros::spinOnce();
-	//if (init_csip.initAuto)
-		//init_csip.autoInitVel();		
+	if (init_csip.initAuto)
+		init_csip.autoInitVel();		
 	if (init_csip.activeAxis>=5 && !offsetsDone) {
 	  std::cerr << "All axis initialized. Sending zero offsets to the arm..." << std::endl;
 	  init_csip.callSetZeroService();	

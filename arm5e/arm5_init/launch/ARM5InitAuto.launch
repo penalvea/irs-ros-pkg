@@ -17,11 +17,11 @@
     <param name="initElbowThreshold" value="1" type="double"/>
     <param name="initWrist" value="false" type="bool"/>
     <param name="initWristThreshold" value="1" type="double"/>
-    <param name="initJaw" value="false" type="bool"/>
+    <param name="initJaw" value="true" type="bool"/>
     <param name="initJawThreshold" value="1" type="double"/>
 
   <!-- joy-csiparm-initialization control node -->
-  <node pkg="ARM5Init" type="ARM5Init" name="ARM5Init"/>
+  <node pkg="arm5_init" type="arm5_init" name="arm5_init"/>
 
 </launch>
 <!-- %EndTag(FULL)%-->
