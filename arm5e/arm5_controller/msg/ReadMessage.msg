@@ -4,7 +4,7 @@ int32[] currents
 int32[] waters
 int32[] temps
 int32[] voltages
-int32 masterVoltage
-int32 masterTemp
-int32 masterCurrent
+int32 master_voltage
+int32 master_temp
+int32 master_current
 

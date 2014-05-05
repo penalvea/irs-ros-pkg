@@ -471,9 +471,9 @@ void ARM5Control::publishReadMessage() {
 	msg.voltages[3]=coms->Channel4.disVoltage();
 	msg.voltages[4]=coms->Channel5.disVoltage();
 	
-	msg.masterVoltage=coms->MasterVoltage();
-	msg.masterTemp=coms->MasterTemprature();
-	msg.masterCurrent=coms->MasterCurrent();
+	msg.master_voltage=coms->MasterVoltage();
+	msg.master_temp=coms->MasterTemprature();
+	msg.master_current=coms->MasterCurrent();
 	
 	message_r_pub.publish(msg);	
 }
@@ -482,25 +482,25 @@ void ARM5Control::publishSendMessage() {
     arm5_controller::SendMessage msg;
 	
 	msg.demands.resize(5);
-	msg.demands[0]=coms->Channel1.Demand;
-	msg.demands[1]=coms->Channel2.Demand;
-	msg.demands[2]=coms->Channel3.Demand;
-	msg.demands[3]=coms->Channel4.Demand;
-	msg.demands[4]=coms->Channel5.Demand;
+	msg.demands[0]=coms->Channel1.disDemand();
+	msg.demands[1]=coms->Channel2.disDemand();
+	msg.demands[2]=coms->Channel3.disDemand();
+	msg.demands[3]=coms->Channel4.disDemand();
+	msg.demands[4]=coms->Channel5.disDemand();
 	
-	msg.speedLimits.resize(5);
-	msg.speedLimits[0]=coms->Channel1.SpeedLimit;
-	msg.speedLimits[1]=coms->Channel2.SpeedLimit;
-	msg.speedLimits[2]=coms->Channel3.SpeedLimit;
-	msg.speedLimits[3]=coms->Channel4.SpeedLimit;
-	msg.speedLimits[4]=coms->Channel5.SpeedLimit;
+	msg.speed_limits.resize(5);
+	msg.speed_limits[0]=coms->Channel1.disSpeedLimit();
+	msg.speed_limits[1]=coms->Channel2.disSpeedLimit();
+	msg.speed_limits[2]=coms->Channel3.disSpeedLimit();
+	msg.speed_limits[3]=coms->Channel4.disSpeedLimit();
+	msg.speed_limits[4]=coms->Channel5.disSpeedLimit();
 	
-	msg.currentLimits.resize(5);
-	msg.currentLimits[0]=coms->Channel1.CurrentLimit;
-	msg.currentLimits[1]=coms->Channel2.CurrentLimit;
-	msg.currentLimits[2]=coms->Channel3.CurrentLimit;
-	msg.currentLimits[3]=coms->Channel4.CurrentLimit;
-	msg.currentLimits[4]=coms->Channel5.CurrentLimit;
+	msg.current_limits.resize(5);
+	msg.current_limits[0]=coms->Channel1.disCurrentLimit();
+	msg.current_limits[1]=coms->Channel2.disCurrentLimit();
+	msg.current_limits[2]=coms->Channel3.disCurrentLimit();
+	msg.current_limits[3]=coms->Channel4.disCurrentLimit();
+	msg.current_limits[4]=coms->Channel5.disCurrentLimit();
 	
 	message_s_pub.publish(msg);	
 }

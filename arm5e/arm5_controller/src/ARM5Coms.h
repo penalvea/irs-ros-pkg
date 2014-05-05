@@ -24,7 +24,11 @@ class Motor
 	 bool PIDupdate;
 	 bool PIDsent;
 
-
+	 Int32 Demand;
+	 byte DemandType; // 0 for Emergancy Stop/Brake, 1 voltage, 2 speed, 3 postion, 4 current
+	 UInt16 SpeedLimit;
+	 UInt16 CurrentLimit;
+	
 
 	//PID Values
 	 byte SpeedP;
@@ -49,12 +53,7 @@ class Motor
 
 	public:
 	
-	 //DF: temporarily publis until TODO disDemand, disCurrentLimit etc
-	 Int32 Demand;
-	 byte DemandType; // 0 for Emergancy Stop/Brake, 1 voltage, 2 speed, 3 postion, 4 current
-	 UInt16 SpeedLimit;
-	 UInt16 CurrentLimit;
-	
+
 
 	Motor() {
 		PIDupdate = true;
@@ -98,6 +97,26 @@ class Motor
 	{
 	   return Current;
 	}
+	
+    Int32 disDemand()
+	{
+	   return Demand;
+	}
+	
+	byte disDemandType()
+	{
+	   return DemandType;
+	}
+	
+	UInt16 disSpeedLimit()
+	{
+	   return SpeedLimit;
+	}
+	
+	UInt16 disCurrentLimit()
+	{
+	   return CurrentLimit;
+	}	
 
 	/// <summary>
 	/// the display varable for peek current
