@@ -28,6 +28,7 @@ class Motor
 	 byte DemandType; // 0 for Emergancy Stop/Brake, 1 voltage, 2 speed, 3 postion, 4 current
 	 UInt16 SpeedLimit;
 	 UInt16 CurrentLimit;
+	
 
 	//PID Values
 	 byte SpeedP;
@@ -51,6 +52,8 @@ class Motor
 	 bool signedRelativePositionInit; //whether signedRelativePosition has been initialized or not
 
 	public:
+	
+
 
 	Motor() {
 		PIDupdate = true;
@@ -94,6 +97,26 @@ class Motor
 	{
 	   return Current;
 	}
+	
+    Int32 disDemand()
+	{
+	   return Demand;
+	}
+	
+	byte disDemandType()
+	{
+	   return DemandType;
+	}
+	
+	UInt16 disSpeedLimit()
+	{
+	   return SpeedLimit;
+	}
+	
+	UInt16 disCurrentLimit()
+	{
+	   return CurrentLimit;
+	}	
 
 	/// <summary>
 	/// the display varable for peek current
@@ -179,6 +202,7 @@ class Motor
 		} else {
 			this->DemandType = 0; //brake
 			this->Demand=0;
+			//DF: std::cerr << "BRAKE demand" std::endl;
 		}
 	    }
 
@@ -335,10 +359,16 @@ class Motor
 	    //no specal messages, return the demand
 	    message[0] = (byte)(0 + AddressUp); // can buffer 0
 	    message[1] = DemandType;
+	    
+	    //Avoid speed demand with 0x0a in the LSM to be sent, send 0x0b instead
+	    if((byte)(Demand & 0xff)==0x0a);
+			Demand +=1;
+			//Demand = (Demand & 0xff00) + 0xb;
+			
 	    message[2] = (byte)(Demand >> 8 & 0xff); //Demand MSB 
 	    message[3] = (byte)(Demand & 0xff); //Demand LSB
 	    message[4] = (byte)(SpeedLimit >> 8 & 0xff); //Speed Limit MSB
-	    message[5] = (byte)(SpeedLimit & 0xff); //Demand Type and staus
+	    message[5] = (byte)(SpeedLimit & 0xff); //Speed Limit LSB
 	    message[6] = (byte)(CurrentLimit >> 8 & 0xff); //Speed Limit MSB
 	    message[7] = (byte)(CurrentLimit & 0xff); //Demand Type and staus
 	    message[8] = 0;          //not defined for future use

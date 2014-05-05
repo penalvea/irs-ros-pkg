@@ -12,6 +12,13 @@ add_service_files(
   setZero.srv
 )
 
+add_message_files(
+  FILES
+  SendMessage.msg
+  ReadMessage.msg
+)
+
+
 generate_messages()
 
 catkin_package(

@@ -1,0 +1,10 @@
+int32[] positions
+int32[] speeds
+int32[] currents
+int32[] waters
+int32[] temps
+int32[] voltages
+int32 master_voltage
+int32 master_temp
+int32 master_current
+
