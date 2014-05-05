@@ -16,6 +16,8 @@
 #include <sensor_msgs/JointState.h>
 #include "arm5_controller/setZero.h"
 #include "arm5_controller/setPID.h"
+#include "arm5_controller/SendMessage.h"
+#include "arm5_controller/ReadMessage.h"
 //#include "arm5_controller/setParams.h"
 
 #include "ARM5Coms.h"
@@ -86,6 +88,10 @@ private:
 
   ARM5Coms *coms;		//Pointer to the communications object
   int coms_fd;			//File descriptor for communications
+  
+  //DF: Serial message publisher functions.
+  void publishReadMessage();
+  void publishSendMessage();
 
 public:
   ros::NodeHandle nh_;
@@ -100,6 +106,10 @@ public:
   ros::Publisher js_angle_pub;	//Publish position/velocity/effort commands in tick units (rad & rad/s)
   ros::ServiceServer PIDService; //Service for setting the PID params
   //ros::ServiceServer ParamService; //Service for setting the controller params
+  
+  //DF: Serial message publishers
+  ros::Publisher message_r_pub; //Read status
+  ros::Publisher message_s_pub; //Command to send
 };
 
 #endif

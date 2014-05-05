@@ -84,6 +84,10 @@ ARM5Control::ARM5Control()
   js_angle_sub = nh_.subscribe<sensor_msgs::JointState>("/arm5e/command_angle", 10, &ARM5Control::commandAngle, this);
   PIDService = nh_.advertiseService("/arm5e/setPID", &ARM5Control::setPID_callback, this);
   //ParamService = nh_.advertiseService("/arm5e/setParams", &ARM5Control::setParams_callback, this);
+  
+  //DF: Serial message publishers
+  message_r_pub = nh_.advertise<arm5_controller::ReadMessage>("/arm5e/read_message",1);
+  message_s_pub = nh_.advertise<arm5_controller::SendMessage>("/arm5e/write_message",1);
 
   //Start read thread
 //  pthread_t readt;
@@ -331,9 +335,13 @@ vpColVector lToAlpha(vpColVector &axis_l, vpColVector &axis_d, vpColVector &axis
 void ARM5Control::controlCycle() {
 	static double oldt=0;
 
-	coms->sendMessage();
+	coms->sendMessage(); 
+    publishSendMessage(); //DF DEBUG send message publish
+	
 	usleep(10000);
-	coms->readMessage();
+	
+	coms->readMessage(); 
+	publishReadMessage(); //DF DEBUG send message publish
 
 	vpColVector old_rawticks(5), old_rticks(5);
 	old_rawticks=rawticks;
@@ -418,6 +426,84 @@ void ARM5Control::controlCycle() {
 	
 }
 
+void ARM5Control::publishReadMessage() {
+	arm5_controller::ReadMessage msg;
+	
+	msg.positions.resize(5);
+	msg.positions[0]=coms->Channel1.disPosition();
+	msg.positions[1]=coms->Channel2.disPosition();
+	msg.positions[2]=coms->Channel3.disPosition();
+	msg.positions[3]=coms->Channel4.disPosition();
+	msg.positions[4]=coms->Channel5.disPosition();
+	
+	msg.speeds.resize(5);
+	msg.speeds[0]=coms->Channel1.disSpeed();
+	msg.speeds[1]=coms->Channel2.disSpeed();
+	msg.speeds[2]=coms->Channel3.disSpeed();
+	msg.speeds[3]=coms->Channel4.disSpeed();
+	msg.speeds[4]=coms->Channel5.disSpeed();
+	
+	msg.currents.resize(5);
+	msg.currents[0]=coms->Channel1.disCurrent();
+	msg.currents[1]=coms->Channel2.disCurrent();
+	msg.currents[2]=coms->Channel3.disCurrent();
+	msg.currents[3]=coms->Channel4.disCurrent();
+	msg.currents[4]=coms->Channel5.disCurrent();
+	
+	msg.waters.resize(5);
+	msg.waters[0]=coms->Channel1.disWater();
+	msg.waters[1]=coms->Channel2.disWater();
+	msg.waters[2]=coms->Channel3.disWater();
+	msg.waters[3]=coms->Channel4.disWater();
+	msg.waters[4]=coms->Channel5.disWater();
+	
+	msg.temps.resize(5);
+	msg.temps[0]=coms->Channel1.disTemp();
+	msg.temps[1]=coms->Channel2.disTemp();
+	msg.temps[2]=coms->Channel3.disTemp();
+	msg.temps[3]=coms->Channel4.disTemp();
+	msg.temps[4]=coms->Channel5.disTemp();
+	
+	msg.voltages.resize(5);
+	msg.voltages[0]=coms->Channel1.disVoltage();
+	msg.voltages[1]=coms->Channel2.disVoltage();
+	msg.voltages[2]=coms->Channel3.disVoltage();
+	msg.voltages[3]=coms->Channel4.disVoltage();
+	msg.voltages[4]=coms->Channel5.disVoltage();
+	
+	msg.masterVoltage=coms->MasterVoltage();
+	msg.masterTemp=coms->MasterTemprature();
+	msg.masterCurrent=coms->MasterCurrent();
+	
+	message_r_pub.publish(msg);	
+}
+
+void ARM5Control::publishSendMessage() {
+    arm5_controller::SendMessage msg;
+	
+	msg.demands.resize(5);
+	msg.demands[0]=coms->Channel1.Demand;
+	msg.demands[1]=coms->Channel2.Demand;
+	msg.demands[2]=coms->Channel3.Demand;
+	msg.demands[3]=coms->Channel4.Demand;
+	msg.demands[4]=coms->Channel5.Demand;
+	
+	msg.speedLimits.resize(5);
+	msg.speedLimits[0]=coms->Channel1.SpeedLimit;
+	msg.speedLimits[1]=coms->Channel2.SpeedLimit;
+	msg.speedLimits[2]=coms->Channel3.SpeedLimit;
+	msg.speedLimits[3]=coms->Channel4.SpeedLimit;
+	msg.speedLimits[4]=coms->Channel5.SpeedLimit;
+	
+	msg.currentLimits.resize(5);
+	msg.currentLimits[0]=coms->Channel1.CurrentLimit;
+	msg.currentLimits[1]=coms->Channel2.CurrentLimit;
+	msg.currentLimits[2]=coms->Channel3.CurrentLimit;
+	msg.currentLimits[3]=coms->Channel4.CurrentLimit;
+	msg.currentLimits[4]=coms->Channel5.CurrentLimit;
+	
+	message_s_pub.publish(msg);	
+}
 
 int main(int argc, char** argv)
 {

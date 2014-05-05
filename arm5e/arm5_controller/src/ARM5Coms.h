@@ -24,10 +24,7 @@ class Motor
 	 bool PIDupdate;
 	 bool PIDsent;
 
-	 Int32 Demand;
-	 byte DemandType; // 0 for Emergancy Stop/Brake, 1 voltage, 2 speed, 3 postion, 4 current
-	 UInt16 SpeedLimit;
-	 UInt16 CurrentLimit;
+
 
 	//PID Values
 	 byte SpeedP;
@@ -51,6 +48,13 @@ class Motor
 	 bool signedRelativePositionInit; //whether signedRelativePosition has been initialized or not
 
 	public:
+	
+	 //DF: temporarily publis until TODO disDemand, disCurrentLimit etc
+	 Int32 Demand;
+	 byte DemandType; // 0 for Emergancy Stop/Brake, 1 voltage, 2 speed, 3 postion, 4 current
+	 UInt16 SpeedLimit;
+	 UInt16 CurrentLimit;
+	
 
 	Motor() {
 		PIDupdate = true;
