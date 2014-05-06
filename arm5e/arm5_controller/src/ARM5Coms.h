@@ -361,9 +361,9 @@ class Motor
 	    message[1] = DemandType;
 	    
 	    //Avoid speed demand with 0x0a in the LSM to be sent, send 0x0b instead
-	    if((byte)(Demand & 0xff)==0x0a);
+	    if((byte)(Demand & 0xff)==0x0a)
 			Demand +=1;
-			//Demand = (Demand & 0xff00) + 0xb;
+	    
 			
 	    message[2] = (byte)(Demand >> 8 & 0xff); //Demand MSB 
 	    message[3] = (byte)(Demand & 0xff); //Demand LSB
