@@ -7,4 +7,4 @@ int32[] voltages
 int32 master_voltage
 int32 master_temp
 int32 master_current
-
+int32[] speedErrors

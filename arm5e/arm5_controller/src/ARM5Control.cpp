@@ -474,6 +474,13 @@ void ARM5Control::publishReadMessage() {
 	msg.master_voltage=coms->MasterVoltage();
 	msg.master_temp=coms->MasterTemprature();
 	msg.master_current=coms->MasterCurrent();
+
+	msg.speedErrors.resize(5);
+	msg.speedErrors[0]=coms->Channel1.disDemand()-coms->Channel1.disSpeed();
+	msg.speedErrors[1]=coms->Channel2.disDemand()-coms->Channel2.disSpeed();
+	msg.speedErrors[2]=coms->Channel3.disDemand()-coms->Channel3.disSpeed();
+	msg.speedErrors[3]=coms->Channel4.disDemand()-coms->Channel4.disSpeed();
+	msg.speedErrors[4]=coms->Channel5.disDemand()-coms->Channel5.disSpeed();
 	
 	message_r_pub.publish(msg);	
 }
