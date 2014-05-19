@@ -10,6 +10,7 @@ add_service_files(
   setParams.srv
   setPID.srv
   setZero.srv
+  setOneZero.srv
 )
 
 add_message_files(

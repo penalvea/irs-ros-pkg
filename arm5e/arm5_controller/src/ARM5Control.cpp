@@ -73,6 +73,7 @@ ARM5Control::ARM5Control()
   maxCurrentEnabled=false;
 
   service = nh_.advertiseService("setZero", &ARM5Control::setZero,this);
+  setOneZeroService = nh_.advertiseService("setOneZero", &ARM5Control::setOneZero,this);
 
   js_rawticks_pub = nh_.advertise<sensor_msgs::JointState>("/arm5e/joint_state_rawticks",1);
   js_rticks_pub = nh_.advertise<sensor_msgs::JointState>("/arm5e/joint_state_rticks",1);
@@ -238,6 +239,24 @@ bool ARM5Control::setZero(arm5_controller::setZero::Request  &req,
 	return true;
 }
 
+bool ARM5Control::setOneZero(arm5_controller::setOneZero::Request &req, arm5_controller::setOneZero::Response &res){
+
+		if(req.joint<0 || req.joint>4){
+			ROS_INFO("ARM5Control::setOneZero Error: Wrong joint");
+			res.success=false;
+		}
+		else{
+			if(offsets_defined){
+				tick_offsets[req.joint]=req.zeroOffsets;
+				res.success=true;
+			}
+			else{
+				ROS_INFO("ARM5Control::setOneZero Error: Joints must be initialized");
+				res.success=false;
+			}
+		}
+		return true;
+}
 
 
 
