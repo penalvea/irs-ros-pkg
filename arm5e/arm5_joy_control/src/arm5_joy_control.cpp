@@ -1,7 +1,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
 #include <sensor_msgs/Joy.h>
-#define CURRENT_THRESHOLD 1.7
+#define CURRENT_THRESHOLD 1.0
 
 class TeleopCSIP
 {
@@ -53,9 +53,10 @@ TeleopCSIP::TeleopCSIP()
 void TeleopCSIP::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 {
 	sensor_msgs::JointState js;
+
 	if(current<CURRENT_THRESHOLD){
 		js.name.push_back(std::string("Slew"));
-		if(joy->axes[axisindex[0]]>0.2 || joy->axes[axisindex[0]<-0.2]){
+		if(joy->axes[axisindex[0]]>0.2 || joy->axes[axisindex[0]]<-0.2){
 			js.velocity.push_back(scale_*joy->axes[axisindex[0]]*AxisDir[0]);
 		}
 		else{
@@ -70,13 +71,19 @@ void TeleopCSIP::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 
 		js.name.push_back(std::string("JawRotate"));
 
-		js.velocity.push_back(scale_*joy->axes[axisindex[3]]*AxisDir[3]);
+		js.velocity.push_back(0.3*scale_*joy->axes[axisindex[3]]*AxisDir[3]);
 
 		js.name.push_back(std::string("JawOpening"));
 		if (joy->axes[axisindex[4]] < joy->axes[axisindex[5]]) {
-			js.velocity.push_back(scale_*((joy->axes[axisindex[4]]-1)/2)*AxisDir[4]);
+			if(joy->axes[axisindex[4]]!=0)
+				js.velocity.push_back(scale_*((joy->axes[axisindex[4]]-1)/2)*AxisDir[4]);
+			else
+				js.velocity.push_back(0);
 		} else if (joy->axes[axisindex[4]] > joy->axes[axisindex[5]]) {
-			js.velocity.push_back(-scale_*((joy->axes[axisindex[5]]-1)/2)*AxisDir[4]);
+			if(joy->axes[axisindex[5]]!=0)
+				js.velocity.push_back(-scale_*((joy->axes[axisindex[5]]-1)/2)*AxisDir[4]);
+			else
+				js.velocity.push_back(0);
 		} else {
 			js.velocity.push_back(0);
 		}
