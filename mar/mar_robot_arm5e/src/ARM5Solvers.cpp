@@ -106,9 +106,9 @@ int ChainIkSolverVel_pinv_red::CartToJnt(const JntArray& q_in, const Twist& v_in
 		sv[7]=M_PI_2-q_in(7);
 	} else {
 		sv[0]=0;//-q_in(4);
-		sv[1]=M_PI_4-q_in(5);
-		sv[2]=M_PI_4-q_in(6);
-		sv[3]=M_PI_2-q_in(7);
+		sv[1]=0.78;//-q_in(5);
+		sv[2]=0.78;//-q_in(6);
+		sv[3]=1.57;//-q_in(7);
 	}
 
 
