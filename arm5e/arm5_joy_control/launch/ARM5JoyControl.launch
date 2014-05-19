@@ -4,7 +4,7 @@
 
  <!-- joy node -->
   <node respawn="true" pkg="joy"
-        type="joy" name="xbox_joy" >
+        type="joy_node" name="xbox_joy" >
     <param name="dev" type="string" value="/dev/input/js0" />
     <param name="deadzone" value="0.1" />
     <param name="autorepeat_rate" value="20" />
@@ -26,7 +26,7 @@
   <param name="scale" value="2500" type="double"/>
 
 
-  <node pkg="ARM5JoyControl" type="ARM5JoyControl" name="ARM5JoyControl"/>
+  <node pkg="arm5_joy_control" type="arm5_joy_control" name="arm5_joy_control" respawn="false" output="screen"/>
 
 </launch>
 <!-- %EndTag(FULL)%-->
