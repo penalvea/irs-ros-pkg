@@ -1,5 +1,5 @@
 /*
- * Transform.cpp
+ * VispUtils: usage example in http://github.com/davidfornas/pcl_manipulation
  *
  *  Created on: 24/04/2014
  *      Author: dfornas
@@ -9,7 +9,6 @@
 #include <tf/transform_broadcaster.h>
 #include <visp/vpHomogeneousMatrix.h>
 #include <stdlib.h>
-
 
 VispToTF::VispToTF( vpHomogeneousMatrix sMs, std::string parent, std::string child){
 	  broadcaster_ = new tf::TransformBroadcaster();
@@ -28,16 +27,7 @@ void VispToTF::addTransform( vpHomogeneousMatrix sMs, std::string parent, std::s
 		  return;		  
 	  }
 	  
-	  tf::Transform pose;
-
-	  vpTranslationVector trans;
-	  sMs.extract(trans);
-	  tf::Vector3 translation(trans[0],trans[1],trans[2]);
-
-	  vpQuaternionVector rot;
-	  sMs.extract(rot);
-	  tf::Quaternion rotation( rot.x(), rot.y(), rot.z(), rot.w());
-	  pose.setOrigin(translation);   pose.setRotation(rotation);
+	  tf::Transform pose=tfTransFromVispHomog(sMs);
 	  
 	  Frame f; 
 	  f.pose=pose;
