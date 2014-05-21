@@ -26,6 +26,23 @@ void VispToTF::addTransform( vpHomogeneousMatrix sMs, std::string parent, std::s
 		  std::cerr << "ID [" << id << "] already in use. It won't be added." << std::endl;
 		  return;		  
 	  }
+	  // Check for transform duplicates, traverse through the map so keep it small.
+	  bool duplicate=false;
+	  std::string old_id;
+	  for( std::map<std::string, Frame>::iterator ii=frames_.begin(); ii!=frames_.end(); ++ii)
+	  {
+			if( (*ii).second.parent == parent &&  (*ii).second.child == child){
+				duplicate=true;
+				old_id=(*ii).first;
+			}	
+	  }
+	  //Valid tree structure it's not checked. TF does this check, though.
+	  
+	  if(duplicate){
+		  std::cerr << "Frame from " << child << " to " << parent << " already specified. Reset it with resetTransform(sMs, " << old_id << " )." << std::endl;
+		  return;		  
+	  }
+	  
 	  
 	  tf::Transform pose=tfTransFromVispHomog(sMs);
 	  
@@ -35,6 +52,17 @@ void VispToTF::addTransform( vpHomogeneousMatrix sMs, std::string parent, std::s
 	  f.child=child;
 	  
 	  frames_[id]=f;
+	  
+}
+
+void VispToTF::resetTransform( vpHomogeneousMatrix sMs, std::string id){
+	  
+	  if(frames_.count(id)<1){
+		  std::cerr << "Can't reset this item. ID [" << id << "] not found." << std::endl;
+		  return;		  
+	  }
+	  tf::Transform pose=tfTransFromVispHomog(sMs);	  
+	  frames_[id].pose=pose;
 	  
 }
 

@@ -39,6 +39,8 @@ public:
 	/** Remove a frame from the publish list */
 	void removeTransform( std::string id  );
 	
+	/** Modify homog matrix of a transform, it's better to keep parent and child unmodified */
+	void resetTransform( vpHomogeneousMatrix sMs, std::string id);
 	
 	void publish();
 	void print();
