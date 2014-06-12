@@ -24,6 +24,11 @@
   <param name="JawOpenAxis" value="2" type="int"/>
   <param name="JawDir" value="1" type="int"/>
   <param name="scale" value="2500" type="double"/>
+  
+  <param name="LockSlewButton" value="0" type="int"/>  
+  <param name="LockJawRotateButton" value="1" type="int"/>  
+  <param name="LockJawOpenButton" value="2" type="int"/>
+  
 
 
   <node pkg="arm5_joy_control" type="arm5_joy_control" name="arm5_joy_control" respawn="false" output="screen"/>
