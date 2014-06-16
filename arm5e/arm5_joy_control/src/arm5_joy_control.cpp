@@ -16,13 +16,14 @@ private:
 
   int axisindex[6];
   int AxisDir[5];
-  int buttonindex[3], lastValue_[3];
+  int buttonindex[5], lastValue_[5];
   double scale_;
   double current;
   ros::Publisher vel_pub_;
   ros::Subscriber joy_sub_;
   ros::Subscriber arm_sub_;
-  bool slewLocked_, jawRotateLocked_, jawOpenLocked_ ;
+  bool slewLocked_, jawRotateLocked_, jawOpenLocked_, fixSlew_, park_;
+  int rticks_[5];
   
 };
 
@@ -32,7 +33,11 @@ TeleopCSIP::TeleopCSIP()
   for (int i=0; i<5; i++)
         AxisDir[i]=1;
   current=0;
-  slewLocked_=false, jawRotateLocked_=false;
+  slewLocked_=false;
+  jawRotateLocked_=false;
+  jawOpenLocked_=false;
+  fixSlew_=false;
+  park_=false; 
   nh_.param("SlewAxis", axisindex[0], axisindex[0]);
   nh_.param("ShoulderAxis", axisindex[1], axisindex[1]);
   nh_.param("ElbowAxis", axisindex[2], axisindex[2]);
@@ -48,7 +53,9 @@ TeleopCSIP::TeleopCSIP()
   nh_.param("LockSlewButton", buttonindex[0], buttonindex[0]);
   nh_.param("LockJawRotateButton", buttonindex[1], buttonindex[1]);  
   nh_.param("LockJawOpenButton", buttonindex[2], buttonindex[2]);
-
+  nh_.param("FixSlewButton", buttonindex[3], buttonindex[3]);
+  nh_.param("ParkButton", buttonindex[4], buttonindex[4]);
+  
   vel_pub_ = nh_.advertise<sensor_msgs::JointState>("/arm5e/command_ticks",1);
 
   joy_sub_ = nh_.subscribe<sensor_msgs::Joy>("arm_joy", 10, &TeleopCSIP::joyCallback, this);
@@ -75,39 +82,75 @@ void TeleopCSIP::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 		ROS_INFO("Button %d pressed, Jaw open locked: %s", buttonindex[2], jawOpenLocked_?"yes":"no" );
 	}
 	
+	if (joy->buttons[buttonindex[3]]==1 && lastValue_[3]!=1){
+		fixSlew_=fixSlew_?false:true;
+		if(fixSlew_) park_=false;
+		ROS_INFO("Button %d pressed, Fix slew angle: %s", buttonindex[3], fixSlew_?"yes":"no" );
+	}
+	
+	if (joy->buttons[buttonindex[4]]==1 && lastValue_[4]!=1){
+		park_=park_?false:true;
+		if(park_)fixSlew_=false;
+		ROS_INFO("Button %d pressed, Park: %s", buttonindex[4], park_?"yes":"no" );
+	}
+	
 
 	if(current<CURRENT_THRESHOLD){
-		js.name.push_back(std::string("Slew"));
-		if(joy->axes[axisindex[0]]>0.2 || joy->axes[axisindex[0]]<-0.2){
-			js.velocity.push_back(scale_*joy->axes[axisindex[0]]*AxisDir[0]*(slewLocked_?0.0:1.0));
-		}
-		else{
-			js.velocity.push_back(0);
-		}
-		js.name.push_back(std::string("Shoulder"));
-		js.velocity.push_back(scale_*joy->axes[axisindex[1]]*AxisDir[1]);
-
-		js.name.push_back(std::string("Elbow"));
-
-		js.velocity.push_back(scale_*joy->axes[axisindex[2]]*AxisDir[2]);
-
-		js.name.push_back(std::string("JawRotate"));
-
-		js.velocity.push_back(0.3*scale_*joy->axes[axisindex[3]]*AxisDir[3]*(jawRotateLocked_?0.0:1.0));
-
-		js.name.push_back(std::string("JawOpening"));
-		if (joy->axes[axisindex[4]] < joy->axes[axisindex[5]]) {
-			if(joy->axes[axisindex[4]]!=0)
-				js.velocity.push_back(scale_*((joy->axes[axisindex[4]]-1)/2)*AxisDir[4]*(jawOpenLocked_?0.0:1.0));
-			else
+		if (park_){
+			ROS_INFO("Should be parking");
+		}else if (fixSlew_){
+			js.name.push_back(std::string("Slew"));
+			if(rticks_[0]>-25 && rticks_[0]<25){//Near 0
+				fixSlew_=false;
+				ROS_INFO("SLEW FIXED"); TODO:: Pasar a tomar angles mejor.
 				js.velocity.push_back(0);
-		} else if (joy->axes[axisindex[4]] > joy->axes[axisindex[5]]) {
-			if(joy->axes[axisindex[5]]!=0)
-				js.velocity.push_back(-scale_*((joy->axes[axisindex[5]]-1)/2)*AxisDir[4]*(jawOpenLocked_?0.0:1.0));
-			else
-				js.velocity.push_back(0);
-		} else {
+			}else{
+				if(rticks_[0]>0)
+					js.velocity.push_back(-2250);
+				else
+					js.velocity.push_back(2250);
+			}
+			js.name.push_back(std::string("Shoulder"));
 			js.velocity.push_back(0);
+			js.name.push_back(std::string("Elbow"));
+			js.velocity.push_back(0);
+			js.name.push_back(std::string("JawRotate"));
+			js.velocity.push_back(0);
+			js.name.push_back(std::string("JawOpening"));
+			js.velocity.push_back(0);
+		}else{
+			js.name.push_back(std::string("Slew"));
+			if(joy->axes[axisindex[0]]>0.2 || joy->axes[axisindex[0]]<-0.2){
+				js.velocity.push_back(scale_*joy->axes[axisindex[0]]*AxisDir[0]*(slewLocked_?0.0:1.0));
+			}
+			else{
+				js.velocity.push_back(0);
+			}
+			js.name.push_back(std::string("Shoulder"));
+			js.velocity.push_back(scale_*joy->axes[axisindex[1]]*AxisDir[1]);
+
+			js.name.push_back(std::string("Elbow"));
+
+			js.velocity.push_back(scale_*joy->axes[axisindex[2]]*AxisDir[2]);
+
+			js.name.push_back(std::string("JawRotate"));
+
+			js.velocity.push_back(0.3*scale_*joy->axes[axisindex[3]]*AxisDir[3]*(jawRotateLocked_?0.0:1.0));
+
+			js.name.push_back(std::string("JawOpening"));
+			if (joy->axes[axisindex[4]] < joy->axes[axisindex[5]]) {
+				if(joy->axes[axisindex[4]]!=0)
+					js.velocity.push_back(scale_*((joy->axes[axisindex[4]]-1)/2)*AxisDir[4]);
+				else
+					js.velocity.push_back(0);
+			} else if (joy->axes[axisindex[4]] > joy->axes[axisindex[5]]) {
+				if(joy->axes[axisindex[5]]!=0)
+					js.velocity.push_back(-scale_*((joy->axes[axisindex[5]]-1)/2)*AxisDir[4]*(jawOpenLocked_?0.0:1.0));
+				else
+					js.velocity.push_back(0);
+			} else {
+				js.velocity.push_back(0);
+			}
 		}
 	}
 	else{
@@ -144,10 +187,13 @@ void TeleopCSIP::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 	lastValue_[0]=joy->buttons[buttonindex[0]];
 	lastValue_[1]=joy->buttons[buttonindex[1]];	
 	lastValue_[2]=joy->buttons[buttonindex[2]];
+	lastValue_[3]=joy->buttons[buttonindex[3]];
+	lastValue_[4]=joy->buttons[buttonindex[4]];
 }
 
 void TeleopCSIP::armCallback(const sensor_msgs::JointState::ConstPtr& mes){
 	current=mes->effort[0];
+	for(int i=0;i<5;i++) rticks_[i]=mes->position[i];
 }
 int main(int argc, char** argv)
 {
