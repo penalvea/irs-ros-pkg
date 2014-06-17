@@ -11,19 +11,21 @@ public:
 private:
   void joyCallback(const sensor_msgs::Joy::ConstPtr& joy);
   void armCallback(const sensor_msgs::JointState::ConstPtr& mes);
+  void armAngleCallback(const sensor_msgs::JointState::ConstPtr& mes);
   
   ros::NodeHandle nh_;
 
   int axisindex[6];
   int AxisDir[5];
   int buttonindex[5], lastValue_[5];
+  double error_;
   double scale_;
   double current;
   ros::Publisher vel_pub_;
   ros::Subscriber joy_sub_;
-  ros::Subscriber arm_sub_;
+  ros::Subscriber arm_sub_, arm_angle_sub_;
   bool slewLocked_, jawRotateLocked_, jawOpenLocked_, fixSlew_, park_;
-  int rticks_[5];
+  double angles_[5], desired_[5];
   
 };
 
@@ -38,6 +40,7 @@ TeleopCSIP::TeleopCSIP()
   jawOpenLocked_=false;
   fixSlew_=false;
   park_=false; 
+  error_=0.03;//Load from launchfile
   nh_.param("SlewAxis", axisindex[0], axisindex[0]);
   nh_.param("ShoulderAxis", axisindex[1], axisindex[1]);
   nh_.param("ElbowAxis", axisindex[2], axisindex[2]);
@@ -60,6 +63,14 @@ TeleopCSIP::TeleopCSIP()
 
   joy_sub_ = nh_.subscribe<sensor_msgs::Joy>("arm_joy", 10, &TeleopCSIP::joyCallback, this);
   arm_sub_= nh_.subscribe<sensor_msgs::JointState>("/arm5e/joint_state_rticks", 1, &TeleopCSIP::armCallback, this);
+  arm_angle_sub_= nh_.subscribe<sensor_msgs::JointState>("/arm5e/joint_state_angle", 1, &TeleopCSIP::armAngleCallback, this);
+
+  desired_[0]=0.0;
+  desired_[1]=0.35;
+  desired_[2]=1.5;
+  desired_[3]=0.0;
+  desired_[4]=1.0;
+
 }
 
 
@@ -97,15 +108,59 @@ void TeleopCSIP::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 
 	if(current<CURRENT_THRESHOLD){
 		if (park_){
-			ROS_INFO("Should be parking");
+			int okcount=0;int speed_=600; 
+			js.name.push_back(std::string("Slew"));
+			if( (angles_[0]-desired_[0]) > error_){
+			    js.velocity.push_back(-speed_);
+			}else if ( (angles_[0]-desired_[0]) < -error_){
+				js.velocity.push_back(speed_);
+			}else{
+				js.velocity.push_back(0);okcount++;
+			}
+			js.name.push_back(std::string("Shoulder"));
+			if( (angles_[1]-desired_[1]) > error_){
+			    js.velocity.push_back(-speed_);
+			}else if ( (angles_[1]-desired_[1]) < -error_){
+				js.velocity.push_back(speed_);
+			}else{
+				js.velocity.push_back(0);okcount++;
+			}
+			js.name.push_back(std::string("Elbow"));
+			if( (angles_[2]-desired_[2]) > error_){
+			    js.velocity.push_back(speed_);
+			}else if ( (angles_[2]-desired_[2]) < -error_){
+				js.velocity.push_back(-speed_);
+			}else{
+				js.velocity.push_back(0);okcount++;
+			}
+			js.name.push_back(std::string("JawRotate"));
+			if( (angles_[3]-desired_[3]) > error_){
+			    js.velocity.push_back(-speed_/4);
+			}else if ( (angles_[3]-desired_[3]) < -error_){
+				js.velocity.push_back(speed_/4);
+			}else{
+				js.velocity.push_back(0);okcount++;
+			}
+			js.name.push_back(std::string("JawOpening"));
+			if( (angles_[4]-desired_[4]) > error_){
+			    js.velocity.push_back(-speed_);
+			}else if ( (angles_[4]-desired_[4]) < -error_){
+				js.velocity.push_back(speed_);
+			}else{
+				js.velocity.push_back(0);okcount++;
+			}			
+			if(okcount==5){
+				park_=false;
+				ROS_INFO("Parked with a precision of %f", error_);
+			}
 		}else if (fixSlew_){
 			js.name.push_back(std::string("Slew"));
-			if(rticks_[0]>-25 && rticks_[0]<25){//Near 0
+			if(angles_[0]>-error_ && angles_[0]<error_){//Near 0
 				fixSlew_=false;
-				ROS_INFO("SLEW FIXED"); TODO:: Pasar a tomar angles mejor.
+				ROS_INFO("Slew is at 0 angles (+-%f)", error_);
 				js.velocity.push_back(0);
 			}else{
-				if(rticks_[0]>0)
+				if(angles_[0]>0)
 					js.velocity.push_back(-2250);
 				else
 					js.velocity.push_back(2250);
@@ -193,8 +248,12 @@ void TeleopCSIP::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 
 void TeleopCSIP::armCallback(const sensor_msgs::JointState::ConstPtr& mes){
 	current=mes->effort[0];
-	for(int i=0;i<5;i++) rticks_[i]=mes->position[i];
 }
+
+void TeleopCSIP::armAngleCallback(const sensor_msgs::JointState::ConstPtr& mes){
+	for(int i=0;i<5;i++) angles_[i]=mes->position[i];
+}
+
 int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "arm5_joy_control");
