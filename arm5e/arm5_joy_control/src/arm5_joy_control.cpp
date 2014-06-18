@@ -108,50 +108,50 @@ void TeleopCSIP::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 
 	if(current<CURRENT_THRESHOLD){
 		if (park_){
-			int okcount=0;int speed_=600; 
+			int okcount=0;int speed_=900; 
 			js.name.push_back(std::string("Slew"));
 			if( (angles_[0]-desired_[0]) > error_){
-			    js.velocity.push_back(-speed_);
+			    js.velocity.push_back(-speed_*(angles_[0]-desired_[0]));
 			}else if ( (angles_[0]-desired_[0]) < -error_){
-				js.velocity.push_back(speed_);
+				js.velocity.push_back(-speed_*(angles_[0]-desired_[0]));
 			}else{
 				js.velocity.push_back(0);okcount++;
 			}
 			js.name.push_back(std::string("Shoulder"));
 			if( (angles_[1]-desired_[1]) > error_){
-			    js.velocity.push_back(-speed_);
+			    js.velocity.push_back(-speed_*(angles_[1]-desired_[1]));
 			}else if ( (angles_[1]-desired_[1]) < -error_){
-				js.velocity.push_back(speed_);
+				js.velocity.push_back(-speed_*(angles_[1]-desired_[1]));
 			}else{
 				js.velocity.push_back(0);okcount++;
 			}
 			js.name.push_back(std::string("Elbow"));
 			if( (angles_[2]-desired_[2]) > error_){
-			    js.velocity.push_back(speed_);
+			    js.velocity.push_back(speed_*(angles_[2]-desired_[2]));//This speed has the sign changed
 			}else if ( (angles_[2]-desired_[2]) < -error_){
-				js.velocity.push_back(-speed_);
+				js.velocity.push_back(speed_*(angles_[2]-desired_[2]));
 			}else{
 				js.velocity.push_back(0);okcount++;
 			}
 			js.name.push_back(std::string("JawRotate"));
 			if( (angles_[3]-desired_[3]) > error_){
-			    js.velocity.push_back(-speed_/4);
+			    js.velocity.push_back(-speed_/4*(angles_[3]-desired_[3]));
 			}else if ( (angles_[3]-desired_[3]) < -error_){
-				js.velocity.push_back(speed_/4);
+				js.velocity.push_back(-speed_/4*(angles_[3]-desired_[3]));
 			}else{
 				js.velocity.push_back(0);okcount++;
 			}
 			js.name.push_back(std::string("JawOpening"));
 			if( (angles_[4]-desired_[4]) > error_){
-			    js.velocity.push_back(-speed_);
+			    js.velocity.push_back(-speed_*(angles_[4]-desired_[4]));
 			}else if ( (angles_[4]-desired_[4]) < -error_){
-				js.velocity.push_back(speed_);
+				js.velocity.push_back(-speed_*(angles_[4]-desired_[4]));
 			}else{
 				js.velocity.push_back(0);okcount++;
 			}			
 			if(okcount==5){
 				park_=false;
-				ROS_INFO("Parked with a precision of %f", error_);
+				ROS_INFO("Parked with a precision of %3f", error_);
 			}
 		}else if (fixSlew_){
 			js.name.push_back(std::string("Slew"));
