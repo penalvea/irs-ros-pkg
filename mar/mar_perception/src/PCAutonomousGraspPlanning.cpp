@@ -68,6 +68,8 @@ void PCAutonomousGraspPlanning::perceive() {
   pass.filter (*cloud_filtered);
   std::cerr << "PointCloud after filtering has: " << cloud_filtered->points.size () << " data points." << std::endl;
 
+  // @todo : Add more filters -> downsampling and radial ooutlier removal.
+
   // Estimate point normals
   ne.setSearchMethod (tree);
   ne.setInputCloud (cloud_filtered);
@@ -132,7 +134,7 @@ void PCAutonomousGraspPlanning::perceive() {
     std::cerr << *coefficients_cylinder << std::endl;
   }
 
-  //Caulculate CYLINDER SHAPE
+  //Calculate CYLINDER SHAPE
 
   //Puntos de agarre
   PointT mean,mean2;
@@ -165,39 +167,6 @@ void PCAutonomousGraspPlanning::perceive() {
   mean.y+=coefficients_perpendicular->values[4]*coefficients_perpendicular->values[6];
   mean.z+=coefficients_perpendicular->values[5]*coefficients_perpendicular->values[6];
 
-  //Girar ese punto un determinado ángulo TODO Revisar o probar con quaternios
-  //Sea P = (3, 4, 5) un punto arbitrario del espacio que queremos girar theta = pi/8 radianes respecto al eje AB dado por los puntos A = (9, 2, 6) y B = (7, 0, 1)
-  //Averiguar P' mediante productos escalares y vectoriales
-
-  /*
-     osg::Vec3d A,B,P,Pdot,aux,v,vunit,aux2;//AB,n
-
-     A.set((double)middle.x, 
-     (double)middle.y, 
-     (double)middle.z);
-
-     B.set( (double)middle.x+coefficients_cylinder->values[3],
-     (double)middle.y+coefficients_cylinder->values[4],
-     (double)middle.z+coefficients_cylinder->values[5]);
-
-     P.set( (double)mean.x, (double)mean.y, (double)mean.z);
-
-     double vmod,cost,sint;
-     aux=P-A;
-     v=B-A;//theta=0.392699082;
-     std::cerr << "THETA: " << theta << endl;
-     vmod=sqrt(pow(v.x(),2)+pow(v.y(),2)+pow(v.z(),2));
-     vunit=v*(1.0/vmod);
-     sint=sin(theta/2);cost=cos(theta/2);
-     osg::Quat q(vunit.x()*sint,vunit.y()*sint, vunit.z()*sint, cost),Aq(A.x(), A.y(), A.z(), 0),PAq(aux.x(), aux.y(), aux.z(), 0),res;
-     res=Aq+q*PAq*q.inverse();
-     Pdot=res.asVec3(); 
-
-     mean.x=Pdot.x();mean.y=Pdot.y();mean.z=Pdot.z();*/
-  //mean2 es el otro punto calculado como Pdot + (Pdot-A)[distancia de Pdot a A] Es decir 
-  // simétrico con respecto al eje.
-
-
   mean2.x=mean.x+2*(middle.x-mean.x);
   mean2.y=mean.y+2*(middle.y-mean.y);
   mean2.z=mean.z+2*(middle.z-mean.z);
@@ -211,13 +180,12 @@ void PCAutonomousGraspPlanning::perceive() {
     << "x:" << g2.get_X() << "y:" << g2.get_Y()  << "z:" << g2.get_Z()  << std::endl);
    */
 
-  //DF: Two grasp points version.*/
+  //DF: Two grasp points version.
   vpColVector ip1m(3), ip2m(3), middle_point(3),b(3);
   ip1m[0]=g1.get_X();ip1m[1]=g1.get_Y();ip1m[2]=g1.get_Z();
   ip2m[0]=g2.get_X();ip2m[1]=g2.get_Y();ip2m[2]=g2.get_Z();
 
   middle_point=0.5*(ip1m+ip2m);
-
 
   // Ahora mismo lo hace respecto del centro faltaría alejarlo R(radio)
   //Es decir, ahora mismo el end-efector cae dentro del cilindro en vez de en superfície.
@@ -227,7 +195,6 @@ void PCAutonomousGraspPlanning::perceive() {
   base_cMg[1][3]=middle_point[1];
   base_cMg[2][3]=middle_point[2];//cloud_downsampled->points[minzPoint].z+gf_penetration;
   vpColVector n(3),o(3),a(3);
-
 
   //Este es el vector que el utiliza como la Z de la cámara. Si queremos rotar antes habría que cambiar este pero es más sencillo rotar luego.
   a[0]=0; a[1]=0; a[2]=1;
@@ -244,15 +211,12 @@ void PCAutonomousGraspPlanning::perceive() {
   //ROS_INFO_STREAM("cMg is before rotate is...: " << std::endl << cMg);
   recalculate_cMg();
 
-
 }
 
 //Calculate cMg
 void PCAutonomousGraspPlanning::recalculate_cMg(){
 
   intToConfig();
-  //Añado esto para coincidir con el urdf
-  //vpHomogeneousMatrix test(0,0,0,M_PI/2,0,0); //vpHomogeneousMatrix test(0,0,0,0,M_PI/2,0);
   if(aligned_grasp_){
     //aplicamos una rotación y traslación para posicionar la garra mejor
     vpHomogeneousMatrix grMgt0(0,along_,0,0,0,0);
@@ -263,7 +227,7 @@ void PCAutonomousGraspPlanning::recalculate_cMg(){
     vpHomogeneousMatrix cMgt;
     cMgt = grMgt0 * gMgrZ * gMgrX * gMgrY * grMgt;
 
-    cMg = base_cMg * cMgt ;// * test;
+    cMg = base_cMg * cMgt ;
     //ROS_INFO_STREAM("cMg1 is after rotate is...: " << std::endl << cMg);
 
   }else{
@@ -280,30 +244,26 @@ void PCAutonomousGraspPlanning::recalculate_cMg(){
   //Compute bMg and plan a grasp on bMg
   //vpHomogeneousMatrix bMg=bMc*cMg;
   //std::cerr << "bMg is: " << std::endl << bMg << std::endl;
-
 }
 
-//COnf
+/// Config from sliders to float values.
 void PCAutonomousGraspPlanning::intToConfig(){
   bool old=aligned_grasp_;
   aligned_grasp_=ialigned_grasp==1?true:false;
 
-  //TODO: DEFAULTS AQUI?
+  // @todo: Move defaults to other place.
   if(old!=aligned_grasp_){
     if(aligned_grasp_){iangle=45;irad=48;ialong=11;}
     else{ iangle=226;irad=50;ialong=0;}
   }
 
-
-  angle_=iangle*(2.0*M_PI/360.0);ROS_INFO_STREAM("ANGLE is...: " << std::endl << angle_);
-
+  angle_=iangle*(2.0*M_PI/360.0);
   rad_=-irad/100.0;
   along_=ialong/100.0;
-
 }
 
-//Ordenar en función de la proyección del punto sobre el eje definido 
-//por axis_point_g y normal_g (globales)
+///Ordenar en función de la proyección del punto sobre el eje definido 
+///por axis_point_g y normal_g (globales)
 bool PCAutonomousGraspPlanning::sortFunction(const PointT& d1, const PointT& d2)
 {
   double t1 = (normal_g.x()*(d1.x-axis_point_g.x) + normal_g.y()*(d1.y-axis_point_g.y) + normal_g.z()*(d1.z-axis_point_g.z))/(pow(normal_g.x(),2) + pow(normal_g.y(),2) + pow(normal_g.z(),2));
@@ -312,8 +272,8 @@ bool PCAutonomousGraspPlanning::sortFunction(const PointT& d1, const PointT& d2)
   return t1 < t2;
 }
 
-//Obtiene los máximos y mínimos del cilindro para encontrar la altura del cilindro con un margen
-//de descarte del 5%.
+///Obtiene los máximos y mínimos del cilindro para encontrar la altura del cilindro con un margen
+///de descarte del 5%.
 void PCAutonomousGraspPlanning::getMinMax3DAlongAxis(const pcl::PointCloud<PointT>::ConstPtr& cloud, PointT * max_pt, PointT * min_pt, PointT axis_point, tf::Vector3 * normal)
 {
   axis_point_g=axis_point; 

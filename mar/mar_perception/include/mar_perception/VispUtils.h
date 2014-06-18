@@ -40,7 +40,7 @@ public:
 	void removeTransform( std::string id  );
 	
 	/** Modify homog matrix of a transform, it's better to keep parent and child unmodified */
-	void resetTransform( vpHomogeneousMatrix sMs, std::string id);
+	void resetTransform( vpHomogeneousMatrix sMs, std::string id = "0" );
 	
 	void publish();
 	void print();
