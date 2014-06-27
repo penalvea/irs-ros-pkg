@@ -24,6 +24,7 @@
   <param name="JawOpenAxis" value="2" type="int"/>
   <param name="JawDir" value="1" type="int"/>
   <param name="scale" value="2500" type="double"/>
+  <param name="error" value="0.035" type="double"/>
   
   <param name="LockSlewButton" value="0" type="int"/>  
   <param name="LockJawRotateButton" value="1" type="int"/>  

@@ -40,7 +40,6 @@ TeleopCSIP::TeleopCSIP()
   jawOpenLocked_=false;
   fixSlew_=false;
   park_=false; 
-  error_=0.03;//Load from launchfile
   nh_.param("SlewAxis", axisindex[0], axisindex[0]);
   nh_.param("ShoulderAxis", axisindex[1], axisindex[1]);
   nh_.param("ElbowAxis", axisindex[2], axisindex[2]);
@@ -52,7 +51,8 @@ TeleopCSIP::TeleopCSIP()
   nh_.param("ElbowDir", AxisDir[2], AxisDir[2]);
   nh_.param("WristDir", AxisDir[3], AxisDir[3]);
   nh_.param("JawDir", AxisDir[4], AxisDir[4]);
-  nh_.param("scale", scale_, scale_);  
+  nh_.param("scale", scale_, scale_);   
+  nh_.param("error", error_, error_);   
   nh_.param("LockSlewButton", buttonindex[0], buttonindex[0]);
   nh_.param("LockJawRotateButton", buttonindex[1], buttonindex[1]);  
   nh_.param("LockJawOpenButton", buttonindex[2], buttonindex[2]);
@@ -66,10 +66,10 @@ TeleopCSIP::TeleopCSIP()
   arm_angle_sub_= nh_.subscribe<sensor_msgs::JointState>("/arm5e/joint_state_angle", 1, &TeleopCSIP::armAngleCallback, this);
 
   desired_[0]=0.0;
-  desired_[1]=0.35;
-  desired_[2]=1.5;
+  desired_[1]=0.15;
+  desired_[2]=1.8;
   desired_[3]=0.0;
-  desired_[4]=1.0;
+  desired_[4]=0.36;
 
 }
 
@@ -108,7 +108,7 @@ void TeleopCSIP::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 
 	if(current<CURRENT_THRESHOLD){
 		if (park_){
-			int okcount=0;int speed_=900; 
+			int okcount=0;int speed_=scale_; 
 			js.name.push_back(std::string("Slew"));
 			if( (angles_[0]-desired_[0]) > error_){
 			    js.velocity.push_back(-speed_*(angles_[0]-desired_[0]));
