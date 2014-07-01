@@ -86,13 +86,13 @@ ARM5Control::ARM5Control()
   PIDService = nh_.advertiseService("/arm5e/setPID", &ARM5Control::setPID_callback, this);
   //ParamService = nh_.advertiseService("/arm5e/setParams", &ARM5Control::setParams_callback, this);
   
-  //DF: Serial message publishers
-  message_r_pub = nh_.advertise<arm5_controller::ReadMessage>("/arm5e/read_message",1);
-  message_s_pub = nh_.advertise<arm5_controller::SendMessage>("/arm5e/write_message",1);
+  //Serial message publishers. Uncomment to debug.
+  //message_r_pub = nh_.advertise<arm5_controller::ReadMessage>("/arm5e/read_message",1);
+  //message_s_pub = nh_.advertise<arm5_controller::SendMessage>("/arm5e/write_message",1);
 
   //Start read thread
-//  pthread_t readt;
-//  pthread_create(&readt,NULL,readfunc, coms);
+  //  pthread_t readt;
+  //  pthread_create(&readt,NULL,readfunc, coms);
 
   //Set PIDS, and set zero velocity
   controlCycle();
@@ -546,14 +546,13 @@ int main(int argc, char** argv)
 		//Publish position, velocity, and master current, in ticks, lengths and angles
 		//Master Current is replicated for each joint and placed into the effort field
 		sensor_msgs::JointState js_rawticks, js_rticks, js_ticks, js_length, js_angle;
+		std::string names[5]={"Slew", "Shoulder", "Elbow", "JawRotate", "JawOpening"};
 		for (int i=0; i<5; i++) {
-			char name[4];
-			sprintf(name,"q%d",i);
-			js_rawticks.name.push_back(std::string(name));
-			js_rticks.name.push_back(std::string(name));
-			js_ticks.name.push_back(std::string(name));
-			js_length.name.push_back(std::string(name));
-			js_angle.name.push_back(std::string(name));
+			js_rawticks.name.push_back(names[i]);
+			js_rticks.name.push_back(names[i]);
+			js_ticks.name.push_back(names[i]);
+			js_length.name.push_back(names[i]);
+			js_angle.name.push_back(names[i]);
 
 			js_rawticks.position.push_back(csipcontrol.rawticks[i]);
 			js_rticks.position.push_back(csipcontrol.rticks[i]);
