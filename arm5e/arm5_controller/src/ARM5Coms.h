@@ -202,7 +202,6 @@ class Motor
 		} else {
 			this->DemandType = 0; //brake
 			this->Demand=0;
-			//DF: std::cerr << "BRAKE demand" std::endl;
 		}
 	    }
 

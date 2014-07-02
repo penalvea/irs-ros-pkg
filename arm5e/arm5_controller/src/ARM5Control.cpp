@@ -138,6 +138,7 @@ void ARM5Control::setTicksVelocity(vpColVector &rpm) {
 //	coms->Channel5.SpeedDemand(0, slimit, gclimit);
   if (emergencyStop) {
 	std::cerr << "WARNING: Emergency stop. High current detected." << std::endl;
+	sleep(4);
 	coms->Channel2.SpeedDemand(0, slimit, climit);
 	coms->Channel1.SpeedDemand(0, slimit, climit);
 	coms->Channel3.SpeedDemand(0, slimit, climit);
@@ -159,7 +160,7 @@ void ARM5Control::setTicksVelocity(vpColVector &rpm) {
         //if there is a motor velocity above the limit, scale all of them in order to keep them below the limit
         double ratio=0;
         if (maxdiff>0 && rpm[maxindex]!=0) {
-                std::cerr << "WARNING: Motor " << maxindex << " (starting from 0) is in velocity limit: " << rpm[maxindex] << " RPM. Scaling..." << std::endl;
+                //std::cerr << "WARNING: Motor " << maxindex << " (starting from 0) is in velocity limit: " << rpm[maxindex] << " RPM. Scaling..." << std::endl;
                 ratio=fabs(rpmlimit[maxindex])/fabs(rpm[maxindex]);
         } else ratio=1;
 
@@ -184,6 +185,10 @@ void ARM5Control::setTicksVelocity(vpColVector &rpm) {
 			filtered_rpm=0;
 			std::cerr << "WARNING: Aborting velocity on joint " << near_limit_joint << ". Close to limit." << std::endl;
 		}
+	}
+	if((int)filtered_rpm[0]==0 && (int)filtered_rpm[1]==0 && (int)filtered_rpm[2]==0 && (int)filtered_rpm[3]==0 && (int)filtered_rpm[4]==0 ){
+		//std::cout<<"Todo 0"<<std::endl;
+		//sleep(4);
 	}
 
 	coms->Channel2.SpeedDemand((int)filtered_rpm[0],slimit, climit);
