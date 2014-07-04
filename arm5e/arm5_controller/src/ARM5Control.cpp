@@ -139,7 +139,6 @@ void ARM5Control::setTicksVelocity(vpColVector &rpm) {
 //	coms->Channel5.SpeedDemand(0, slimit, gclimit);
   if (emergencyStop) {
 	std::cerr << "WARNING: Emergency stop. High current detected." << std::endl;
-	sleep(4);
 	coms->Channel2.SpeedDemand(0, slimit, climit);
 	coms->Channel1.SpeedDemand(0, slimit, climit);
 	coms->Channel3.SpeedDemand(0, slimit, climit);
