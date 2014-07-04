@@ -15,6 +15,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
 #include "arm5_controller/setZero.h"
+#include "arm5_controller/setOneZero.h"
 #include "arm5_controller/setPID.h"
 #include "arm5_controller/SendMessage.h"
 #include "arm5_controller/ReadMessage.h"
@@ -80,6 +81,8 @@ public:
 
 private:
   bool setZero(arm5_controller::setZero::Request  &req, arm5_controller::setZero::Response &res);
+  bool setOneZero(arm5_controller::setOneZero::Request &req, arm5_controller::setOneZero::Response &res);
+
   void commandTicks(const sensor_msgs::JointState::ConstPtr& js);
   void commandlength(const sensor_msgs::JointState::ConstPtr& js);
   void commandAngle(const sensor_msgs::JointState::ConstPtr& js);
@@ -96,6 +99,7 @@ private:
 public:
   ros::NodeHandle nh_;
   ros::ServiceServer service;	//Service for setting the zero offsets
+  ros::ServiceServer setOneZeroService;	//Service for setting the zero offset of one joint
   ros::Publisher js_rticks_pub;	//Publish position/velocity/effort commands in relative tick units
   ros::Subscriber js_ticks_sub;	//Receive position/velocity/effort commands in abs tick units
   ros::Publisher js_ticks_pub;	//Publish position/velocity/effort commands in abs tick units

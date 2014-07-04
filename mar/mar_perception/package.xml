@@ -15,7 +15,8 @@
   <buildtool_depend>catkin</buildtool_depend>
  
   <build_depend>roscpp</build_depend>
-  <build_depend>geometry_msgs</build_depend>  
+  <build_depend>geometry_msgs</build_depend>    
+  <build_depend>visualization_msgs</build_depend>  
   <build_depend>image_transport</build_depend>
   <build_depend>mar_core</build_depend>
   <build_depend>mar_msgs</build_depend>
@@ -23,7 +24,8 @@
   <build_depend>esm_tracking</build_depend>
 
   <run_depend>roscpp</run_depend>
-  <run_depend>geometry_msgs</run_depend>  
+  <run_depend>geometry_msgs</run_depend> 
+  <run_depend>visualization_msgs</run_depend>   
   <run_depend>image_transport</run_depend>
   <run_depend>mar_core</run_depend>
   <run_depend>mar_msgs</run_depend>

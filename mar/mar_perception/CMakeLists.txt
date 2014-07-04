@@ -4,6 +4,7 @@ project(mar_perception)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   geometry_msgs
+  visualization_msgs
   image_transport
   mar_core
   mar_msgs
@@ -21,7 +22,7 @@ catkin_package(
   CATKIN_DEPENDS    
     geometry_msgs
     roscpp
-    geometry_msgs
+    visualization_msgs
     image_transport
     mar_msgs
     mar_core
@@ -41,6 +42,7 @@ add_library(${PROJECT_NAME}
 src/ESMTracking.cpp
 src/ESMMRTracking.cpp
 src/VirtualImage.cpp
+src/VispUtils.cpp
 src/LaserPeakDetector.cpp
 src/Reconstruction3D.cpp
 src/PCGraspPlanning.cpp

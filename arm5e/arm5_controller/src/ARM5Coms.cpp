@@ -67,10 +67,10 @@ void ARM5Coms::readMessage()
 		usleep(10000);
 	} while (bytes_read==-1);
 
-	//printf("%02X %02X\n",buffer[0], buffer[50]);
+	printf("%02X %02X\n",buffer[0], buffer[50]);
         if (bytes_read==datalength)
         {
-            //std::cerr << "51-byte message received" << std::endl;
+           // std::cerr << "51-byte message received" << std::endl;
 	    memcpy(RXDATA,buffer,datalength*sizeof(byte));
             if (RXDATA[datalength - 1] == EOM && RXDATA[0] == SOM)
             {
