@@ -34,10 +34,10 @@ public:
     VispToTF();
 
     /** Add a frame to the publish list */
-	void addTransform( vpHomogeneousMatrix sMs, std::string parent, std::string child, std::string id  );
+	void addTransform( vpHomogeneousMatrix sMs, std::string parent, std::string child, std::string id = "0"  );
 	
 	/** Remove a frame from the publish list */
-	void removeTransform( std::string id  );
+	void removeTransform( std::string id = "0" );
 	
 	/** Modify homog matrix of a transform, it's better to keep parent and child unmodified */
 	void resetTransform( vpHomogeneousMatrix sMs, std::string id = "0" );
