@@ -8,7 +8,9 @@
 
 #include <ros/ros.h>
 
+//#include <mar_perception/VispUtils.h>
 #include <mar_perception/PCAutonomousGraspPlanning.h>
+
 #include <visp/vpPixelMeterConversion.h>
 #include <visp/vpHomogeneousMatrix.h>
 #include <visp/vpPoint.h>
@@ -146,6 +148,9 @@ void PCAutonomousGraspPlanning::perceive() {
   axis_point.y=coefficients_cylinder->values[1];
   axis_point.z=coefficients_cylinder->values[2];
   tf::Vector3 normal(coefficients_cylinder->values[3], coefficients_cylinder->values[4], coefficients_cylinder->values[5]);
+  ///tf::Transform t();
+  ///MarkerPublisher mp();
+  
 
   //Perpendicular cylinder.
   pcl::ModelCoefficients::Ptr coefficients_perpendicular (new pcl::ModelCoefficients(*coefficients_cylinder));

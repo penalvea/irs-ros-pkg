@@ -25,7 +25,6 @@ class VispToTF
 	tf::TransformBroadcaster *broadcaster_;
 	std::map<std::string, Frame> frames_;
 
-
 public:
 
     /** Create a new publisher with a frame to add to the TF tree */
@@ -72,7 +71,7 @@ tf::Transform tfTransFromVispHomog( vpHomogeneousMatrix sMs){
 	  
 }
 
-class VispToMarker
+class MarkerPublisher
 {
 
 	ros::Publisher publisher_;	
@@ -82,16 +81,18 @@ public:
      //In ths case is safe to make it public. The it's easier to change  marker's appearance.
 	 visualization_msgs::Marker marker;
 		
-
-	 VispToMarker( vpHomogeneousMatrix sMs, std::string parent, std::string topic_name, ros::NodeHandle nh){ 
-		 setMarker( sMs, parent ); 
+	 MarkerPublisher( vpHomogeneousMatrix sMs, std::string parent, std::string topic_name, ros::NodeHandle nh){ 
+		 tf::Transform pose=tfTransFromVispHomog(sMs);
+		 setMarker( pose, parent ); 
 		 publisher_ =nh.advertise<visualization_msgs::Marker>(topic_name,1);
 	 }
 	 
-	 void setMarker( vpHomogeneousMatrix sMs, std::string parent, int duration=1 ){
-		
-		tf::Transform pose=tfTransFromVispHomog(sMs);
-		 
+	 MarkerPublisher( tf::Transform pose, std::string parent, std::string topic_name, ros::NodeHandle nh){ 
+		 setMarker( pose, parent ); 
+		 publisher_ =nh.advertise<visualization_msgs::Marker>(topic_name,1);
+	 }
+	 
+	 void setMarker( tf::Transform pose, std::string parent, int duration=1 ){
 		marker.header.frame_id = parent;
 		marker.header.stamp = ros::Time::now();
 		marker.ns = "pose_marker";
@@ -110,6 +111,13 @@ public:
 		changeColor(1, 0.2, 0.7, 0.7);
 	  }
 	  
+	  void setCylinder( tf::Transform pose, std::string parent, double radious, double height, int duration=1 ){
+		  setMarker(pose, parent, duration);
+		  changeScale(radious, radious, height);
+		  marker.type = visualization_msgs::Marker::CYLINDER;		  
+	  }
+ 
+	  
 	  void publish(){ publisher_.publish(marker); }
 	  
 	  void changeColor( double r, double g, double b, double a ){
@@ -120,6 +128,6 @@ public:
 	  void changeScale( double x, double y, double z){
 		marker.scale.x = x; marker.scale.y = y;	marker.scale.z = z;
 	  }
-
 };
+
 #endif

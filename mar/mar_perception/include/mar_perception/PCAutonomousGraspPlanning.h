@@ -49,7 +49,10 @@ class PCAutonomousGraspPlanning : public CPerception {
 
   public:
   /** Constructor.
-   * @param angle,rad
+   * @param angle
+   * @param rad
+   * @param along
+   * @param aligned_grasp
    * @param pointcloud A PCL point cloud pointer
    * */
   PCAutonomousGraspPlanning( double angle, double rad, double along, double aligned_grasp, pcl::PointCloud<PointT>::Ptr pointcloud): cloud_(pointcloud) {
@@ -61,6 +64,7 @@ class PCAutonomousGraspPlanning : public CPerception {
     setGraspPenetration(DEFAULT_GRASP_PENETRATION);
   }
 
+  /** Main function where segmentation is done */
   void perceive();
 
   /** Set the dimensions of the gripper (in meters) */
@@ -75,6 +79,7 @@ class PCAutonomousGraspPlanning : public CPerception {
   /** Get the grasp frame with respect to the camera frame */
   vpHomogeneousMatrix get_cMg() {return cMg;}
 
+  /** Recalculate cMg with current parameters */
   void recalculate_cMg();	
 
   /** Get the grasp frame pose with respect to an arbitrary frame 'b', given as input relative to the camera frame
@@ -87,10 +92,13 @@ class PCAutonomousGraspPlanning : public CPerception {
 
   private:
 
+  /** Comparer used in the sort function */
   bool sortFunction(const PointT& d1, const PointT& d2);
 
+  /** Get the grasp frame with respect to the camera frame */
   void getMinMax3DAlongAxis(const pcl::PointCloud<PointT>::ConstPtr& cloud, PointT * max_pt, PointT * min_pt, PointT axis_point, tf::Vector3 * normal);
 
+  /** Configure the camera based in int slider parameters */
   void intToConfig();
 
 };
