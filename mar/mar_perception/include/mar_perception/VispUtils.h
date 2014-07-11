@@ -4,19 +4,24 @@
  *  Created on: 24/04/2014
  *      Author: dfornas
  */
-#ifndef VISPUTILS_H
-#define VISPUTILS_H
+#ifndef VISPUTILS_H_
+#define VISPUTILS_H_
 
 #include <tf/transform_broadcaster.h>
 #include <visp/vpHomogeneousMatrix.h>
 #include <string>
 #include <visualization_msgs/Marker.h>
 
+
+
 struct Frame{
 	tf::Transform pose;
 	std::string parent, child;
 	friend std::ostream& operator<<(std::ostream& out, Frame& x );
 };
+
+std::ostream& operator<<(std::ostream&, Frame&);
+tf::Transform tfTransFromVispHomog( vpHomogeneousMatrix);
 
 /** Tool to publish a vpHomogeneousMatrix on the TF tree */
 class VispToTF
@@ -47,29 +52,8 @@ public:
    // ~VispToTF();
 };
 
-std::ostream& operator<<(std::ostream& out, Frame& x ) 
-{
-	  out << "Pose origin  [x: " << x.pose.getOrigin().x() << " y: " << x.pose.getOrigin().y() << " z: " << x.pose.getOrigin().z() << "] "
-	  << "Pose rotation [x:" << x.pose.getRotation().x() << " y:" << x.pose.getRotation().y() << " z:" << x.pose.getRotation().z() << " w:" << x.pose.getRotation().w() << "] "
-	  << std::endl << "Parent: " << x.parent << " Child: " << x.child << std::endl;
-	  return out;
-}
 
-tf::Transform tfTransFromVispHomog( vpHomogeneousMatrix sMs){
-	
-	  tf::Transform pose;
-	
-	  vpTranslationVector trans;
-	  sMs.extract(trans);
-	  tf::Vector3 translation(trans[0],trans[1],trans[2]);
 
-	  vpQuaternionVector rot;
-	  sMs.extract(rot);
-	  tf::Quaternion rotation( rot.x(), rot.y(), rot.z(), rot.w());
-	  pose.setOrigin(translation);   pose.setRotation(rotation);
-	  return pose;
-	  
-}
 
 class MarkerPublisher
 {
@@ -118,7 +102,10 @@ public:
 	  }
  
 	  
-	  void publish(){ publisher_.publish(marker); }
+	  void publish(){ 
+		  marker.header.stamp = ros::Time::now();
+		  publisher_.publish(marker);
+	  }
 	  
 	  void changeColor( double r, double g, double b, double a ){
 		marker.color.a = r;	marker.color.r = g;
@@ -127,6 +114,16 @@ public:
 	  
 	  void changeScale( double x, double y, double z){
 		marker.scale.x = x; marker.scale.y = y;	marker.scale.z = z;
+	  }
+	  
+	  void changePose( tf::Transform pose ){
+		marker.pose.position.x = pose.getOrigin().x();
+		marker.pose.position.y = pose.getOrigin().y();
+		marker.pose.position.z = pose.getOrigin().z();
+		marker.pose.orientation.x = pose.getOrigin().x();
+		marker.pose.orientation.y = pose.getOrigin().y();
+		marker.pose.orientation.z = pose.getOrigin().z();
+		marker.pose.orientation.w = pose.getOrigin().w();
 	  }
 };
 

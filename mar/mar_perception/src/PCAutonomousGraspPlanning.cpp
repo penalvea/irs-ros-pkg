@@ -249,6 +249,9 @@ void PCAutonomousGraspPlanning::recalculate_cMg(){
   //Compute bMg and plan a grasp on bMg
   //vpHomogeneousMatrix bMg=bMc*cMg;
   //std::cerr << "bMg is: " << std::endl << bMg << std::endl;
+  vispToTF.resetTransform(base_cMg, "1");
+  vispToTF.resetTransform(cMg, "2");
+  vispToTF.publish();
 }
 
 /// Config from sliders to float values.

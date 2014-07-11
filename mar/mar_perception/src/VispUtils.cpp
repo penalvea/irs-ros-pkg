@@ -10,6 +10,30 @@
 #include <visp/vpHomogeneousMatrix.h>
 #include <stdlib.h>
 
+std::ostream& operator<<(std::ostream& out, Frame& x ) 
+{
+	  out << "Pose origin  [x: " << x.pose.getOrigin().x() << " y: " << x.pose.getOrigin().y() << " z: " << x.pose.getOrigin().z() << "] "
+	  << "Pose rotation [x:" << x.pose.getRotation().x() << " y:" << x.pose.getRotation().y() << " z:" << x.pose.getRotation().z() << " w:" << x.pose.getRotation().w() << "] "
+	  << std::endl << "Parent: " << x.parent << " Child: " << x.child << std::endl;
+	  return out;
+}
+
+tf::Transform tfTransFromVispHomog( vpHomogeneousMatrix sMs){
+	
+	  tf::Transform pose;
+	
+	  vpTranslationVector trans;
+	  sMs.extract(trans);
+	  tf::Vector3 translation(trans[0],trans[1],trans[2]);
+
+	  vpQuaternionVector rot;
+	  sMs.extract(rot);
+	  tf::Quaternion rotation( rot.x(), rot.y(), rot.z(), rot.w());
+	  pose.setOrigin(translation);   pose.setRotation(rotation);
+	  return pose;
+	  
+}
+
 VispToTF::VispToTF( vpHomogeneousMatrix sMs, std::string parent, std::string child){
 	  broadcaster_ = new tf::TransformBroadcaster();
 	  addTransform(sMs, parent, child, "0");
@@ -93,4 +117,5 @@ void VispToTF::print(){
 		}
 
 }
+
 

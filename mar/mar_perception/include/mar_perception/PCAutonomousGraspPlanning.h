@@ -9,6 +9,7 @@
 #define PCAUTONOMOUSGRASPPLANNING_H_
 
 #include <mar_core/CPerception.h>
+#include <mar_perception/VispUtils.h>
 
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
@@ -41,7 +42,11 @@ class PCAutonomousGraspPlanning : public CPerception {
   //Punto central del cilindro y la direccion.
   PointT axis_point_g; tf::Vector3 normal_g;
   bool aligned_grasp_;
-  public:
+  VispToTF vispToTF;  
+  MarkerPublisher * cylPub;
+  
+ public:
+  
   vpHomogeneousMatrix cMg, base_cMg; //< Grasp frame with respect to the camera after planning
 
   //With integuers to use trackbars
@@ -62,6 +67,8 @@ class PCAutonomousGraspPlanning : public CPerception {
     setHandWidth(DEFAULT_HAND_WIDTH);
     setAlignedGrasp(aligned_grasp);ialigned_grasp=aligned_grasp?1:0;
     setGraspPenetration(DEFAULT_GRASP_PENETRATION);
+    vispToTF.addTransform(cMg, "/stereo", "/base_cMg", "1");
+    vispToTF.addTransform(cMg, "/stereo", "/repositioned_cMg", "2");
   }
 
   /** Main function where segmentation is done */
