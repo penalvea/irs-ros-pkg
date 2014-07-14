@@ -43,6 +43,7 @@ src/ESMTracking.cpp
 src/ESMMRTracking.cpp
 src/VirtualImage.cpp
 src/VispUtils.cpp
+src/PCLUtils.cpp
 src/LaserPeakDetector.cpp
 src/Reconstruction3D.cpp
 src/PCGraspPlanning.cpp

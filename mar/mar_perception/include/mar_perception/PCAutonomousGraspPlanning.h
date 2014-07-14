@@ -10,6 +10,7 @@
 
 #include <mar_core/CPerception.h>
 #include <mar_perception/VispUtils.h>
+#include <mar_perception/PCLUtils.h>
 
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
@@ -31,7 +32,7 @@ typedef pcl::PointXYZRGB PointT;
 /** Grasp planning taking as input a point cloud, a pair of grasp point in cloud coordinates. */
 class PCAutonomousGraspPlanning : public CPerception {
 
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_;
+  pcl::PointCloud<PointT>::Ptr cloud_;
   // Grasp 3D points
   vpPoint g1_, g2_;
   //Grasping params (to allow different grasps and radious (for grasp penetration)).
@@ -47,7 +48,7 @@ class PCAutonomousGraspPlanning : public CPerception {
   
  public:
   
-  vpHomogeneousMatrix cMg, base_cMg; //< Grasp frame with respect to the camera after planning
+  vpHomogeneousMatrix cMg, base_cMg; ///< Grasp frame with respect to the camera after planning
 
   //With integuers to use trackbars
   int iangle, irad, ialong, ialigned_grasp;
