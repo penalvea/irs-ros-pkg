@@ -20,21 +20,22 @@ std::ostream& operator<<(std::ostream& out, Frame& x )
 
 tf::Transform tfTransFromVispHomog( vpHomogeneousMatrix sMs){
 	
-	  tf::Transform pose;
-	
-	  vpTranslationVector trans;
-	  sMs.extract(trans);
-	  tf::Vector3 translation(trans[0],trans[1],trans[2]);
-
-	  vpQuaternionVector rot;
-	  sMs.extract(rot);
-	  tf::Quaternion rotation( rot.x(), rot.y(), rot.z(), rot.w());
-	  pose.setOrigin(translation);   pose.setRotation(rotation);
-	  return pose;
+	  tf::Vector3 translation(sMs[0][3],sMs[1][3],sMs[2][3]);
+      
+      vpQuaternionVector q;
+      sMs.extract(q);
+	  tf::Quaternion rotation( q.x(), q.y(), q.z(), q.w());
 	  
+	  tf::Transform pose(rotation, translation);	  
+	  return pose;
 }
 
 VispToTF::VispToTF( vpHomogeneousMatrix sMs, std::string parent, std::string child){
+	  broadcaster_ = new tf::TransformBroadcaster();
+	  addTransform(sMs, parent, child, "0");
+}
+
+VispToTF::VispToTF( tf::Transform sMs, std::string parent, std::string child){
 	  broadcaster_ = new tf::TransformBroadcaster();
 	  addTransform(sMs, parent, child, "0");
 }
@@ -44,6 +45,13 @@ VispToTF::VispToTF( ){
 }
 
 void VispToTF::addTransform( vpHomogeneousMatrix sMs, std::string parent, std::string child, std::string id){
+
+	  tf::Transform pose=tfTransFromVispHomog(sMs);
+      addTransform( pose, parent, child, id);
+	  
+}
+
+void VispToTF::addTransform( tf::Transform sMs, std::string parent, std::string child, std::string id){
 
 	  //TODO: It's possible to do further checks.
       if(frames_.count(id)>0){
@@ -67,11 +75,9 @@ void VispToTF::addTransform( vpHomogeneousMatrix sMs, std::string parent, std::s
 		  return;		  
 	  }
 	  
-	  
-	  tf::Transform pose=tfTransFromVispHomog(sMs);
-	  
+	  	  
 	  Frame f; 
-	  f.pose=pose;
+	  f.pose=sMs;
 	  f.parent=parent;
 	  f.child=child;
 	  
@@ -81,12 +87,17 @@ void VispToTF::addTransform( vpHomogeneousMatrix sMs, std::string parent, std::s
 
 void VispToTF::resetTransform( vpHomogeneousMatrix sMs, std::string id){
 	  
+	  tf::Transform pose=tfTransFromVispHomog(sMs);	  
+	  resetTransform( pose, id);
+}
+
+void VispToTF::resetTransform( tf::Transform sMs, std::string id){
+	  
 	  if(frames_.count(id)<1){
 		  std::cerr << "Can't reset this item. ID [" << id << "] not found." << std::endl;
 		  return;		  
-	  }
-	  tf::Transform pose=tfTransFromVispHomog(sMs);	  
-	  frames_[id].pose=pose;
+	  }  
+	  frames_[id].pose=sMs;
 	  
 }
 
@@ -113,7 +124,7 @@ void VispToTF::print(){
 	for( std::map<std::string, Frame>::iterator ii=frames_.begin(); ii!=frames_.end(); ++ii)
 		{
 			std::cout << "ID string: " << (*ii).first  << std::endl << 
-			"Frame -> " << (*ii).second << std::endl;
+			"Frame -> " << (*ii).second << std::endl;			
 		}
 
 }

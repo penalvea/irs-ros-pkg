@@ -12,8 +12,6 @@
 #include <string>
 #include <visualization_msgs/Marker.h>
 
-
-
 struct Frame{
 	tf::Transform pose;
 	std::string parent, child;
@@ -34,22 +32,23 @@ public:
 
     /** Create a new publisher with a frame to add to the TF tree */
     VispToTF( vpHomogeneousMatrix sMs, std::string parent, std::string child );
+    VispToTF( tf::Transform sMs, std::string parent, std::string child );
     /** Create a new empty publisher */
     VispToTF();
 
     /** Add a frame to the publish list */
 	void addTransform( vpHomogeneousMatrix sMs, std::string parent, std::string child, std::string id = "0"  );
+	void addTransform( tf::Transform sMs, std::string parent, std::string child, std::string id = "0" );
 	
 	/** Remove a frame from the publish list */
 	void removeTransform( std::string id = "0" );
 	
 	/** Modify homog matrix of a transform, it's better to keep parent and child unmodified */
 	void resetTransform( vpHomogeneousMatrix sMs, std::string id = "0" );
+	void resetTransform( tf::Transform sMs, std::string id = "0" );	
 	
 	void publish();
 	void print();
-
-   // ~VispToTF();
 };
 
 
