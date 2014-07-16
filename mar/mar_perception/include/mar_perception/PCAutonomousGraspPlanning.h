@@ -69,7 +69,7 @@ class PCAutonomousGraspPlanning : public CPerception {
     setAlignedGrasp(aligned_grasp);ialigned_grasp=aligned_grasp?1:0;
     setGraspPenetration(DEFAULT_GRASP_PENETRATION);
     vispToTF.addTransform(cMg, "/stereo", "/base_cMg", "1");
-    vispToTF.addTransform(cMg, "/stereo", "/repositioned_cMg", "2");
+    vispToTF.addTransform(cMg, "/stereo", "/cMg", "2");
   }
 
   /** Main function where segmentation is done */

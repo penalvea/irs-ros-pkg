@@ -47,8 +47,6 @@ void PCAutonomousGraspPlanning::perceive() {
   //Nubes del plano y cilindro.
   pcl::PointCloud<PointT>::Ptr cloud_cylinder (new pcl::PointCloud<PointT> ());
 
-  // Read in the cloud data
-  std::cerr << "PointCloud has: " << cloud_->points.size () << " data points." << std::endl;
   PCLUtils::passThrough(cloud_, cloud_filtered, 10, 10);
   std::cerr << "PointCloud after filtering has: " << cloud_filtered->points.size () << " data points." << std::endl;
 
@@ -59,83 +57,58 @@ void PCAutonomousGraspPlanning::perceive() {
   coefficients_plane = PCLUtils::planeSegmentation(cloud_filtered, cloud_normals, cloud_filtered2, cloud_normals2);
   coefficients_cylinder = PCLUtils::cylinderSegmentation(cloud_filtered2, cloud_normals2, cloud_cylinder);
 
-  //Calculate CYLINDER SHAPE
-
   //Puntos de agarre
-  PointT mean,mean2;
-
-  PointT max, min;  //Puntos que definiran el cilindro.
+  PointT mean, max, min;  //Puntos que definiran el cilindro.
+  
+  //Punto de origen del cilindro.
   PointT axis_point;
-  //Punto de origen y dirección del cilindro.
   axis_point.x=coefficients_cylinder->values[0];
   axis_point.y=coefficients_cylinder->values[1];
   axis_point.z=coefficients_cylinder->values[2];
-  tf::Vector3 normal(coefficients_cylinder->values[3], coefficients_cylinder->values[4], coefficients_cylinder->values[5]);
-  ///tf::Transform t();
-  ///MarkerPublisher mp();
   
-  //Perpendicular cylinder.
-  pcl::ModelCoefficients::Ptr coefficients_perpendicular (new pcl::ModelCoefficients(*coefficients_cylinder));
-  //Cambio de dirección para una perpendicular cualquiera. En realidad tomo la que está en el plano Z, lo que me facilitará las cosas luego.
-  double old_three=coefficients_perpendicular->values[3];
-  coefficients_perpendicular->values[3]=coefficients_perpendicular->values[4];
-  coefficients_perpendicular->values[4]=-old_three;
-  coefficients_perpendicular->values[5]=0;
-  //Unitario.
-  double module=sqrt(pow(coefficients_perpendicular->values[3],2)+pow(coefficients_perpendicular->values[4],2)+pow(coefficients_perpendicular->values[5],2));
-  coefficients_perpendicular->values[3]/=module;coefficients_perpendicular->values[4]/=module;coefficients_perpendicular->values[5]/=module;
-
-  getMinMax3DAlongAxis(cloud_cylinder, &max, &min, axis_point, &normal);
-  //Punto medio.
+  //Vectores directores
+  tf::Vector3 axis_dir(coefficients_cylinder->values[3], coefficients_cylinder->values[4], coefficients_cylinder->values[5]);
+  axis_dir=axis_dir.normalize();
+  //Vector perpendicular a la dirección, en el plano Z de la cámara (ejesX,Y)
+  tf::Vector3 perp(coefficients_cylinder->values[4], -coefficients_cylinder->values[3], 0);
+  perp=perp.normalize();
+  //Vector ortogonal correspondiente
+  tf::Vector3 result=tf::tfCross( perp, axis_dir).normalize();
+ 
+  getMinMax3DAlongAxis(cloud_cylinder, &max, &min, axis_point, &axis_dir);
+  //Punto medio reposicionado.
   mean.x=(max.x+min.x)/2;mean.y=(max.y+min.y)/2;mean.z=(max.z+min.z)/2;
-  PointT middle(mean);
-  //punto medio desplazado vector unitario perpendicular por el radio
-  mean.x+=coefficients_perpendicular->values[3]*coefficients_perpendicular->values[6];
-  mean.y+=coefficients_perpendicular->values[4]*coefficients_perpendicular->values[6];
-  mean.z+=coefficients_perpendicular->values[5]*coefficients_perpendicular->values[6];
 
-  mean2.x=mean.x+2*(middle.x-mean.x);
-  mean2.y=mean.y+2*(middle.y-mean.y);
-  mean2.z=mean.z+2*(middle.z-mean.z);
+  std::cout << "Mean -> x: " << mean.x << " y: " << mean.y << " z: " << mean.z << std::endl;
+  std::cout << "Max -> x: " << max.x << " y: " << max.y << " z: " << max.z << std::endl;
+  std::cout << "Min -> x: " << min.x << " y: " << min.y << " z: " << min.z << std::endl;
+  std::cout << "AxisDir -> x: " << axis_dir.x() << " y: " << axis_dir.y() << " z: " << axis_dir.z() << std::endl;
+  std::cout << "perp -> x: " << perp.x() << " y: " <<perp.y() << " z: " <<perp.z() << std::endl;
+  std::cout << "result -> x: " << result.x() << " y: " << result.y() << " z: " << result.z() << std::endl;//OK UNIT
+  //std::cout << "Dots" << result.dot(perp) << result.dot(axis_dir) << axis_dir.dot(perp);//OK ZEROS
 
-  vpPoint g1, g2;
-  g1.set_X(mean.x);g1.set_Y(mean.y);g1.set_Z(mean.z);
-  g2.set_X(mean2.x);g2.set_Y(mean2.y);g2.set_Z(mean2.z);
 
-  /*ROS_INFO_STREAM( "Grasping points are: " << std::endl 
-    << "x:" << g1.get_X() << "y:" << g1.get_Y()  << "z:" << g1.get_Z()
-    << "x:" << g2.get_X() << "y:" << g2.get_Y()  << "z:" << g2.get_Z()  << std::endl);
-   */
-
-  //DF: Two grasp points version.
-  vpColVector ip1m(3), ip2m(3), middle_point(3),b(3);
-  ip1m[0]=g1.get_X();ip1m[1]=g1.get_Y();ip1m[2]=g1.get_Z();
-  ip2m[0]=g2.get_X();ip2m[1]=g2.get_Y();ip2m[2]=g2.get_Z();
-
-  middle_point=0.5*(ip1m+ip2m);
-
-  // Ahora mismo lo hace respecto del centro faltaría alejarlo R(radio)
-  //Es decir, ahora mismo el end-efector cae dentro del cilindro en vez de en superfície.
+  //Ahora mismo el end-efector cae dentro del cilindro en vez de en superfície.
   //Esto está relativamente bien pero no tenemos en cuenta la penetración. Sin emargo, la 
   //tenemos en cuenta luego al separanos el radio así que no hay problema en realidad. 
-  base_cMg[0][3]=middle_point[0];
-  base_cMg[1][3]=middle_point[1];
-  base_cMg[2][3]=middle_point[2];//cloud_downsampled->points[minzPoint].z+gf_penetration;
-  vpColVector n(3),o(3),a(3);
-
-  //Este es el vector que el utiliza como la Z de la cámara. Si queremos rotar antes habría que cambiar este pero es más sencillo rotar luego.
-  a[0]=0; a[1]=0; a[2]=1;
-  n=(ip1m-ip2m).normalize();
-  /*ROS_INFO_STREAM("Dot product is...: " << std::endl << vpColVector::dotProd(a,n) << std::endl);
-    ROS_INFO_STREAM("N is...: " << std::endl << n << std::endl);
-    ROS_INFO_STREAM("diff is...: " << std::endl << ip1m-ip2m << std::endl);
-    ROS_INFO_STREAM("ip1m is...: " << std::endl << ip1m << std::endl);*/
-
-  o=vpColVector::cross(a,n);
-  base_cMg[0][0]=n[0]; base_cMg[0][1]=o[0]; base_cMg[0][2]=a[0];
-  base_cMg[1][0]=n[1]; base_cMg[1][1]=o[1]; base_cMg[1][2]=a[1];
-  base_cMg[2][0]=n[2]; base_cMg[2][1]=o[2]; base_cMg[2][2]=a[2];
-  //ROS_INFO_STREAM("cMg is before rotate is...: " << std::endl << cMg);
+  base_cMg[0][0]=perp.x(); base_cMg[0][1]=axis_dir.x(); base_cMg[0][2]=result.x();base_cMg[0][3]=mean.x;
+  base_cMg[1][0]=perp.y(); base_cMg[1][1]=axis_dir.y(); base_cMg[1][2]=result.y();base_cMg[1][3]=mean.y;
+  base_cMg[2][0]=perp.z(); base_cMg[2][1]=axis_dir.z(); base_cMg[2][2]=result.z();base_cMg[2][3]=mean.z;//cloud_downsampled->points[minzPoint].z+gf_penetration;
+  base_cMg[3][0]=0;base_cMg[3][1]=0;base_cMg[3][2]=0;base_cMg[3][3]=1;
+  ROS_INFO_STREAM("cMg is before rotate is...: " << std::endl << base_cMg << "Is homog: " << base_cMg.isAnHomogeneousMatrix()?"yes":"no");
+  vispToTF.resetTransform(base_cMg, "1");
+  
+  //Print MAX and MIN
+  vpHomogeneousMatrix cMg2(base_cMg);
+  cMg2[0][3]=max.x;
+  cMg2[1][3]=max.y;
+  cMg2[2][3]=max.z;
+  vispToTF.addTransform(cMg2, "/stereo", "/max", "3");
+  cMg2[0][3]=min.x;
+  cMg2[1][3]=min.y;
+  cMg2[2][3]=min.z;
+  vispToTF.addTransform(cMg2, "/stereo", "/min", "4");  
+  //Compute cMg
   recalculate_cMg();
 
 }
@@ -165,13 +138,12 @@ void PCAutonomousGraspPlanning::recalculate_cMg(){
     vpHomogeneousMatrix cMgt;
     cMgt = gMgr * grMgt0 * grMgt1;
 
-    cMg = base_cMg  * cMgt ;// * test;
+    cMg = base_cMg  * cMgt ;
     //ROS_INFO_STREAM("cMg2 is after rotate is...: " << std::endl << cMg);
   }
   //Compute bMg and plan a grasp on bMg
   //vpHomogeneousMatrix bMg=bMc*cMg;
   //std::cerr << "bMg is: " << std::endl << bMg << std::endl;
-  vispToTF.resetTransform(base_cMg, "1");
   vispToTF.resetTransform(cMg, "2");
   vispToTF.publish();
 }
@@ -240,5 +212,7 @@ void PCAutonomousGraspPlanning::getMinMax3DAlongAxis(const pcl::PointCloud<Point
   p.y = axis_point.y + normal->y() * t;
   p.z = axis_point.z + normal->z() * t;
   *min_pt=p;
+  ///@todo MAke a list with this points and show it.
+  
 }
 
