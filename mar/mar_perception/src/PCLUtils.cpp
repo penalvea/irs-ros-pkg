@@ -1,6 +1,6 @@
 /*
  * PCLUtils: usage example in http://github.com/davidfornas/pcl_manipulation
- *
+ * 			 
  *  Created on: 24/04/2014
  *      Author: dfornas
  */
@@ -19,11 +19,19 @@ void passThrough(pcl::PointCloud<PointT>::Ptr in, pcl::PointCloud<PointT>::Ptr o
   pass.filter (*out);
 }
 
-void statisticalOutlierRemoval(){
-		
+void statisticalOutlierRemoval(pcl::PCLPointCloud2::Ptr in, pcl::PCLPointCloud2::Ptr out){
+  pcl::VoxelGrid< pcl::PCLPointCloud2 > vg;
+  vg.setInputCloud (in);
+  vg.setLeafSize (0.01, 0.01, 0.01);
+  vg.filter (*out);
 }
 
-void voxelGridFilter(){
+void voxelGridFilter(pcl::PCLPointCloud2::Ptr in, pcl::PCLPointCloud2::Ptr out){
+  pcl::StatisticalOutlierRemoval<pcl::PCLPointCloud2> sor;
+  sor.setInputCloud (in);
+  sor.setMeanK (50);
+  sor.setStddevMulThresh (1.0);
+  sor.filter(*out);
 		
 }
 
