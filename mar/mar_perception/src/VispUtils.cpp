@@ -18,6 +18,8 @@ std::ostream& operator<<(std::ostream& out, Frame& x )
 	  return out;
 }
 
+namespace VispUtils{
+
 tf::Transform tfTransFromVispHomog( vpHomogeneousMatrix sMs){
 	
 	  tf::Vector3 translation(sMs[0][3],sMs[1][3],sMs[2][3]);
@@ -28,6 +30,19 @@ tf::Transform tfTransFromVispHomog( vpHomogeneousMatrix sMs){
 	  
 	  tf::Transform pose(rotation, translation);	  
 	  return pose;
+}
+
+vpHomogeneousMatrix vispHomogFromTfTransform( tf::Transform transform ){
+	vpTranslationVector t(transform.getOrigin()[0], transform.getOrigin()[1], transform.getOrigin()[2]);
+	vpQuaternionVector q(transform.getRotation().x(), transform.getRotation().y(), transform.getRotation().z(), transform.getRotation().w() ); 
+	return vpHomogeneousMatrix(t, q); 
+}
+
+vpHomogeneousMatrix vispHomogFromXyzrpy( double x, double y, double z, double r, double p, double yaw ){
+	return vpHomogeneousMatrix(vpTranslationVector(x, y, z), vpRotationMatrix(vpRxyzVector(r, p, yaw)) );
+	
+}
+
 }
 
 VispToTF::VispToTF( vpHomogeneousMatrix sMs, std::string parent, std::string child){
@@ -46,7 +61,7 @@ VispToTF::VispToTF( ){
 
 void VispToTF::addTransform( vpHomogeneousMatrix sMs, std::string parent, std::string child, std::string id){
 
-	  tf::Transform pose=tfTransFromVispHomog(sMs);
+	  tf::Transform pose=VispUtils::tfTransFromVispHomog(sMs);
       addTransform( pose, parent, child, id);
 	  
 }
@@ -87,7 +102,7 @@ void VispToTF::addTransform( tf::Transform sMs, std::string parent, std::string 
 
 void VispToTF::resetTransform( vpHomogeneousMatrix sMs, std::string id){
 	  
-	  tf::Transform pose=tfTransFromVispHomog(sMs);	  
+	  tf::Transform pose=VispUtils::tfTransFromVispHomog(sMs);	  
 	  resetTransform( pose, id);
 }
 

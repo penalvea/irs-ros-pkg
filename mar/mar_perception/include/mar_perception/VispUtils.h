@@ -19,7 +19,14 @@ struct Frame{
 };
 
 std::ostream& operator<<(std::ostream&, Frame&);
-tf::Transform tfTransFromVispHomog( vpHomogeneousMatrix);
+
+namespace VispUtils{
+
+tf::Transform tfTransFromVispHomog( vpHomogeneousMatrix );
+vpHomogeneousMatrix vispHomogFromTfTransform( tf::Transform );
+vpHomogeneousMatrix vispHomogFromXyzrpy( double, double, double, double, double, double);
+
+}
 
 /** Tool to publish a vpHomogeneousMatrix on the TF tree */
 class VispToTF
@@ -65,7 +72,7 @@ public:
 	 visualization_msgs::Marker marker;
 		
 	 MarkerPublisher( vpHomogeneousMatrix sMs, std::string parent, std::string topic_name, ros::NodeHandle nh){ 
-		 tf::Transform pose=tfTransFromVispHomog(sMs);
+		 tf::Transform pose=VispUtils::tfTransFromVispHomog(sMs);
 		 setMarker( pose, parent ); 
 		 publisher_ =nh.advertise<visualization_msgs::Marker>(topic_name,1);
 	 }
