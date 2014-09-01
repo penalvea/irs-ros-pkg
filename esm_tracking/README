@@ -4,10 +4,9 @@ Demo code for ESM real-time visual tracking
 
 INRIA Sophia-Antipolis
 
-Authors: Selim BENHIMANE (Selim.Benhimane@sophia.inria.fr)
-	 Ezio  MALIS 	 (Ezio.Malis@sophia.inria.fr) 
+Authors: Selim BENHIMANE and Ezio  MALIS (Ezio.Malis@sophia.inria.fr) 
 
-Version 0.1, April, 2005
+Version 0.4, April, 2007
 
 This directory contains a compiled library for performing real-time
 visual tracking, a sample program showing the use of the ESM tracking
@@ -16,11 +15,11 @@ library and a 10 images test sequence.
 A longer test sequence with 200 images can be downloaded from the ftp
 site:
 
-	ftp://ftp-sop.inria.fr/icare/malis/software/ESM/seq.tar.gz
+	ftp://ftp-sop.inria.fr/evolution/malis/software/ESM/seq1.tar.gz
 
 See the web page at:
 
-	http://www-sop.inria.fr/icare/WEB/English/Software/ESM.html
+	http://esm.gforge.inria.fr
 
 for references to the relevant papers describing the ESM approach.
 
