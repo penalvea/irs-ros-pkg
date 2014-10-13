@@ -80,7 +80,7 @@ pcl::ModelCoefficients::Ptr planeSegmentation(pcl::PointCloud<PointT>::Ptr in_cl
   // Write the planar inliers to disk
   extract.filter (*cloud_plane);
   std::cerr << "PointCloud representing the planar component: " << cloud_plane->points.size () << " data points. Saved." << std::endl;
-  writer.write ("/home/david/scene_plane.pcd", *cloud_plane, false); 
+  writer.write ("/home/dfornas/data/scene_plane.pcd", *cloud_plane, false); 
 
   // Remove the planar inliers, extract the rest
   extract.setNegative (true);
@@ -129,7 +129,7 @@ pcl::ModelCoefficients::Ptr cylinderSegmentation(pcl::PointCloud<PointT>::Ptr in
   {
     std::cerr << "PointCloud representing the cylindrical component: " << cloud_cylinder->points.size () << " data points." << std::endl;
     std::cerr << *coefficients_cylinder << std::endl;
-    writer.write ("/home/david/scene_cylinder.pcd", *cloud_cylinder, false);
+    writer.write ("/home/dfornas/data/scene_cylinder.pcd", *cloud_cylinder, false);
   }
 
   return coefficients_cylinder;

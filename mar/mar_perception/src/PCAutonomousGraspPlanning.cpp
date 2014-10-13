@@ -52,8 +52,7 @@ void PCAutonomousGraspPlanning::perceive() {
 
   // @todo : Add more filters -> downsampling and radial ooutlier removal.
   PCLUtils::estimateNormals(cloud_filtered, cloud_normals);
-  
-  
+    
   coefficients_plane = PCLUtils::planeSegmentation(cloud_filtered, cloud_normals, cloud_filtered2, cloud_normals2);
   coefficients_cylinder = PCLUtils::cylinderSegmentation(cloud_filtered2, cloud_normals2, cloud_cylinder);
 
@@ -79,27 +78,27 @@ void PCAutonomousGraspPlanning::perceive() {
   //Punto medio reposicionado.
   mean.x=(max.x+min.x)/2;mean.y=(max.y+min.y)/2;mean.z=(max.z+min.z)/2;
 
-  std::cout << "Mean -> x: " << mean.x << " y: " << mean.y << " z: " << mean.z << std::endl;
-  std::cout << "Max -> x: " << max.x << " y: " << max.y << " z: " << max.z << std::endl;
-  std::cout << "Min -> x: " << min.x << " y: " << min.y << " z: " << min.z << std::endl;
-  std::cout << "AxisDir -> x: " << axis_dir.x() << " y: " << axis_dir.y() << " z: " << axis_dir.z() << std::endl;
-  std::cout << "perp -> x: " << perp.x() << " y: " <<perp.y() << " z: " <<perp.z() << std::endl;
-  std::cout << "result -> x: " << result.x() << " y: " << result.y() << " z: " << result.z() << std::endl;//OK UNIT
-  //std::cout << "Dots" << result.dot(perp) << result.dot(axis_dir) << axis_dir.dot(perp);//OK ZEROS
-
+  //DEBUG, check if they are ortogonal.
+  //std::cout << "Mean -> x: " << mean.x << " y: " << mean.y << " z: " << mean.z << std::endl;
+  //std::cout << "Max -> x: " << max.x << " y: " << max.y << " z: " << max.z << std::endl;
+  //std::cout << "Min -> x: " << min.x << " y: " << min.y << " z: " << min.z << std::endl;
+  //std::cout << "AxisDir -> x: " << axis_dir.x() << " y: " << axis_dir.y() << " z: " << axis_dir.z() << std::endl;
+  //std::cout << "perp -> x: " << perp.x() << " y: " <<perp.y() << " z: " <<perp.z() << std::endl;
+  //std::cout << "result -> x: " << result.x() << " y: " << result.y() << " z: " << result.z() << std::endl;//OK UNIT
+  //std::cout << "Dot products" << result.dot(perp) << result.dot(axis_dir) << axis_dir.dot(perp);//OK ZEROS
 
   //Ahora mismo el end-efector cae dentro del cilindro en vez de en superfície.
   //Esto está relativamente bien pero no tenemos en cuenta la penetración. Sin emargo, la 
   //tenemos en cuenta luego al separanos el radio así que no hay problema en realidad. 
-  base_cMg[0][0]=perp.x(); base_cMg[0][1]=axis_dir.x(); base_cMg[0][2]=result.x();base_cMg[0][3]=mean.x;
-  base_cMg[1][0]=perp.y(); base_cMg[1][1]=axis_dir.y(); base_cMg[1][2]=result.y();base_cMg[1][3]=mean.y;
-  base_cMg[2][0]=perp.z(); base_cMg[2][1]=axis_dir.z(); base_cMg[2][2]=result.z();base_cMg[2][3]=mean.z;//cloud_downsampled->points[minzPoint].z+gf_penetration;
-  base_cMg[3][0]=0;base_cMg[3][1]=0;base_cMg[3][2]=0;base_cMg[3][3]=1;
-  ROS_INFO_STREAM("cMg is before rotate is...: " << std::endl << base_cMg << "Is homog: " << base_cMg.isAnHomogeneousMatrix()?"yes":"no");
-  vispToTF.resetTransform(base_cMg, "1");
+  cMo[0][0]=perp.x(); cMo[0][1]=axis_dir.x(); cMo[0][2]=result.x();cMo[0][3]=mean.x;
+  cMo[1][0]=perp.y(); cMo[1][1]=axis_dir.y(); cMo[1][2]=result.y();cMo[1][3]=mean.y;
+  cMo[2][0]=perp.z(); cMo[2][1]=axis_dir.z(); cMo[2][2]=result.z();cMo[2][3]=mean.z;
+  cMo[3][0]=0;cMo[3][1]=0;cMo[3][2]=0;cMo[3][3]=1;
+  //ROS_INFO_STREAM("cMo is...: " << std::endl << cMo << "Is homog: " << cMo.isAnHomogeneousMatrix()?"yes":"no");
+  vispToTF.resetTransform(cMo, "1");
   
-  //Print MAX and MIN
-  vpHomogeneousMatrix cMg2(base_cMg);
+  //DEBUG Print MAX and MIN frames
+  /*vpHomogeneousMatrix cMg2(cMo);
   cMg2[0][3]=max.x;
   cMg2[1][3]=max.y;
   cMg2[2][3]=max.z;
@@ -107,48 +106,49 @@ void PCAutonomousGraspPlanning::perceive() {
   cMg2[0][3]=min.x;
   cMg2[1][3]=min.y;
   cMg2[2][3]=min.z;
-  vispToTF.addTransform(cMg2, "/stereo", "/min", "4");  
-  //Compute cMg
+  vispToTF.addTransform(cMg2, "/stereo", "/min", "4");  */
+  
+  //Compute modified cMg from cMo
   recalculate_cMg();
-
 }
 
-//Calculate cMg
+//Compute cMg from cMo
 void PCAutonomousGraspPlanning::recalculate_cMg(){
 
+  //Set grasp config values from interface int values.
   intToConfig();
+  vpHomogeneousMatrix oMg;
+  
   if(aligned_grasp_){
-    //aplicamos una rotación y traslación para posicionar la garra mejor
+    //Aplicamos una rotación y traslación para posicionar la garra mejor
     vpHomogeneousMatrix grMgt0(0,along_,0,0,0,0);
     vpHomogeneousMatrix gMgrZ(0,0,0,0,0,1.57);
     vpHomogeneousMatrix gMgrX(0,0,0,1.57,0,0);		
     vpHomogeneousMatrix gMgrY(0,0,0,0,0,angle_);		
-    vpHomogeneousMatrix grMgt(rad_,0,0,0,0,0);//-0.6
-    vpHomogeneousMatrix cMgt;
-    cMgt = grMgt0 * gMgrZ * gMgrX * gMgrY * grMgt;
-
-    cMg = base_cMg * cMgt ;
-    //ROS_INFO_STREAM("cMg1 is after rotate is...: " << std::endl << cMg);
-
+    vpHomogeneousMatrix grMgt(rad_,0,0,0,0,0);
+    oMg = grMgt0 * gMgrZ * gMgrX * gMgrY * grMgt;
+    cMg = cMo * oMg ;
   }else{
     //aplicamos una rotación y traslación para posicionar la garra mejor
     vpHomogeneousMatrix gMgr(0,0,0,0,angle_,0);
     vpHomogeneousMatrix grMgt0(rad_,0,0,0,0,0);
     vpHomogeneousMatrix grMgt1(0,along_,0,0,0,0);
-    vpHomogeneousMatrix cMgt;
-    cMgt = gMgr * grMgt0 * grMgt1;
-
-    cMg = base_cMg  * cMgt ;
-    //ROS_INFO_STREAM("cMg2 is after rotate is...: " << std::endl << cMg);
+    oMg = gMgr * grMgt0 * grMgt1;
+    cMg = cMo  * oMg ;
   }
+  vpHomogeneousMatrix rot(0,0,0,0,1.57,0);
+  cMg=cMg*rot;
+  
   //Compute bMg and plan a grasp on bMg
   //vpHomogeneousMatrix bMg=bMc*cMg;
   //std::cerr << "bMg is: " << std::endl << bMg << std::endl;
+  
+  //Publish cMg in TF, 2 is the TF list index.
   vispToTF.resetTransform(cMg, "2");
   vispToTF.publish();
 }
 
-/// Config from sliders to float values.
+/// Set config values: from int sliders to float values.
 void PCAutonomousGraspPlanning::intToConfig(){
   bool old=aligned_grasp_;
   aligned_grasp_=ialigned_grasp==1?true:false;

@@ -37,7 +37,6 @@ class PCAutonomousGraspPlanning : public CPerception {
   vpPoint g1_, g2_;
   //Grasping params (to allow different grasps and radious (for grasp penetration)).
   double angle_, rad_, along_;
-
   //Now unused
   double hand_width_, grasp_penetration_;
   //Punto central del cilindro y la direccion.
@@ -48,7 +47,7 @@ class PCAutonomousGraspPlanning : public CPerception {
   
  public:
   
-  vpHomogeneousMatrix cMg, base_cMg; ///< Grasp frame with respect to the camera after planning
+  vpHomogeneousMatrix cMg, cMo; ///< Grasp frame with respect to the camera after planning
 
   //With integuers to use trackbars
   int iangle, irad, ialong, ialigned_grasp;
@@ -68,7 +67,7 @@ class PCAutonomousGraspPlanning : public CPerception {
     setHandWidth(DEFAULT_HAND_WIDTH);
     setAlignedGrasp(aligned_grasp);ialigned_grasp=aligned_grasp?1:0;
     setGraspPenetration(DEFAULT_GRASP_PENETRATION);
-    vispToTF.addTransform(cMg, "/stereo", "/base_cMg", "1");
+    vispToTF.addTransform(cMg, "/stereo", "/cMo", "1");
     vispToTF.addTransform(cMg, "/stereo", "/cMg", "2");
   }
 
