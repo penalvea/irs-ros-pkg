@@ -23,6 +23,8 @@
 
 #include <tf/transform_datatypes.h>
 
+#include <list>
+
 #define DEFAULT_HAND_WIDTH	0.1
 #define DEFAULT_GRASP_PENETRATION	0.05	//Maximum penetration of the hand around the object
 #define DEFAULT_ALIGNED_GRASP false
@@ -70,6 +72,14 @@ class PCAutonomousGraspPlanning : public CPerception {
     vispToTF.addTransform(cMg, "/stereo", "/cMo", "1");
     vispToTF.addTransform(cMg, "/stereo", "/cMg", "2");
   }
+  PCAutonomousGraspPlanning( pcl::PointCloud<PointT>::Ptr pointcloud): cloud_(pointcloud) {
+    angle_=0;iangle=0;
+    rad_=0;irad=0;
+    along_=0;ialong=0;
+    setAlignedGrasp(true);ialigned_grasp=1;
+    vispToTF.addTransform(cMg, "/stereo", "/cMo", "1");
+    vispToTF.addTransform(cMg, "/stereo", "/cMg", "2");
+  }
 
   /** Main function where segmentation is done */
   void perceive();
@@ -107,6 +117,12 @@ class PCAutonomousGraspPlanning : public CPerception {
 
   /** Configure the camera based in int slider parameters */
   void intToConfig();
+
+  ///GRASP LIST FUNCTIONS, @todo Refactor
+public:
+  std::list<vpHomogeneousMatrix> cMg_list;
+  void generateGraspList();
+  void filterGraspList();
 
 };
 

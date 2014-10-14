@@ -216,3 +216,43 @@ void PCAutonomousGraspPlanning::getMinMax3DAlongAxis(const pcl::PointCloud<Point
   
 }
 
+/// @todo Add d,a,r as parameters.
+void PCAutonomousGraspPlanning::generateGraspList()
+{
+  for (double d = -0.15; d <= 0.15; d += 0.05)
+  {
+    for (double a = 40; a <= 90; a += 10)
+    {
+      for (double r = -0.5; r <= -0.3; r += 0.05)
+      {
+        double angle = a * 2 * 3.1416 / 360; // Deg -> Rad
+        vpHomogeneousMatrix grMgt0(0, d, 0, 0, 0, 0);
+        vpHomogeneousMatrix gMgrZ(0, 0, 0, 0, 0, 1.57);
+        vpHomogeneousMatrix gMgrX(0, 0, 0, 1.57, 0, 0);
+        vpHomogeneousMatrix gMgrY(0, 0, 0, 0, 0, angle);
+        vpHomogeneousMatrix grMgt(r, 0, 0, 0, 0, 0);
+        vpHomogeneousMatrix oMg = grMgt0 * gMgrZ * gMgrX * gMgrY * grMgt;
+        cMg = cMo * oMg;
+        vpHomogeneousMatrix rot(0, 0, 0, 0, 1.57, 0);
+        cMg=cMg*rot;
+        cMg_list.push_back(cMg);
+      }
+    }
+  }
+}
+
+
+//As a kinematic filter will be applied, I prefer to do it externally to avoid adding more deps.
+void PCAutonomousGraspPlanning::filterGraspList(){
+
+  std::list<vpHomogeneousMatrix>::iterator i = cMg_list.begin();
+  while (i != cMg_list.end())
+  {
+      if (!false)//Replace with desired condition
+      {
+        cMg_list.erase(i++);  // alternatively, i = items.erase(i);
+      }
+  }
+}
+
+
