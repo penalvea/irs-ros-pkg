@@ -219,11 +219,11 @@ void PCAutonomousGraspPlanning::getMinMax3DAlongAxis(const pcl::PointCloud<Point
 /// @todo Add d,a,r as parameters.
 void PCAutonomousGraspPlanning::generateGraspList()
 {
-  for (double d = -0.15; d <= 0.15; d += 0.05)
+  for (double d = -0.2; d <= 0.2; d += 0.04)
   {
-    for (double a = 40; a <= 90; a += 10)
+    for (double a = 40; a <= 90; a += 5)
     {
-      for (double r = -0.5; r <= -0.3; r += 0.05)
+      for (double r = -0.5; r <= -0.2; r += 0.05)
       {
         double angle = a * 2 * 3.1416 / 360; // Deg -> Rad
         vpHomogeneousMatrix grMgt0(0, d, 0, 0, 0, 0);
@@ -240,7 +240,6 @@ void PCAutonomousGraspPlanning::generateGraspList()
     }
   }
 }
-
 
 //As a kinematic filter will be applied, I prefer to do it externally to avoid adding more deps.
 void PCAutonomousGraspPlanning::filterGraspList(){

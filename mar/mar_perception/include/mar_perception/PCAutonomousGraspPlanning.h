@@ -118,7 +118,7 @@ class PCAutonomousGraspPlanning : public CPerception {
   /** Configure the camera based in int slider parameters */
   void intToConfig();
 
-  ///GRASP LIST FUNCTIONS, @todo Refactor
+  ///GRASP LIST FUNCTIONS, @todo Refactor, GraspHypothesis code and score should be in mar_perception
 public:
   std::list<vpHomogeneousMatrix> cMg_list;
   void generateGraspList();
