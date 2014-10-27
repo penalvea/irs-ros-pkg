@@ -221,7 +221,7 @@ void PCAutonomousGraspPlanning::generateGraspList()
 {
   for (double d = -0.2; d <= 0.2; d += 0.04)
   {
-    for (double a = 40; a <= 90; a += 5)
+    for (double a = 40; a <= 140; a += 8)
     {
       for (double r = -0.5; r <= -0.2; r += 0.05)
       {
