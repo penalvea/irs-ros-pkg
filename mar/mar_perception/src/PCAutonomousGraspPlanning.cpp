@@ -46,6 +46,7 @@ void PCAutonomousGraspPlanning::perceive() {
   pcl::ModelCoefficients::Ptr coefficients_plane (new pcl::ModelCoefficients), coefficients_cylinder (new pcl::ModelCoefficients);
   //Nubes del plano y cilindro.
   pcl::PointCloud<PointT>::Ptr cloud_cylinder (new pcl::PointCloud<PointT> ());
+  pcl::PointCloud<PointT>::Ptr cloud_plane (new pcl::PointCloud<PointT> ());
 
   PCLUtils::passThrough(cloud_, cloud_filtered, 10, 10);
   std::cerr << "PointCloud after filtering has: " << cloud_filtered->points.size () << " data points." << std::endl;
@@ -53,8 +54,10 @@ void PCAutonomousGraspPlanning::perceive() {
   // @todo : Add more filters -> downsampling and radial ooutlier removal.
   PCLUtils::estimateNormals(cloud_filtered, cloud_normals);
     
-  coefficients_plane = PCLUtils::planeSegmentation(cloud_filtered, cloud_normals, cloud_filtered2, cloud_normals2);
-  coefficients_cylinder = PCLUtils::cylinderSegmentation(cloud_filtered2, cloud_normals2, cloud_cylinder);
+  coefficients_plane = PCLUtils::planeSegmentation(cloud_filtered, cloud_normals, cloud_filtered2, cloud_normals2, cloud_plane, plane_distance_threshold_, plane_iterations_);
+  coefficients_cylinder = PCLUtils::cylinderSegmentation(cloud_filtered2, cloud_normals2, cloud_cylinder, cylinder_distance_threshold_, cylinder_iterations_, radious_limit_);
+  PCLUtils::showClouds(cloud_plane, cloud_cylinder, coefficients_plane, coefficients_cylinder);
+
 
   //Puntos de agarre
   PointT mean, max, min;  //Puntos que definiran el cilindro.
@@ -77,6 +80,9 @@ void PCAutonomousGraspPlanning::perceive() {
   getMinMax3DAlongAxis(cloud_cylinder, &max, &min, axis_point, &axis_dir);
   //Punto medio reposicionado.
   mean.x=(max.x+min.x)/2;mean.y=(max.y+min.y)/2;mean.z=(max.z+min.z)/2;
+ coefficients_cylinder->values[0]=mean.x;
+   coefficients_cylinder->values[1]=mean.y;
+  coefficients_cylinder->values[2]=mean.z;
 
   //DEBUG, check if they are ortogonal.
   //std::cout << "Mean -> x: " << mean.x << " y: " << mean.y << " z: " << mean.z << std::endl;
@@ -155,13 +161,13 @@ void PCAutonomousGraspPlanning::intToConfig(){
 
   // @todo: Move defaults to other place.
   if(old!=aligned_grasp_){
-    if(aligned_grasp_){iangle=45;irad=48;ialong=11;}
-    else{ iangle=226;irad=50;ialong=0;}
+    if(aligned_grasp_){iangle=45;irad=48;ialong=31;}
+    else{ iangle=226;irad=50;ialong=20;}
   }
 
   angle_=iangle*(2.0*M_PI/360.0);
   rad_=-irad/100.0;
-  along_=ialong/100.0;
+  along_=(ialong-20)/100.0;//to allow 20 cm negative.... should allow a range based on minMax distance
 }
 
 ///Ordenar en función de la proyección del punto sobre el eje definido 

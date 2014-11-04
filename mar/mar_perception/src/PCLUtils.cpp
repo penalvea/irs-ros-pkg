@@ -6,7 +6,10 @@
  */
 #include <mar_perception/PCLUtils.h>
 
-//...
+//Time measures
+#include <ctime>
+
+
 
 namespace PCLUtils{
 	
@@ -48,11 +51,12 @@ void estimateNormals(pcl::PointCloud<PointT>::Ptr in, pcl::PointCloud<pcl::Norma
 }
 
 pcl::ModelCoefficients::Ptr planeSegmentation(pcl::PointCloud<PointT>::Ptr in_cloud, pcl::PointCloud<pcl::Normal>::Ptr in_normals,
-											  pcl::PointCloud<PointT>::Ptr out_cloud, pcl::PointCloud<pcl::Normal>::Ptr out_normals){
+                                                pcl::PointCloud<PointT>::Ptr out_cloud, pcl::PointCloud<pcl::Normal>::Ptr out_normals,
+                                                pcl::PointCloud<PointT>::Ptr cloud_plane, double distanceThreshold, int iterations){
 
+  clock_t begin = clock();
   pcl::PointIndices::Ptr inliers_plane (new pcl::PointIndices);
   pcl::ModelCoefficients::Ptr coefficients_plane (new pcl::ModelCoefficients);
-  pcl::PointCloud<PointT>::Ptr cloud_plane (new pcl::PointCloud<PointT> ());
   
   pcl::ExtractIndices<PointT> extract;
   pcl::ExtractIndices<pcl::Normal> extract_normals;
@@ -64,13 +68,15 @@ pcl::ModelCoefficients::Ptr planeSegmentation(pcl::PointCloud<PointT>::Ptr in_cl
   seg.setModelType (pcl::SACMODEL_NORMAL_PLANE);
   seg.setNormalDistanceWeight (0.1);
   seg.setMethodType (pcl::SAC_RANSAC);
-  seg.setMaxIterations (100);
-  seg.setDistanceThreshold (0.03);
+  seg.setMaxIterations (iterations);
+  seg.setDistanceThreshold (distanceThreshold);
   seg.setInputCloud (in_cloud);
   seg.setInputNormals (in_normals);
   // Obtain the plane inliers and coefficients
   seg.segment (*inliers_plane, *coefficients_plane);
   std::cerr << "Plane coefficients: " << *coefficients_plane << std::endl;
+  clock_t end = clock();
+  std::cerr << "Elapsed seg. time: " << double(end - begin) / CLOCKS_PER_SEC << std::endl;
 
   // Extract the planar inliers from the input cloud
   extract.setInputCloud (in_cloud);
@@ -95,8 +101,10 @@ pcl::ModelCoefficients::Ptr planeSegmentation(pcl::PointCloud<PointT>::Ptr in_cl
 }
 
 pcl::ModelCoefficients::Ptr cylinderSegmentation(pcl::PointCloud<PointT>::Ptr in_cloud, pcl::PointCloud<pcl::Normal>::Ptr in_normals,
-											  pcl::PointCloud<PointT>::Ptr cloud_cylinder){
+                                                    pcl::PointCloud<PointT>::Ptr cloud_cylinder, double distanceThreshold,
+                                                    int iterations, double rlimit){
 
+  clock_t begin = clock();
   pcl::PointIndices::Ptr inliers_cylinder (new pcl::PointIndices);
   pcl::ModelCoefficients::Ptr coefficients_cylinder (new pcl::ModelCoefficients);  
   pcl::ExtractIndices<PointT> extract;
@@ -108,15 +116,17 @@ pcl::ModelCoefficients::Ptr cylinderSegmentation(pcl::PointCloud<PointT>::Ptr in
   seg.setModelType (pcl::SACMODEL_CYLINDER);
   seg.setMethodType (pcl::SAC_RANSAC);
   seg.setNormalDistanceWeight (0.1);
-  seg.setMaxIterations (20000);//10000
-  seg.setDistanceThreshold (0.05);//0.05
-  seg.setRadiusLimits (0, 0.1);//0, 0.1
+  seg.setMaxIterations (iterations);//10000
+  seg.setDistanceThreshold (distanceThreshold);//0.05
+  seg.setRadiusLimits (0, rlimit);//0, 0.1
   seg.setInputCloud (in_cloud);
   seg.setInputNormals (in_normals);
 
   // Obtain the cylinder inliers and coefficients
   seg.segment (*inliers_cylinder, *coefficients_cylinder);
   std::cerr << "Cylinder coefficients: " << *coefficients_cylinder << std::endl;
+  clock_t end = clock();
+  std::cerr << "Elapsed seg. time: " << double(end - begin) / CLOCKS_PER_SEC << std::endl;
 
   // Write the cylinder inlier1s to disk
   extract.setInputCloud (in_cloud);
@@ -132,7 +142,43 @@ pcl::ModelCoefficients::Ptr cylinderSegmentation(pcl::PointCloud<PointT>::Ptr in
     writer.write ("/home/dfornas/data/scene_cylinder.pcd", *cloud_cylinder, false);
   }
 
+
   return coefficients_cylinder;
 }
-	
+
+void showClouds(pcl::PointCloud<PointT>::Ptr c1, pcl::PointCloud<PointT>::Ptr c2, pcl::ModelCoefficients::Ptr plane_coeffs, pcl::ModelCoefficients::Ptr cylinder_coeffs){
+
+  //pcl::visualization::PCLVisualizer viewer ("3D Viewer");
+     //viewer.setBackgroundColor (0, 0, 0);
+     //viewer.addPointCloud<PointT> (c1, "sample cloud");
+     //viewer.setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "sample cloud");
+     //viewer.addCoordinateSystem (1.0);
+     //viewer.initCameraParameters ();
+     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
+     viewer->setBackgroundColor (0, 0, 0);
+     pcl::visualization::PointCloudColorHandlerCustom<PointT> single_color(c1, 0, 255, 0);
+     pcl::visualization::PointCloudColorHandlerCustom<PointT> single_color2(c1, 0, 255, 255);
+
+     viewer->addPointCloud<PointT>(c1, single_color,  "sample cloud");
+     viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "sample cloud");
+     viewer->addPointCloud<PointT>(c2, single_color2, "sample cloud2");
+     viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "sample cloud2");
+
+     if(plane_coeffs!=0){
+       viewer->addPlane (*plane_coeffs, "plane");
+     }
+
+     if(cylinder_coeffs!=0){
+       viewer->addCylinder(*cylinder_coeffs, "cylinder");
+     }
+
+     viewer->addCoordinateSystem (0.1);
+     viewer->initCameraParameters ();
+     while (!viewer->wasStopped ())
+     {
+       viewer->spinOnce (100);
+       boost::this_thread::sleep (boost::posix_time::microseconds (100000));
+     }
+}
+
 }

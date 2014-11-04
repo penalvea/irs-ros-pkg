@@ -46,6 +46,8 @@ class PCAutonomousGraspPlanning : public CPerception {
   bool aligned_grasp_;
   VispToTF vispToTF;  
   MarkerPublisher * cylPub;
+  double plane_distance_threshold_, cylinder_distance_threshold_, radious_limit_;
+  int plane_iterations_, cylinder_iterations_;
   
  public:
   
@@ -65,12 +67,14 @@ class PCAutonomousGraspPlanning : public CPerception {
   PCAutonomousGraspPlanning( double angle, double rad, double along, double aligned_grasp, pcl::PointCloud<PointT>::Ptr pointcloud): cloud_(pointcloud) {
     angle_=angle;iangle=angle*360.0/(2.0*M_PI);
     rad_=rad;irad=rad*100;
-    along_=along;ialong=along*100;
+    along_=along;ialong=(along*100)+20;
     setHandWidth(DEFAULT_HAND_WIDTH);
     setAlignedGrasp(aligned_grasp);ialigned_grasp=aligned_grasp?1:0;
     setGraspPenetration(DEFAULT_GRASP_PENETRATION);
     vispToTF.addTransform(cMg, "/stereo", "/cMo", "1");
     vispToTF.addTransform(cMg, "/stereo", "/cMg", "2");
+    setPlaneSegmentationParams();
+    setCylinderSegmentationParams();
   }
   PCAutonomousGraspPlanning( pcl::PointCloud<PointT>::Ptr pointcloud): cloud_(pointcloud) {
     angle_=0;iangle=0;
@@ -79,6 +83,8 @@ class PCAutonomousGraspPlanning : public CPerception {
     setAlignedGrasp(true);ialigned_grasp=1;
     vispToTF.addTransform(cMg, "/stereo", "/cMo", "1");
     vispToTF.addTransform(cMg, "/stereo", "/cMg", "2");
+    setPlaneSegmentationParams();
+    setCylinderSegmentationParams();
   }
 
   /** Main function where segmentation is done */
@@ -92,6 +98,17 @@ class PCAutonomousGraspPlanning : public CPerception {
 
   /** Set the max penetration of the grasp around the object (in meters) */
   void setGraspPenetration(double p) {grasp_penetration_=p;}
+
+  void setPlaneSegmentationParams(double distanceThreshold = 0.03, int iterations = 100){
+    plane_distance_threshold_=distanceThreshold;
+    plane_iterations_=iterations;
+  }
+  void setCylinderSegmentationParams(double distanceThreshold = 0.05,int iterations = 20000, double rlimit = 0.1){
+    cylinder_distance_threshold_=distanceThreshold;
+    cylinder_iterations_=iterations;
+    radious_limit_=rlimit;
+  }
+
 
   /** Get the grasp frame with respect to the camera frame */
   vpHomogeneousMatrix get_cMg() {return cMg;}
