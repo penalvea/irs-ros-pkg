@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(mar_robot_arm5e)
 
-find_package(Eigen REQUIRED)
 find_package(orocos_kdl REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   kdl_conversions
@@ -10,7 +9,10 @@ find_package(catkin REQUIRED COMPONENTS
   mar_robot
   mar_core
   arm5_controller
+  cmake_modules
 )
+find_package(Eigen REQUIRED)
+
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
@@ -25,6 +27,7 @@ catkin_package(
     boost
     orocos_kdl
 )
+
 include_directories(${PROJECT_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS} ${catkin_LIBRARY_DIRS})
 

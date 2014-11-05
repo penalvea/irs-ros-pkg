@@ -22,6 +22,7 @@
   <build_depend>arm5_controller</build_depend>
   <build_depend>mar_robot</build_depend>  
   <build_depend>mar_core</build_depend>
+  <build_depend>cmake_modules</build_depend>
 
   <run_depend>roscpp</run_depend>
   <run_depend>kdl_conversions</run_depend>
@@ -31,6 +32,7 @@
   <run_depend>kdl_conversions</run_depend>
   <run_depend>mar_robot</run_depend>
   <run_depend>mar_core</run_depend>
+  <run_depend>cmake_modules</run_depend>
 
 </package>
 

@@ -1,6 +1,5 @@
 #include "ARM5Coms.h"
 #include <termios.h>
-#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -56,7 +55,7 @@ void ARM5Coms::readMessage()
 		//So, if read fails with EAGAIN, sends a zero velocities message
 		if (bytes_read==-1) {
 			perror("Recovering from read error: ");
-			printf("Velocities: %d %d %d %d %d\n", Channel2.disDemand(), Channel1.disDemand(), Channel3.disDemand(), Channel4.disDemand(), Channel5.disDemand());
+			std::cout<<"Velocities: "<<Channel2.disDemand()<< " " << Channel1.disDemand()<< " " << Channel3.disDemand() << " " << Channel4.disDemand()<< " " << Channel5.disDemand()<<std::endl;
 			Channel2.SpeedDemand(Channel2.disDemand()+1, 0xffff, 0x0fff);
 			Channel1.SpeedDemand(Channel1.disDemand()+1, 0xffff, 0x0fff);
 			Channel3.SpeedDemand(Channel3.disDemand()+1, 0xffff, 0x0fff);
