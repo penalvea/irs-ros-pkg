@@ -148,13 +148,13 @@ pcl::ModelCoefficients::Ptr cylinderSegmentation(pcl::PointCloud<PointT>::Ptr in
 
 void showClouds(pcl::PointCloud<PointT>::Ptr c1, pcl::PointCloud<PointT>::Ptr c2, pcl::ModelCoefficients::Ptr plane_coeffs, pcl::ModelCoefficients::Ptr cylinder_coeffs){
 
-  //pcl::visualization::PCLVisualizer viewer ("3D Viewer");
+     //pcl::visualization::PCLVisualizer viewer ("3D Viewer");
      //viewer.setBackgroundColor (0, 0, 0);
      //viewer.addPointCloud<PointT> (c1, "sample cloud");
      //viewer.setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "sample cloud");
      //viewer.addCoordinateSystem (1.0);
      //viewer.initCameraParameters ();
-     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
+     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("Segmentation Viewer"));
      viewer->setBackgroundColor (0, 0, 0);
      pcl::visualization::PointCloudColorHandlerCustom<PointT> single_color(c1, 0, 255, 0);
      pcl::visualization::PointCloudColorHandlerCustom<PointT> single_color2(c1, 0, 255, 255);
@@ -167,12 +167,11 @@ void showClouds(pcl::PointCloud<PointT>::Ptr c1, pcl::PointCloud<PointT>::Ptr c2
      if(plane_coeffs!=0){
        viewer->addPlane (*plane_coeffs, "plane");
      }
-
      if(cylinder_coeffs!=0){
        viewer->addCylinder(*cylinder_coeffs, "cylinder");
      }
 
-     viewer->addCoordinateSystem (0.1);
+     //viewer->addCoordinateSystem (0.1);
      viewer->initCameraParameters ();
      while (!viewer->wasStopped ())
      {
