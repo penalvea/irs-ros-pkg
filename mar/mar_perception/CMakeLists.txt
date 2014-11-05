@@ -17,6 +17,8 @@ find_package(PCL REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(orocos_kdl REQUIRED)
 
+
+
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
@@ -36,11 +38,19 @@ catkin_package(
     PCL
     OpenCV
 )
+
+#Library type definition needed for ESMlibrary (INRIA)
+if( CMAKE_SIZEOF_VOID_P EQUAL 8)
+  set( LIBRARY_TYPE STATIC)
+else( CMAKE_SIZEOF_VOID_P EQUAL 8)	
+  set( LIBRARY_TYPE SHARED )
+endif( CMAKE_SIZEOF_VOID_P EQUAL 8)
+
 add_definitions(${VISP_DEFINITIONS})
 link_directories(${VISP_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${catkin_LIBRARY_DIRS})
 include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${VISP_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
 
-add_library(${PROJECT_NAME} 
+add_library(${PROJECT_NAME} ${LIBRARY_TYPE}
 src/ESMTracking.cpp
 src/ESMMRTracking.cpp
 src/VirtualImage.cpp

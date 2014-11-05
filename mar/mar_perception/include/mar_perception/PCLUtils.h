@@ -26,6 +26,10 @@
 #include <pcl/point_types.h>
 #include <pcl/sample_consensus/method_types.h>
 #include <pcl/sample_consensus/model_types.h>
+#include <pcl/visualization/cloud_viewer.h>
+#include <pcl/visualization/pcl_visualizer.h>
+
+
 
 /** Usually using color 3D point clouds. */
 typedef pcl::PointXYZRGB PointT;
@@ -42,12 +46,14 @@ void voxelGridFilter();
 void estimateNormals(pcl::PointCloud<PointT>::Ptr in, pcl::PointCloud<pcl::Normal>::Ptr cloud_normals);
 /** RANSAC plane estimation */
 pcl::ModelCoefficients::Ptr planeSegmentation(pcl::PointCloud<PointT>::Ptr, pcl::PointCloud<pcl::Normal>::Ptr,
-											  pcl::PointCloud<PointT>::Ptr, pcl::PointCloud<pcl::Normal>::Ptr);
+                                              pcl::PointCloud<PointT>::Ptr, pcl::PointCloud<pcl::Normal>::Ptr,
+                                              pcl::PointCloud<PointT>::Ptr, double distanceThreshold = 0.03, int iterations = 100);
 /** RANSAC cylinder estimation */
 pcl::ModelCoefficients::Ptr cylinderSegmentation(pcl::PointCloud<PointT>::Ptr, pcl::PointCloud<pcl::Normal>::Ptr,
-											     pcl::PointCloud<PointT>::Ptr);
-
-
+                                                 pcl::PointCloud<PointT>::Ptr, double distanceThreshold = 0.05,
+                                                 int iterations = 20000, double rlimit = 0.1);
+/** Show segmented cloud and plane by coefficients and inliers */
+void showClouds(pcl::PointCloud<PointT>::Ptr, pcl::PointCloud<PointT>::Ptr, pcl::ModelCoefficients::Ptr, pcl::ModelCoefficients::Ptr);
 }
 
 #endif

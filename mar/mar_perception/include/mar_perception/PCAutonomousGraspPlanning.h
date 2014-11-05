@@ -23,6 +23,8 @@
 
 #include <tf/transform_datatypes.h>
 
+#include <list>
+
 #define DEFAULT_HAND_WIDTH	0.1
 #define DEFAULT_GRASP_PENETRATION	0.05	//Maximum penetration of the hand around the object
 #define DEFAULT_ALIGNED_GRASP false
@@ -37,7 +39,6 @@ class PCAutonomousGraspPlanning : public CPerception {
   vpPoint g1_, g2_;
   //Grasping params (to allow different grasps and radious (for grasp penetration)).
   double angle_, rad_, along_;
-
   //Now unused
   double hand_width_, grasp_penetration_;
   //Punto central del cilindro y la direccion.
@@ -45,10 +46,12 @@ class PCAutonomousGraspPlanning : public CPerception {
   bool aligned_grasp_;
   VispToTF vispToTF;  
   MarkerPublisher * cylPub;
+  double plane_distance_threshold_, cylinder_distance_threshold_, radious_limit_;
+  int plane_iterations_, cylinder_iterations_;
   
  public:
   
-  vpHomogeneousMatrix cMg, base_cMg; ///< Grasp frame with respect to the camera after planning
+  vpHomogeneousMatrix cMg, cMo; ///< Grasp frame with respect to the camera after planning
 
   //With integuers to use trackbars
   int iangle, irad, ialong, ialigned_grasp;
@@ -64,12 +67,24 @@ class PCAutonomousGraspPlanning : public CPerception {
   PCAutonomousGraspPlanning( double angle, double rad, double along, double aligned_grasp, pcl::PointCloud<PointT>::Ptr pointcloud): cloud_(pointcloud) {
     angle_=angle;iangle=angle*360.0/(2.0*M_PI);
     rad_=rad;irad=rad*100;
-    along_=along;ialong=along*100;
+    along_=along;ialong=(along*100)+20;
     setHandWidth(DEFAULT_HAND_WIDTH);
     setAlignedGrasp(aligned_grasp);ialigned_grasp=aligned_grasp?1:0;
     setGraspPenetration(DEFAULT_GRASP_PENETRATION);
-    vispToTF.addTransform(cMg, "/stereo", "/base_cMg", "1");
+    vispToTF.addTransform(cMg, "/stereo", "/cMo", "1");
     vispToTF.addTransform(cMg, "/stereo", "/cMg", "2");
+    setPlaneSegmentationParams();
+    setCylinderSegmentationParams();
+  }
+  PCAutonomousGraspPlanning( pcl::PointCloud<PointT>::Ptr pointcloud): cloud_(pointcloud) {
+    angle_=0;iangle=0;
+    rad_=0;irad=0;
+    along_=0;ialong=0;
+    setAlignedGrasp(true);ialigned_grasp=1;
+    vispToTF.addTransform(cMg, "/stereo", "/cMo", "1");
+    vispToTF.addTransform(cMg, "/stereo", "/cMg", "2");
+    setPlaneSegmentationParams();
+    setCylinderSegmentationParams();
   }
 
   /** Main function where segmentation is done */
@@ -83,6 +98,17 @@ class PCAutonomousGraspPlanning : public CPerception {
 
   /** Set the max penetration of the grasp around the object (in meters) */
   void setGraspPenetration(double p) {grasp_penetration_=p;}
+
+  void setPlaneSegmentationParams(double distanceThreshold = 0.03, int iterations = 100){
+    plane_distance_threshold_=distanceThreshold;
+    plane_iterations_=iterations;
+  }
+  void setCylinderSegmentationParams(double distanceThreshold = 0.05,int iterations = 20000, double rlimit = 0.1){
+    cylinder_distance_threshold_=distanceThreshold;
+    cylinder_iterations_=iterations;
+    radious_limit_=rlimit;
+  }
+
 
   /** Get the grasp frame with respect to the camera frame */
   vpHomogeneousMatrix get_cMg() {return cMg;}
@@ -108,6 +134,12 @@ class PCAutonomousGraspPlanning : public CPerception {
 
   /** Configure the camera based in int slider parameters */
   void intToConfig();
+
+  ///GRASP LIST FUNCTIONS, @todo Refactor, GraspHypothesis code and score should be in mar_perception
+public:
+  std::list<vpHomogeneousMatrix> cMg_list;
+  void generateGraspList();
+  void filterGraspList();
 
 };
 
