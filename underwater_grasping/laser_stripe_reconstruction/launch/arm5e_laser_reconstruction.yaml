@@ -1,5 +1,5 @@
 #Joint values for initial and final scanning configurations
-scan_initial_posture: [0.0, 0.1, 2.0, 0.0, 0.0]
+scan_initial_posture: [0.0, 0.1, 1.4, 0.0, 0.0]
 scan_final_posture: [0.0, 0.1, 2.6, 0.0, 0.0]
 
 #Laser to end-effector transform

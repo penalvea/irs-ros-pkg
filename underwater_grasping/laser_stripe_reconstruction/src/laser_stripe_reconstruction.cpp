@@ -1,8 +1,8 @@
 /*
  * Makes a laser scan and performs a 3D reconstruction
  *
- *  Created on: 19/06/2012
- *      Author: mprats
+ * Created on: 19/06/2012
+ * Author: mprats
  */
 
 #include <mar_perception/VirtualImage.h>
@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
 	ESMMotionEstimatorPtr mest;
 	if (!fixed) {
 		tracker=ESMTrackingPtr(new ESMTracking(I.get()));
-        	tracker->perceive();
+		tracker->perceive();
 		mest=ESMMotionEstimatorPtr(new ESMMotionEstimator(tracker, grabber->K));
 		mest->setZ(1.0); //Depth at the UJI water tank. FIXME: should get it from somewhere
 	}
@@ -86,14 +86,14 @@ int main(int argc, char **argv) {
 	//SimpleSubPixelLaserPeakDetectorPtr peak_detector(new SimpleSubPixelLaserPeakDetector(grabber));
 	ArmLaserReconstruction3DPtr rec(new ArmLaserReconstruction3D(peak_detector, robot, tracker, mest, grabber));
 	vpHomogeneousMatrix eMl=mar_params::paramToVispHomogeneousMatrix(&nh, "eMl");
-    rec->setLaserToEef(eMl);
+	rec->setLaserToEef(eMl);
 
 	//Camera to arm base calibration
 	//vpHomogeneousMatrix bMc=mar_params::paramToVispHomogeneousMatrix(&nh, "bMc");
 	vpHomogeneousMatrix bMc(-0.18, 0.0, -0.01, 0, 0, 0), auxRotZ(0,0,0,0,0,-1.57), auxRotX(0,0,0,0.2,0,0);
 	bMc=bMc*auxRotZ*auxRotX;
 	rec->setCameraToBase(bMc);
-	
+
 	Reconstruction3DAction action(I, grabber, robot, tracker, rec, mest);
 	action.enableDrawing(boost::shared_ptr<vpImage<vpRGBa> >(I));
 	action.setOffline(offline);

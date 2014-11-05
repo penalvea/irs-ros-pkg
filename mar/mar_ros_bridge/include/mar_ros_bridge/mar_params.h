@@ -18,7 +18,16 @@ vpHomogeneousMatrix paramToVispHomogeneousMatrix(ros::NodeHandle *nh, std::strin
 			e[i]=static_cast<double>(value);
 		}
 		m.buildFrom(vpTranslationVector(e[0],e[1],e[2]), vpRotationMatrix(vpRxyzVector(e[3],e[4],e[5])));
-	} else {
+	}
+	else if(nh->getParam(param,v) && v.size()==7){
+		double e[7];
+		for (int i=0; i<7; i++){
+			XmlRpc::XmlRpcValue value=v[i];
+			e[i]=static_cast<double>(value);
+		}
+		m.buildFrom(vpTranslationVector(e[0],e[1],e[2]), vpQuaternionVector(e[3],e[4],e[5],e[6]));
+	}
+	else {
 		ROS_WARN("Parameter %s not found or not of correct dimension", param.c_str());
 	}
 	return m;
