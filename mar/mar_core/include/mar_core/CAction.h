@@ -9,7 +9,6 @@
 
 class CAction {
 protected:
-	boost::shared_ptr<vpImage<vpRGBa> > Idraw_;
 	bool drawing_enabled;
 
 public:
@@ -18,10 +17,10 @@ public:
 	virtual int doAction()=0;	///< Perform the action
 
 	/** Enables drawing. If enabled, the draw() method can be called on the action main loop */
-	void enableDrawing(boost::shared_ptr<vpImage<vpRGBa> > I) {Idraw_=I; drawing_enabled=true;}
+	void enableDrawing() {drawing_enabled=true;}
 
 	/** Disables drawing */
-	void disableDrawing() {Idraw_.reset(); drawing_enabled=false;}
+	void disableDrawing() {drawing_enabled=false;}
 
 	/** Draw the progress of the action on an image. To be overloaded by specialized classes */
 	virtual void draw() {}

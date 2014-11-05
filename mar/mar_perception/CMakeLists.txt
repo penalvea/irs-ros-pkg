@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
   visualization_msgs
   image_transport
   mar_core
+  mar_robot_arm5e
   mar_msgs
   mar_ros_bridge
   esm_tracking
@@ -28,6 +29,7 @@ catkin_package(
     image_transport
     mar_msgs
     mar_core
+    mar_robot_arm5e
     mar_ros_bridge
     esm_tracking
   DEPENDS
@@ -56,6 +58,8 @@ src/VispUtils.cpp
 src/PCLUtils.cpp
 src/LaserPeakDetector.cpp
 src/Reconstruction3D.cpp
+src/ArmLaserReconstruction3DStatic.cpp
+src/ArmLaserReconstruction3DEye.cpp
 src/PCGraspPlanning.cpp
 src/PCAutonomousGraspPlanning.cpp
 src/MotionEstimator.cpp

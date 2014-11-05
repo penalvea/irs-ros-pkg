@@ -89,9 +89,13 @@ ARM5Arm::ARM5Arm(ros::NodeHandle &nh) :  nh_(nh), current(0)
 
 ARM5Arm::ARM5Arm(ros::NodeHandle &nh, std::string state_topic, std::string control_topic) :  nh_(nh), current(0)
 {
+
 	initKinematicSolvers();
+
 	position_sub=nh.subscribe<sensor_msgs::JointState>(state_topic, 1, &ARM5Arm::readJointsCallback, this);
+
 	velocity_pub=nh.advertise<sensor_msgs::JointState>(control_topic,1);
+
 }
 
 void ARM5Arm::readJointsCallback(const sensor_msgs::JointState::ConstPtr& state) {

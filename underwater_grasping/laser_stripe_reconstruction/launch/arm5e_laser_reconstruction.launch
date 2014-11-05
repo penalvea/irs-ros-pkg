@@ -1,8 +1,8 @@
 <launch>
         <rosparam command="load" file="$(find laser_stripe_reconstruction)/launch/arm5e_laser_reconstruction.yaml" />
 
-        <arg name="image_topic" default="/uwsim/camera1" />
-        <arg name="camera_info_topic" default="/uwsim/camera1_info" />
+        <arg name="image_topic" default="/uwsim/eye" />
+        <arg name="camera_info_topic" default="/uwsim/eye_info" />
         <arg name="output_basename" default="output" />
 	<param name="image_topic" value="$(arg image_topic)" />
 	<param name="camera_info_topic" value="$(arg camera_info_topic)" />

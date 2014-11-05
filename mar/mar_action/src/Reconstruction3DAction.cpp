@@ -9,8 +9,6 @@
  */
 int Reconstruction3DAction::doAction() {
 	if (!offline_ && robot_)  {
-		//Initialize the arm zero offsets
-		//robot_->init();
 		//Move the arm to the initial position
 		std::cout<<vp_scan_initial_posture_<<std::endl;
 		robot_->setJointValues(vp_scan_initial_posture_, true);
@@ -21,19 +19,18 @@ int Reconstruction3DAction::doAction() {
 	bool done=false;
 	while (ros::ok() && !done) {
 		ros::spinOnce();
-		grabber_->acquire(*I_);
 
 		//Update perceptions
 		if (!fixed_base_ && tracker_ && mest_) {
 			tracker_->perceive();
 			mest_->perceive();
 		}
-		//std::cerr << "peak detector " << rec_->getPeakDetector() << std::endl;
-		rec_->getPeakDetector()->perceive();
-		rec_->perceive();
 
+		for(int i=0; i<rec_.size(); i++){
+			rec_[i]->perceive();
+		}
 		draw();
-		if (drawing_enabled && vpDisplay::getClick(*Idraw_, false)) done=true;
+		//if (drawing_enabled && vpDisplay::getClick(*Idraw_, false)) done=true;
 
 		//Make the scan motion: Send the arm to the final joint position with a suitable joint velocity
 		if (!offline_) {
@@ -48,22 +45,37 @@ int Reconstruction3DAction::doAction() {
 			robot_->setJointVelocity((vp_scan_final_posture_-q)*scale);
 		}
 	}
-	//TODO: Park the arm
-
-	//Save the point cloud in tmp
-	//std::cerr << "Saving the point cloud in /tmp/pointcloud.pcd" << std::endl;
-	//rec_->savePCD("/tmp/pointcloud.pcd");
 
 	return SUCCESS;
 }
 
 void Reconstruction3DAction::draw() {
-	if (drawing_enabled) {
-		vpDisplay::display(*Idraw_);
-		for (unsigned int i=0; i<rec_->getPeakDetector()->points.size(); i++) {
-			vpDisplay::displayCross(*Idraw_,rec_->getPeakDetector()->points[i][0], rec_->getPeakDetector()->points[i][1], 5,vpColor::red);
-			if (!fixed_base_ && tracker_) tracker_->draw(*Idraw_);
+	if(drawing_enabled){
+		for(int i=0; i<rec_.size(); i++){
+			cv::Mat image;
+			vpImage<vpRGBa> Ic;
+			rec_[i]->getPeakDetector()->getGrabber()->acquire(Ic);
+			vpImageConvert::convert(Ic, image);
+			cv::namedWindow("camera"+boost::lexical_cast<std::string>(i), cv::WINDOW_AUTOSIZE);
+			cv::line(image,cv::Point(0, rec_[i]->getPeakDetector()->getLimits()[0]),
+				           cv::Point(Ic.getCols()-1, rec_[i]->getPeakDetector()->getLimits()[0]),
+					       cv::Scalar(255,0,0));
+
+			cv::line(image,cv::Point(0, rec_[i]->getPeakDetector()->getLimits()[1]),
+							           cv::Point(Ic.getCols()-1, rec_[i]->getPeakDetector()->getLimits()[1]),
+							           cv::Scalar(255,0,0));
+			for(unsigned int j=0; j<rec_[i]->getPeakDetector()->points.size(); j++){
+				//	std::cout<<rec_[i]->getPeakDetector()->points[i][1]<<"----"<<rec_[i]->getPeakDetector()->points[i][0]<<std::endl;
+				cv::Vec3b & pixel=image.at<cv::Vec3b>(rec_[i]->getPeakDetector()->points[j][0], rec_[i]->getPeakDetector()->points[j][1]);
+				pixel[0]=0;
+				pixel[1]=0;
+				pixel[2]=255;
+
+			}
+
+			cv::imshow("camera"+boost::lexical_cast<std::string>(i), image);
 		}
-		vpDisplay::flush(*Idraw_);
+
 	}
+
 }
