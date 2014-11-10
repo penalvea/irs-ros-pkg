@@ -19,8 +19,6 @@ void ArmLaserReconstruction3DStatic::perceive(){
 	vpHomogeneousMatrix bMe;
 	ros::Time begin=ros::Time::now();
 	bMe=arm_->directKinematics(q);
-	laser_detector_->setRadiusMax(2.0);
-	laser_detector_->setRadiusMin(1.0);
 	laser_detector_->setLimits(bMc, bMe*eMl);
 	laser_detector_->perceive();
 	ros::Duration duration=ros::Time::now()-begin;

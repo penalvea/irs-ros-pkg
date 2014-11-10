@@ -20,17 +20,6 @@
 
 
 /** Makes a 3D reconstruction of a surface with a laser stripe emitter mounted on an arm and using a camera mounted on the same arm
- * Expects the following params to be set in the ROS parameter server:
- * image_topic: The topic where to listen for images
- * camera_info_topic: The topic with the camera info
- * offline: If 1, do not try to connect to the real robot
- * output_basename: The full path to the output file names without extension, ie. /tmp/scan_2
- *
- * scan_initial_posture: a vector with the joint values where to start the scan (used if offline=0)
- * scan_final_posture: a vector with the joint values where to end the scan (used if offline=0)
- *
- * eMl: a six-element vector representing the laser pose wrt the end-effector. [x y z roll pitch yaw] format
- * bMc: a six-element vector representing the camera pose wrt the arm base. [x y z roll pitch yaw] format
  */
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "multiple_arm5e_laser_reconstruction");
@@ -110,14 +99,25 @@ int main(int argc, char **argv) {
 					ArmLaserReconstruction3DStaticPtr rec(new ArmLaserReconstruction3DStatic(detector, robot));
 					rec->setCameraToBase(bMc);
 					rec->setLaserToEef(eMl);
+					double max_radius, min_radius;
+					if(nh.getParam(camera+"/min_radius_WS", min_radius) && nh.getParam(camera+"/max_radius_WS", max_radius)){
+						rec->getPeakDetector()->setRadiusMin(min_radius);
+						rec->getPeakDetector()->setRadiusMax(max_radius);
+					}
 					rec_vector.push_back(rec);
 				}
 				else if(reconstruction_type=="eye"){
+					std::cout<<"aqui3"<<std::endl;
 					vpHomogeneousMatrix eMc=mar_params::paramToVispHomogeneousMatrix(&nh, camera+"/eMc");
 					vpHomogeneousMatrix eMl=mar_params::paramToVispHomogeneousMatrix(&nh, camera+"/eMl");
 					ArmLaserReconstruction3DEyePtr rec(new ArmLaserReconstruction3DEye(detector, robot));
 					rec->setCameraToEef(eMc);
 					rec->setLaserToEef(eMl);
+					double max_radius, min_radius;
+					if(nh.getParam(camera+"/min_radius_WS", min_radius) && nh.getParam(camera+"/max_radius_WS", max_radius)){
+						rec->getPeakDetector()->setRadiusMin(min_radius);
+						rec->getPeakDetector()->setRadiusMax(max_radius);
+					}
 					rec_vector.push_back(rec);
 				}
 				else{
