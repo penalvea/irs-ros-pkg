@@ -83,6 +83,8 @@ void PCAutonomousGraspPlanning::perceive() {
  coefficients_cylinder->values[0]=mean.x;
    coefficients_cylinder->values[1]=mean.y;
   coefficients_cylinder->values[2]=mean.z;
+  radious=coefficients_cylinder->values[6];
+  height=sqrt((max.x-min.x)*(max.x-min.x)+(max.y-min.y)*(max.y-min.y)+(max.z-min.z)*(max.z-min.z));
 
   //DEBUG, check if they are ortogonal.
   //std::cout << "Mean -> x: " << mean.x << " y: " << mean.y << " z: " << mean.z << std::endl;
