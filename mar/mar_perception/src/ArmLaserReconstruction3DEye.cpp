@@ -11,6 +11,8 @@
 #include <visp/vpColVector.h>
 #include <visp/vpPixelMeterConversion.h>
 
+
+
 void ArmLaserReconstruction3DEye::perceive() {
 
 	vpColVector q;

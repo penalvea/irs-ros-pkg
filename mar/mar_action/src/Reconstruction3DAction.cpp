@@ -1,4 +1,6 @@
 #include <mar_action/Reconstruction3DAction.h>
+#include <boost/thread.hpp>
+
 
 /** Performs the logic necessary for 3D reconstruction using a laser mounted on an arm
  *  If not offline, the arm is initialized and moved to the starting configuration. It is then moved with joint velocities
@@ -13,11 +15,17 @@ int Reconstruction3DAction::doAction() {
 		std::cout<<vp_scan_initial_posture_<<std::endl;
 		robot_->setJointValues(vp_scan_initial_posture_, true);
 	}
+	int cont=0;
 	//The main loop. Acquire image, track template, detect peaks, estimate motion, and reconstruction, while
 	//controlling the arm through the scan:
 	vpHomogeneousMatrix eMl;
-	bool done=false;
-	while (ros::ok() && !done) {
+	done_=false;
+	boost::thread threads[rec_.size()];
+	for(int i=0; i<rec_.size(); i++){
+		threads[i]=this->createThread(rec_[i]);
+	}
+	sleep(1);
+	while (ros::ok() && !done_) {
 		ros::spinOnce();
 
 		//Update perceptions
@@ -26,10 +34,13 @@ int Reconstruction3DAction::doAction() {
 			mest_->perceive();
 		}
 
-		for(int i=0; i<rec_.size(); i++){
-			rec_[i]->perceive();
-		}
 		draw();
+
+		/*for(int i=0; i<rec_.size(); i++){
+			rec_[i]->perceive();
+
+		}*/
+
 		//if (drawing_enabled && vpDisplay::getClick(*Idraw_, false)) done=true;
 
 		//Make the scan motion: Send the arm to the final joint position with a suitable joint velocity
@@ -41,9 +52,15 @@ int Reconstruction3DAction::doAction() {
 				//scale to the maximum allowed velocity
 				scale=max_joint_velocity_/(vp_scan_final_posture_-q).infinityNorm();
 			}
-			if ((vp_scan_final_posture_ - q).infinityNorm() < position_tolerance_) break;
+			if ((vp_scan_final_posture_ - q).infinityNorm() < position_tolerance_) done_=true;
 			robot_->setJointVelocity((vp_scan_final_posture_-q)*scale);
 		}
+
+		cont++;
+	}
+	std::cout<<"Cont="<<cont<<std::endl;
+	for(int i=0; i<rec_.size(); i++){
+		threads[i].join();
 	}
 
 	return SUCCESS;
@@ -60,11 +77,11 @@ void Reconstruction3DAction::draw() {
 			cv::line(image,cv::Point(0, rec_[i]->getPeakDetector()->getLimits()[0]),
 				           cv::Point(Ic.getCols()-1, rec_[i]->getPeakDetector()->getLimits()[0]),
 					       cv::Scalar(255,0,0));
-
 			cv::line(image,cv::Point(0, rec_[i]->getPeakDetector()->getLimits()[1]),
 							           cv::Point(Ic.getCols()-1, rec_[i]->getPeakDetector()->getLimits()[1]),
 							           cv::Scalar(255,0,0));
 			for(unsigned int j=0; j<rec_[i]->getPeakDetector()->points.size(); j++){
+
 				//	std::cout<<rec_[i]->getPeakDetector()->points[i][1]<<"----"<<rec_[i]->getPeakDetector()->points[i][0]<<std::endl;
 				cv::Vec3b & pixel=image.at<cv::Vec3b>(rec_[i]->getPeakDetector()->points[j][0], rec_[i]->getPeakDetector()->points[j][1]);
 				pixel[0]=0;
@@ -72,8 +89,8 @@ void Reconstruction3DAction::draw() {
 				pixel[2]=255;
 
 			}
-
 			cv::imshow("camera"+boost::lexical_cast<std::string>(i), image);
+			cv::waitKey(5);
 		}
 
 	}

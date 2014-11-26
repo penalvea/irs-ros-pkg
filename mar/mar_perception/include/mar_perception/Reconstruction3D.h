@@ -20,6 +20,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+
 /** Abstract class for 3D reconstruction algorithms */
 class Reconstruction3D : public CPerception {
 public:
@@ -32,6 +33,7 @@ protected:
 public:
 	Reconstruction3D(): CPerception() {
 		cloud_.reset();
+
 	}
 
 	pcl::PointCloud<pcl::PointXYZ>::Ptr getCloud() {
@@ -46,7 +48,9 @@ public:
 
 	void savePCD(std::string filename);
 
-	virtual ~Reconstruction3D() {}
+
+	virtual ~Reconstruction3D() {
+	}
 };
 typedef boost::shared_ptr<Reconstruction3D> Reconstruction3DPtr;
 

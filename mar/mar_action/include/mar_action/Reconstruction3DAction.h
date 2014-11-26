@@ -1,6 +1,8 @@
 #ifndef RECONSTRUCTION3DACTION_H
 #define RECONSTRUCTION3DACTION_H
 
+#include <sensor_msgs/PointCloud.h>
+
 #include <mar_core/CAction.h>
 
 #include <mar_perception/VirtualImage.h>
@@ -13,6 +15,7 @@
 #include <visp/vpColVector.h>
 
 #include <boost/shared_ptr.hpp>
+#include <boost/thread.hpp>
 
 /** Maximum joint velocity to send to the arm */
 #define DEFAULT_MAX_JOINT_VELOCITY 0.02
@@ -38,28 +41,69 @@ class Reconstruction3DAction : public CAction {
 
 	bool fixed_base_; ///< If fixed base, do not perform tracking
 	bool offline_;	///< If offline, do not try to move the robot arm
+	bool done_;
+	bool publish_point_cloud_;
 
-public:	
+	ros::Publisher point_cloud_pub_;
+	ros::NodeHandle nh_;
+
+public:
 	Reconstruction3DAction( ArmPtr robot, ESMTrackingPtr tracker, MotionEstimatorPtr mest )
 	: CAction(), robot_(robot), tracker_(tracker), mest_(mest), max_joint_velocity_(DEFAULT_MAX_JOINT_VELOCITY), position_tolerance_(DEFAULT_POSITION_TOLERANCE),
 	  fixed_base_(false), offline_(false) {
+		point_cloud_pub_=nh_.advertise<sensor_msgs::PointCloud>("LaserReconstructionPointCloud", 1000);
 	}
 
 	Reconstruction3DAction()
 	: CAction(), max_joint_velocity_(DEFAULT_MAX_JOINT_VELOCITY), position_tolerance_(DEFAULT_POSITION_TOLERANCE),
 	  fixed_base_(true), offline_(true) {
+		point_cloud_pub_=nh_.advertise<sensor_msgs::PointCloud>("LaserReconstructionPointCloud", 1000);
 	}
 
 	Reconstruction3DAction( ESMTrackingPtr tracker, MotionEstimatorPtr mest )
 	: CAction(), tracker_(tracker), mest_(mest), max_joint_velocity_(DEFAULT_MAX_JOINT_VELOCITY), position_tolerance_(DEFAULT_POSITION_TOLERANCE),
 	  fixed_base_(false), offline_(true) {
+		point_cloud_pub_=nh_.advertise<sensor_msgs::PointCloud>("LaserReconstructionPointCloud", 1000);
 	}
 
 	Reconstruction3DAction( ArmPtr robot, std::vector<Reconstruction3DPtr> rec )
 	: CAction(), robot_(robot), rec_(rec), max_joint_velocity_(DEFAULT_MAX_JOINT_VELOCITY), position_tolerance_(DEFAULT_POSITION_TOLERANCE),
 	  fixed_base_(true), offline_(false) {
+		point_cloud_pub_=nh_.advertise<sensor_msgs::PointCloud>("LaserReconstructionPointCloud", 1000);
 	}
+	static void threadReconstruction(Reconstruction3DPtr rec, Reconstruction3DAction *act){
+		//int contador=0;
+		int cont_points=0;
+		while(ros::ok() && !act->done_){
 
+			rec->perceive();
+			ros::spinOnce();
+		//	contador++;
+			if(act->publish_point_cloud_){
+				if(cont_points!=rec->points3d.size()){
+					sensor_msgs::PointCloud msg;
+					for(int i=cont_points; i<rec->points3d.size(); i++){
+						geometry_msgs::Point32 point;
+						point.x=rec->points3d[i][0];
+						point.y=rec->points3d[i][1];
+						point.z=rec->points3d[i][2];
+						msg.points.push_back(point);
+					}
+					cont_points=rec->points3d.size();
+					msg.header.stamp=ros::Time::now();
+					msg.header.frame_id="girona500/kinematic_base";
+					act->point_cloud_pub_.publish(msg);
+					ros::spinOnce();
+				}
+			}
+		}
+		//std::cout<<"Puntos: "<<rec->getCloud()->size()<<std::endl;
+		//std::cout<<"Contador thread"<<contador<<std::endl;
+		}
+
+	boost::thread createThread(Reconstruction3DPtr rec){
+		return boost::thread (&Reconstruction3DAction::threadReconstruction, rec, this);
+	}
 
 	int doAction();	///< Perform the action
 	
@@ -79,6 +123,9 @@ public:
 
 	/** If set to true, the action does not try to access the robot arm */
 	void setOffline(bool flag) {offline_=flag;}
+
+	/** If set to true, the point cloud is published during the reconstruction */
+	void setPointCloudPublished(bool flag){publish_point_cloud_=flag;}
 
 	void addReconstruction3D(Reconstruction3DPtr rec){ rec_.push_back(rec);}
 

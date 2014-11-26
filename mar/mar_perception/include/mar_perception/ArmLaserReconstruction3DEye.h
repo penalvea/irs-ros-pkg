@@ -46,6 +46,8 @@ public:
 		//duration_=0;
 
 	}
+
+
 	void perceive();
 
 

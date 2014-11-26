@@ -115,6 +115,15 @@ double LaserPeakDetector::getIntersectionPoint(vpHomogeneousMatrix bMc, vpHomoge
 		//std::cout<<"There is no intersection between the laser plane, the camera plane and the WS sphere"<<std::endl;
 	}
 	else if(delta==0){
+		double d1=(-b)/(2*a);
+		vpColVector final_point1(3), final_point2(3), final_point3(3);
+		final_point1=intersection_point1+d1*(intersection_point2-intersection_point1);
+		vpHomogeneousMatrix bMpoint1(final_point1[0],final_point1[1],final_point1[2],0,0,0);
+		vpHomogeneousMatrix cMpoint1=bMc.inverse()*bMpoint1;
+		if(cMpoint1[2][3]>0){
+			return (cMpoint1[1][3]*grabber_->K.get_py()/cMpoint1[2][3])+grabber_->K.get_v0();
+		}
+
 		//std::cout<<"There is only a single intersection between the laser plane, the camera plane and the WS sphere"<<std::endl;
 	}
 	else{
@@ -137,9 +146,6 @@ double LaserPeakDetector::getIntersectionPoint(vpHomogeneousMatrix bMc, vpHomoge
 			return (cMpoint2[1][3]*grabber_->K.get_py()/cMpoint2[2][3])+grabber_->K.get_v0();
 
 		}
-		else{
-			std::cout<<"Invalid points"<<std::endl;
-		}
 	}
 	return -1;
 	//std::cout<<"--------------------------------------------------------------------------------------------------"<<std::endl;
@@ -153,19 +159,17 @@ void LaserPeakDetector::setLimits(vpHomogeneousMatrix bMc, vpHomogeneousMatrix b
 		double right_min=getIntersectionPoint(bMc, bMl, grabber_->image.getCols(), min_radius_);
 		double left_max=getIntersectionPoint(bMc, bMl, 0, max_radius_);
 		double right_max=getIntersectionPoint(bMc, bMl, grabber_->image.getCols(), max_radius_);
-		/*std::cout<<"left_min="<<left_min<<std::endl;
-		std::cout<<"right_min="<<right_min<<std::endl;
-		std::cout<<"left_max="<<left_max<<std::endl;
-		std::cout<<"right_max="<<right_max<<std::endl;*/
+
 
 		if(left_min!=-1 && right_min!=-1){
 			limits_[1]=left_min>right_min?(int)left_min+1:(int)right_min+1;
-			if(limits_[1]>grabber_->image.getRows()-1){
-				limits_[1]=grabber_->image.getRows()-1;
-			}
 			if(limits_[1]<0){
 				limits_[1]=0;
 			}
+			if(limits_[1]>grabber_->image.getRows()-1){
+				limits_[1]=grabber_->image.getRows()-1;
+			}
+
 		}
 		if(left_max!=-1 && right_max!=-1){
 			limits_[0]=left_max<right_max?((int)left_max):((int)right_max);
@@ -177,8 +181,13 @@ void LaserPeakDetector::setLimits(vpHomogeneousMatrix bMc, vpHomogeneousMatrix b
 			}
 
 		}
-	}
+		if(limits_[0]>limits_[1]){
+			int limit_aux=limits_[0];
+			limits_[0]=limits_[1];
+			limits_[1]=limit_aux;
+		}
 
+	}
 }
 
 void SimpleLaserPeakDetector::perceive() {
@@ -282,61 +291,6 @@ void LastImageSubPixelLaserPeakDetector::perceive() {
 
 
 HSVSubPixelLaserPeakDetector::HSVSubPixelLaserPeakDetector(VirtualImagePtr grabber):LaserPeakDetector(grabber){
-	vpImage<unsigned char> I;
-	grabber_->acquire(I);
-	//std::cout<<max_distance<<"  "<<min_distance<<std::endl;
-	//if(min_distance==-1 || max_distance==-1){
-	/*	for(int col=0; col<I.getCols(); col++){
-			limits_.push_back(std::vector<int>(2));
-			limits_[col][0]=0;
-			limits_[col][1]=I.getRows()-1;
-		}*/
-	//}
-	//else{
-		/*
-		std::cout<<"matrix: "<<cMl<<std::endl;
-		vpRotationMatrix cRl;
-		cMl.extract(cRl);
-
-		vpColVector pn_l(3), pn_c(3), pp(3);
-		pn_l[0]=1; pn_l[1]=0; pn_l[2]=0;
-		pp[0]=cMl[0][3]; pp[1]=cMl[1][3]; pp[2]=cMl[2][3];
-		pn_c=cRl*pn_l;
-		ros::spinOnce();
-		for(int col=0; col<I.getCols(); col++){
-			limits_.push_back(std::vector<int>(2));
-			std::cout<<"pp="<<pp<<std::endl;
-			std::cout<<"pn_c="<<pn_c<<std::endl;
-			std::cout<<"min_distance="<<min_distance<<std::endl;
-			std::cout<<"col="<<col<<std::endl;
-			std::cout<<"grabber_->K.get_u0()="<<grabber_->K.get_u0()<<std::endl;
-			std::cout<<"grabber_->K.get_px()="<<grabber_->K.get_px()<<std::endl;
-			std::cout<<"grabber_->K.get_py()="<<grabber_->K.get_py()<<std::endl;
-			std::cout<<"grabber_->K.get_v0()="<<grabber_->K.get_v0()<<std::endl;
-
-			double r_min=(((vpColVector::dotProd(pp, pn_c)/min_distance)-((col-grabber_->K.get_u0())/grabber_->K.get_px()*pn_c[0])-pn_c[2])*grabber_->K.get_py()/pn_c[1])+grabber_->K.get_v0();
-			double r_max=(((vpColVector::dotProd(pp, pn_c)/max_distance)-((col-grabber_->K.get_u0())/grabber_->K.get_px()*pn_c[0])-pn_c[2])*grabber_->K.get_py()/pn_c[1])+grabber_->K.get_v0();
-			std::cout<<"r_min: "<<r_min<<"  rmax="<<r_max<<std::endl;
-			if(r_min<0)
-				r_min=0;
-			else if(r_min>=I.getRows())
-				r_min=I.getRows()-2;
-			std::cout<<"r_min="<<r_min<<std::endl;
-			if(r_max<0)
-				r_max=0;
-			else if(r_max>=I.getRows())
-				r_max=I.getRows()-2;
-			if(r_min<r_max){
-				limits_[col][0]=(int)r_min;
-				limits_[col][1]=(int)r_max+1;
-			}
-			else{
-				limits_[col][0]=(int)r_max;
-				limits_[col][1]=(int)r_min+1;
-			}
-			std::cout<<"limits: "<<limits_[col][0]<<"  "<<limits_[col][1]<<std::endl;
-		}*/
-	//}
 	//Values for real
 		iLowH = 15;
 		iHighH = 91;
@@ -432,73 +386,7 @@ void HSVSubPixelLaserPeakDetector::perceive(){
 
 
 SimulationLaserPeakDetector::SimulationLaserPeakDetector(VirtualImagePtr grabber):LaserPeakDetector(grabber){
-	/*vpImage<unsigned char> I;
-	do{
-		grabber_->acquire(I);
-		ros::spinOnce();
-		std::cout<<"image: "<<I.getCols()<<"---"<<I.getRows()<<std::endl;
-	}while(I.getCols()==0);
-	//std::cout<<max_distance<<"  "<<min_distance<<std::endl;
-	//if(min_distance==-1 || max_distance==-1){
-		for(int col=0; col<I.getCols(); col++){
-			limits_.push_back(std::vector<int>(2));
-			limits_[col][0]=0;
-			limits_[col][1]=I.getRows()-1;
-		}*/
-	//}
-	//else{
-		/*std::cout<<"matrix: "<<cMl<<std::endl;
-		vpRotationMatrix cRl;
-		cMl.extract(cRl);
 
-		vpColVector pn_l(3), pn_c(3), pp(3);
-		pn_l[0]=1; pn_l[1]=0; pn_l[2]=0;
-		pp[0]=cMl[0][3]; pp[1]=cMl[1][3]; pp[2]=cMl[2][3];
-		pn_c=cRl*pn_l;
-		ros::spinOnce();
-		for(int col=0; col<I.getCols(); col++){
-			limits_.push_back(std::vector<int>(2));
-			std::cout<<"pp="<<pp<<std::endl;
-			std::cout<<"pn_c="<<pn_c<<std::endl;
-			std::cout<<"min_distance="<<min_distance<<std::endl;
-			std::cout<<"col="<<col<<std::endl;
-			std::cout<<"grabber_->K.get_u0()="<<grabber_->K.get_u0()<<std::endl;
-			std::cout<<"grabber_->K.get_px()="<<grabber_->K.get_px()<<std::endl;
-			std::cout<<"grabber_->K.get_py()="<<grabber_->K.get_py()<<std::endl;
-			std::cout<<"grabber_->K.get_v0()="<<grabber_->K.get_v0()<<std::endl;
-
-			double r_min=(((vpColVector::dotProd(pp, pn_c)/min_distance)-((col-grabber_->K.get_u0())/grabber_->K.get_px()*pn_c[0])-pn_c[2])*grabber_->K.get_py()/pn_c[1])+grabber_->K.get_v0();
-			double r_max=(((vpColVector::dotProd(pp, pn_c)/max_distance)-((col-grabber_->K.get_u0())/grabber_->K.get_px()*pn_c[0])-pn_c[2])*grabber_->K.get_py()/pn_c[1])+grabber_->K.get_v0();
-			std::cout<<"r_min: "<<r_min<<"  rmax="<<r_max<<std::endl;
-			if(r_min<0)
-				r_min=0;
-			else if(r_min>=I.getRows())
-				r_min=I.getRows()-2;
-			std::cout<<"r_min="<<r_min<<std::endl;
-			if(r_max<0)
-				r_max=0;
-			else if(r_max>=I.getRows())
-				r_max=I.getRows()-2;
-			if(r_min<r_max){
-				limits_[col][0]=(int)r_min;
-				limits_[col][1]=(int)r_max+1;			}
-			else{
-				limits_[col][0]=(int)r_max;
-				limits_[col][1]=(int)r_min+1;
-			}
-			std::cout<<"limits: "<<limits_[col][0]<<"  "<<limits_[col][1]<<std::endl;
-		}*/
-	//}
-		//Values for simulation amphora
-/*
-		iLowH = 33;
-		iHighH = 91;
-
-		iLowS = 83;
-		iHighS = 255;
-
-		iLowV = 40;
-		iHighV = 255;*/
 
 		//Values for simulation blackbox
 
@@ -523,7 +411,8 @@ void SimulationLaserPeakDetector::perceive(){
 	vpImage<vpRGBa> Ic;
 	Ic=grabber_->image;
 
-	cv::namedWindow("Control", CV_WINDOW_NORMAL );
+
+	/*cv::namedWindow("Control", CV_WINDOW_NORMAL );
 	cvCreateTrackbar("LowH", "Control", &iLowH, 255); //Hue (0 - 179)
 	cvCreateTrackbar("HighH", "Control", &iHighH, 179);
 
@@ -532,12 +421,13 @@ void SimulationLaserPeakDetector::perceive(){
 
 	cvCreateTrackbar("LowV", "Control", &iLowV, 255); //Value (0 - 255)
 	cvCreateTrackbar("HighV", "Control", &iHighV, 255);
-	cv::waitKey(5);
+	cv::waitKey(5);*/
 	vpImageConvert::convert(Ic, first_img);
 	img=first_img(cv::Rect(0,limits_[0], Ic.getCols(), limits_[1]-limits_[0]));
 	cv::GaussianBlur(img, filtered, cv::Size(5,5), 10, 10, 4);
 	cv::cvtColor(filtered, filtered_aux, CV_RGBA2RGB);
 	cv::cvtColor(filtered_aux, hsv,CV_RGB2HSV);
+
 	cv::inRange(hsv, cv::Scalar(iLowH, iLowS, iLowV), cv::Scalar(iHighH, iHighS, iHighV), thresholding); //Threshold the image
 	cv::erode(thresholding, thresholding, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
 	cv::dilate(thresholding, thresholding, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
@@ -576,33 +466,6 @@ void SimulationLaserPeakDetector::perceive(){
 
 
 
-	/*for(int j=0; j<thresholding.cols; j++){
-		int up=-1, down=-1;
-		for(int i=limits_[0]; i<=limits_[1]; i++){
-			if(thresholding.at<unsigned char>(i,j)!=0){
-				if(up==-1)
-					up=i;
-				else
-					down=i;
-			}
-			else{
-				if(up!=-1){
-					vpColVector point(2);
-					point[0]=(up+down)/2;
-					point[1]=j;
-					points.push_back(point);
-					up=-1;
-					down=-1;
-				}
-			}
-		}
-		if(up!=-1){
-			vpColVector point(2);
-			point[0]=(up+limits_[1])/2;
-			point[1]=j;
-			points.push_back(point);
-		}
-	}*/
 }
 
 

@@ -53,6 +53,8 @@ public:
 		times_=0;
 
 	}
+
+
 	void perceive();
 
 	/** Sets the relationship between the camera frame and the arm base frame */

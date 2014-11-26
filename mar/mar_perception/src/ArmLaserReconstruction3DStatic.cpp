@@ -11,6 +11,8 @@
 #include <visp/vpColVector.h>
 #include <visp/vpPixelMeterConversion.h>
 
+
+
 void ArmLaserReconstruction3DStatic::perceive(){
 	vpColVector q;
 	arm_->getJointValues(q);

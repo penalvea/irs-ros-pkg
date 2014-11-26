@@ -27,10 +27,16 @@ int main(int argc, char **argv) {
 
 	bool offline=true;
 	bool fixed=true;
+	bool draw=false;
+	bool publish_point_cloud=false;
 	nh.getParam("offline", offline);
 	ROS_INFO("Offline: %d", offline);
 	nh.getParam("fixed", fixed);
 	ROS_INFO("Fixed: %d", fixed);
+	nh.getParam("draw", draw);
+	ROS_INFO("Drawing: %d", draw);
+	nh.getParam("publish_point_cloud", publish_point_cloud);
+	ROS_INFO("Publishing point cloud: %d", publish_point_cloud);
 
 
 	std::string joint_state_topic("uwsim/joint_state");
@@ -152,9 +158,15 @@ int main(int argc, char **argv) {
 	else{
 		Reconstruction3DAction action(robot, rec_vector);
 
-		action.enableDrawing();
+		if(draw){
+			action.enableDrawing();
+		}
+		else{
+			action.disableDrawing();
+		}
 		action.setOffline(offline);
 		action.setFixedBase(fixed);
+		action.setPointCloudPublished(publish_point_cloud);
 
 		action.setInitialPosture(vp_scan_initial_posture);
 		action.setFinalPosture(vp_scan_final_posture);
