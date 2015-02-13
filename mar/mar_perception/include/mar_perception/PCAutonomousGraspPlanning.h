@@ -52,6 +52,7 @@ class PCAutonomousGraspPlanning : public CPerception {
  public:
   
   vpHomogeneousMatrix cMg, cMo; ///< Grasp frame with respect to the camera after planning
+  double radious, height;
 
   //With integuers to use trackbars
   int iangle, irad, ialong, ialigned_grasp;
