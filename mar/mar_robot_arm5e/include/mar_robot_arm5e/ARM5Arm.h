@@ -123,6 +123,7 @@ public:
 
 	/** Compute the IK of the vehicle-arm for reaching a given frame wMe */
 	vpColVector vehicleArmIK(vpHomogeneousMatrix &wMe);
+        vpColVector vehicleArmIK(vpHomogeneousMatrix &wMe, vpColVector masJointLimits, vpColVector minJointLimits);
 
 	/** Compute the IK of the arm-hotStab for reaching a given frame wMe (=bMe) */
 	vpColVector armHotStabIK(vpHomogeneousMatrix &wMe);

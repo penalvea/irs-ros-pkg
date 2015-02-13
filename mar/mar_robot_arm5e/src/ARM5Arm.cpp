@@ -320,18 +320,16 @@ vpColVector ARM5Arm::armIK(vpHomogeneousMatrix &wMe,vpColVector maxJointLimits, 
 	KDL::JntArray qmin(chain.getNrOfJoints());
 	KDL::JntArray qmax(chain.getNrOfJoints());
 
-
-
 	//Joint limits
-		qmax(0)=maxJointLimits[0];
-		qmax(1)=maxJointLimits[1];
-		qmax(2)=maxJointLimits[2];
-		qmax(3)=maxJointLimits[3];
+	qmax(0)=maxJointLimits[0];
+	qmax(1)=maxJointLimits[1];
+	qmax(2)=maxJointLimits[2];
+	qmax(3)=maxJointLimits[3];
 
-		qmin(0)=minJointLimits[0];
-		qmin(1)=minJointLimits[1];
-		qmin(2)=minJointLimits[2];
-		qmin(3)=minJointLimits[3];
+	qmin(0)=minJointLimits[0];
+	qmin(1)=minJointLimits[1];
+	qmin(2)=minJointLimits[2];
+	qmin(3)=minJointLimits[3];
 
 	//Set destination frame
 	vpTranslationVector wTe;
@@ -378,30 +376,52 @@ vpColVector ARM5Arm::armIK(vpHomogeneousMatrix &wMe,vpColVector maxJointLimits, 
 }
 
 /** Compute the IK of the vehicle-arm for reaching a given frame wMe */
-vpColVector ARM5Arm::vehicleArmIK(vpHomogeneousMatrix &wMe) {
+vpColVector ARM5Arm::vehicleArmIK(vpHomogeneousMatrix &wMe){
+        vpColVector maxJointLimits(8), minJointLimits(8);
+        maxJointLimits[0]=100;
+        maxJointLimits[1]=100;
+        maxJointLimits[2]=100;
+        maxJointLimits[3]=360*M_PI/180;
+        maxJointLimits[4]=30*M_PI/180;
+        maxJointLimits[5]=90*M_PI/180;
+        maxJointLimits[6]=145*M_PI/180;
+        maxJointLimits[7]=360*M_PI/180;
+
+        minJointLimits[0]=-100;
+        minJointLimits[1]=-100;
+        minJointLimits[2]=-100;
+        minJointLimits[3]=-360*M_PI/180;
+        maxJointLimits[4]=30*M_PI/180;
+        maxJointLimits[5]=90*M_PI/180;
+        maxJointLimits[6]=145*M_PI/180;
+        maxJointLimits[7]=360*M_PI/180;
+        return vehicleArmIK(wMe, maxJointLimits, minJointLimits);
+}
+vpColVector ARM5Arm::vehicleArmIK(vpHomogeneousMatrix &wMe,vpColVector maxJointLimits, vpColVector minJointLimits) {
 	KDL::JntArray q(auvarm_chain.getNrOfJoints());
 	KDL::JntArray q_init(auvarm_chain.getNrOfJoints());
 	KDL::JntArray qmin(auvarm_chain.getNrOfJoints());
 	KDL::JntArray qmax(auvarm_chain.getNrOfJoints());
 
 	//Joint limits
-	qmax(0)=100000;
-	qmax(1)=100000;
-	qmax(2)=100000;
-	qmax(3)=360*M_PI/180;
-	qmax(4)=30*M_PI/180;
-	qmax(5)=90*M_PI/180;
-	qmax(6)=145*M_PI/180;
-	qmax(7)=360*M_PI/180;
+	qmax(0)=maxJointLimits[0];
+        qmax(1)=maxJointLimits[1];
+        qmax(2)=maxJointLimits[2];
+        qmax(3)=maxJointLimits[3];
+        qmax(4)=maxJointLimits[4];
+        qmax(5)=maxJointLimits[5];
+        qmax(6)=maxJointLimits[6];
+        qmax(7)=maxJointLimits[7];
 
-	qmin(0)=-100000;
-	qmin(1)=-100000;
-	qmin(2)=-100000;
-	qmin(3)=-360*M_PI/180;
-	qmin(4)=-90*M_PI/180;
-	qmin(5)=0*M_PI/180;
-	qmin(6)=0*M_PI/180;
-	qmin(7)=-360*M_PI/180;
+        qmin(0)=minJointLimits[0];
+        qmin(1)=minJointLimits[1];
+        qmin(2)=minJointLimits[2];
+        qmin(3)=minJointLimits[3];
+        qmin(4)=minJointLimits[4];
+        qmin(5)=minJointLimits[5];
+        qmin(6)=minJointLimits[6];
+        qmin(7)=minJointLimits[7];
+        qmin(0)=minJointLimits[0];
 
 	//Set destination frame
 	vpTranslationVector wTe;
@@ -414,20 +434,20 @@ vpColVector ARM5Arm::vehicleArmIK(vpHomogeneousMatrix &wMe) {
 	for (int i=0; i<3; i++) tvec.data[i]=wTe.data[i];
 	KDL::Frame F_dest(rot,tvec);
 
-	std::cout << "F_dest: " << std::endl;
+	/*std::cout << "F_dest: " << std::endl;
 	for (int i=0; i<4; i++) {
 		for (int j=0; j<4; j++) {
 			std::cout << F_dest(i,j) << " ";
 		}
 		std::cout << std::endl;
-	} 
-
+	}*/
 
 	//Kinematic solvers
 	KDL::ChainFkSolverPos_recursive fksolver(auvarm_chain);//Forward position solver
 	KDL::ChainIkSolverVel_pinv_red iksolverv(auvarm_chain);//Custom Inverse velocity solver (grasp redundancy)
 	iksolverv.setBaseJacobian(true);
-	KDL::ChainIkSolverPos_NR iksolver(auvarm_chain, fksolver,iksolverv,100,1e-6);//Maximum 100 iterations, stop at accuracy 1e-6
+	//KDL::ChainIkSolverPos_NR iksolver(auvarm_chain, fksolver,iksolverv,100,1e-6);//Maximum 100 iterations, stop at accuracy 1e-6
+	KDL::ChainIkSolverPos_NR_JL iksolver(auvarm_chain, qmin, qmax, fksolver,iksolverv,100,1e-6);//Maximum 100 iterations, stop at accuracy 1e-6
 
 	//Initial guess
 	q_init(0)=0;
