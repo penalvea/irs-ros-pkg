@@ -55,6 +55,19 @@ void ARM5Arm::initKinematicSolvers() {
 
 	is_initialized=false;
 
+
+	KDL::JntArray opt_pos(4);
+	opt_pos(0)=0.0;
+	opt_pos(1)=0.7;
+	opt_pos(2)=0.7;
+	opt_pos(3)=0.0;
+
+	KDL::JntArray weight(4);
+	weight(0)=0;
+	weight(1)=0;
+	weight(2)=0;
+	weight(3)=0;
+
 	ivk_solver=new KDL::ChainIkSolverVel_pinv_red(chain);
 
 	auvarm_chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::TransX)));
@@ -287,22 +300,38 @@ int ARM5Arm::setCartesianVelocity(vpColVector xdot) {
 }
 
 /** Compute the IK of the arm for reaching a given frame wMe (=bMe)*/
-vpColVector ARM5Arm::armIK(vpHomogeneousMatrix &wMe) {
+vpColVector ARM5Arm::armIK(vpHomogeneousMatrix &wMe){
+	vpColVector maxJointLimits(4), minJointLimits(4);
+	maxJointLimits[0]=30*M_PI/180;
+	maxJointLimits[1]=90*M_PI/180;
+	maxJointLimits[2]=145*M_PI/180;
+	maxJointLimits[3]=360*M_PI/180;
+
+	minJointLimits[0]=-90*M_PI/180;
+	minJointLimits[1]=0*M_PI/180;
+	minJointLimits[2]=0*M_PI/180;
+	minJointLimits[3]=-360*M_PI/180;
+	return armIK(wMe, maxJointLimits, minJointLimits);
+
+}
+vpColVector ARM5Arm::armIK(vpHomogeneousMatrix &wMe,vpColVector maxJointLimits, vpColVector minJointLimits) {
 	KDL::JntArray q(chain.getNrOfJoints());
 	KDL::JntArray q_init(chain.getNrOfJoints());
 	KDL::JntArray qmin(chain.getNrOfJoints());
 	KDL::JntArray qmax(chain.getNrOfJoints());
 
-	//Joint limits
-	qmax(0)=30*M_PI/180;
-	qmax(1)=90*M_PI/180;
-	qmax(2)=145*M_PI/180;
-	qmax(3)=360*M_PI/180;
 
-	qmin(0)=-90*M_PI/180;
-	qmin(1)=0*M_PI/180;
-	qmin(2)=0*M_PI/180;
-	qmin(3)=-360*M_PI/180;
+
+	//Joint limits
+		qmax(0)=maxJointLimits[0];
+		qmax(1)=maxJointLimits[1];
+		qmax(2)=maxJointLimits[2];
+		qmax(3)=maxJointLimits[3];
+
+		qmin(0)=minJointLimits[0];
+		qmin(1)=minJointLimits[1];
+		qmin(2)=minJointLimits[2];
+		qmin(3)=minJointLimits[3];
 
 	//Set destination frame
 	vpTranslationVector wTe;
@@ -329,8 +358,8 @@ vpColVector ARM5Arm::armIK(vpHomogeneousMatrix &wMe) {
 	KDL::ChainFkSolverPos_recursive fksolver(chain);//Forward position solver
 	KDL::ChainIkSolverVel_pinv_red iksolverv(chain);//Custom Inverse velocity solver (grasp redundancy)
 	iksolverv.setBaseJacobian(true);
-	KDL::ChainIkSolverPos_NR iksolver(chain,fksolver,iksolverv,100,1e-6);//Maximum 100 iterations, stop at accuracy 1e-6
-	//KDL::ChainIkSolverPos_NR_JL iksolver(chain, qmin, qmax, fksolver,iksolverv,100,1e-6);//Maximum 100 iterations, stop at accuracy 1e-6
+	//KDL::ChainIkSolverPos_NR iksolver(chain,fksolver,iksolverv,100,1e-6);//Maximum 100 iterations, stop at accuracy 1e-6
+	KDL::ChainIkSolverPos_NR_JL iksolver(chain, qmin, qmax, fksolver,iksolverv,100,1e-6);//Maximum 100 iterations, stop at accuracy 1e-6
 
 	//Initial guess
 	q_init(0)=0;

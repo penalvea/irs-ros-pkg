@@ -49,6 +49,7 @@ class ARM5Arm : public Arm
 
 	KDL::ChainFkSolverPos_recursive *fksolver;
 	KDL::ChainIkSolverVel_pinv_red  *ivk_solver;	 //KDL inverse velocity solver of the ARM
+	//KDL::ChainIkSolverVel_wdls  *ivk_solver;	 //KDL inverse velocity solver of the ARM
 	KDL::ChainIkSolverVel_pinv_red  *auvarm_ivk_solver; //KDL inverse velocity solver of the Vehicle-Arm
 	KDL::ChainIkSolverVel_pinv_red  *armhotstab_ivk_solver; //KDL inverse velocity solver of the Arm-hotStab
 
@@ -117,6 +118,8 @@ public:
 
 	/** Compute the IK of the arm for reaching a given frame wMe (=bMe) */
 	vpColVector armIK(vpHomogeneousMatrix &wMe);
+	vpColVector armIK(vpHomogeneousMatrix &wMe, vpColVector masJointLimits, vpColVector minJointLimits);
+
 
 	/** Compute the IK of the vehicle-arm for reaching a given frame wMe */
 	vpColVector vehicleArmIK(vpHomogeneousMatrix &wMe);
