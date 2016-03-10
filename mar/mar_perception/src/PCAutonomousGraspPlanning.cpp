@@ -48,7 +48,7 @@ void PCAutonomousGraspPlanning::perceive() {
   pcl::PointCloud<PointT>::Ptr cloud_cylinder (new pcl::PointCloud<PointT> ());
   pcl::PointCloud<PointT>::Ptr cloud_plane (new pcl::PointCloud<PointT> ());
 
-  PCLUtils::passThrough(cloud_, cloud_filtered, 10, 10);
+  PCLUtils::passThrough(cloud_, cloud_filtered, -10, 10);
   std::cerr << "PointCloud after filtering has: " << cloud_filtered->points.size () << " data points." << std::endl;
 
   // @todo : Add more filters -> downsampling and radial ooutlier removal.

@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   mar_msgs
   mar_ros_bridge
   esm_tracking
+  visp_bridge
 )
 find_package(VISP REQUIRED)
 find_package(PCL REQUIRED)
@@ -32,6 +33,7 @@ catkin_package(
     mar_robot_arm5e
     mar_ros_bridge
     esm_tracking
+    visp_bridge
   DEPENDS
     orocos_kdl
     VISP
@@ -65,7 +67,7 @@ src/PCAutonomousGraspPlanning.cpp
 src/MotionEstimator.cpp
 src/PlanarDetector.cpp
 )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${VISP_LIBRARIES})
 
 
 install(
