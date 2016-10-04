@@ -113,6 +113,7 @@ int ChainIkSolverVel_pinv_red::CartToJnt(const JntArray& q_in, const Twist& v_in
 
 
 	vpColVector vh(6), qdot(jac.columns());
+	;
 	for (unsigned int i=0; i<6; i++) {
 		vh[i]=v_in[i];
 	}
@@ -121,6 +122,8 @@ int ChainIkSolverVel_pinv_red::CartToJnt(const JntArray& q_in, const Twist& v_in
 	vpMatrix I(jac.columns(),jac.columns());
 	I.setIdentity();
 	qdot=Jriv*vh+(I-Jriv*Jr)*sv; /* *(0.8*Jiv*vg+0.5*sv);*/
+
+
 
 	for (unsigned int i=0; i<jac.columns(); i++) {
 		qdot_out(i)=qdot[i];

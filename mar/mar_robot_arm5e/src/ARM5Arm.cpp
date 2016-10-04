@@ -14,11 +14,15 @@
 #include <ros/ros.h>
 #include <arm5_controller/setZero.h>
 
+#include <std_msgs/Float32MultiArray.h>
+
 void ARM5Arm::initKinematicSolvers() {
 	chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( 0.08052,  M_PI_2,  0.0    , 0.0     )));
+	//chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( 0.44278, 0.0 ,  0.0    , 5.0*M_PI/180     )));//7.98
 	chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( 0.44278, 0.0 ,  0.0    , 7.98*M_PI/180     )));//7.98
-	chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( -0.083 ,  M_PI_2,  0.0    , 113*M_PI/180     )));//127.02
-	chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( 0.0, 0,  0.49938    , 0.0     )));
+	//chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( -0.083 ,  M_PI_2,  0.0    , 127.02*M_PI/180     )));//127.02
+	chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( -0.083 ,  M_PI_2,  0.0    , 113.0*M_PI/180     )));//127.02
+	chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( 0.0, 0,  0.49938+0.45    , 0.0     )));
 
 	/*chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( 0.0911,  M_PI_2,  0.0    , 0.0     )));
 	chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( 0.4650, 0.0 ,  0.0    , 0.1119     )));
@@ -109,12 +113,14 @@ ARM5Arm::ARM5Arm(ros::NodeHandle &nh, std::string state_topic, std::string contr
 
 	velocity_pub=nh.advertise<sensor_msgs::JointState>(control_topic,1);
 
+
 }
 
 void ARM5Arm::readJointsCallback(const sensor_msgs::JointState::ConstPtr& state) {
 	for (int i=0; i<5; i++) q[i]=state->position[i];
 	current=state->effort[0];
 	is_initialized=true;
+	vpHomogeneousMatrix bMe=directKinematics(q);
 }
 
 
@@ -187,6 +193,7 @@ int ARM5Arm::setJointValues(vpColVector &q, bool blocking, double tol) {
 		js.header.stamp=ros::Time::now();
 		velocity_pub.publish(js);
 		if (blocking) ros::spinOnce();
+               // std::cout<<(this->q-q).euclideanNorm()<<std::endl;
 	} while(blocking && ros::ok() && (this->q-q).euclideanNorm()>tol);
 	return ros::ok();
 }
@@ -582,9 +589,11 @@ vpHomogeneousMatrix ARM5Arm::directKinematics(vpColVector q) {
 
 	KDL::Frame cartpos;
 	fksolver->JntToCart(jq,cartpos);
-	for (int i=0; i<4; i++)
-		for (int j=0;j<4;j++)
+	for (int i=0; i<4; i++){
+		for (int j=0;j<4;j++){
 			wMe[i][j]=cartpos(i,j);
+		}
+	}
 
 	return wMe;
 }
@@ -601,51 +610,52 @@ ARM5Arm::~ARM5Arm()
 
 InitCSIP::InitCSIP(ros::NodeHandle &nh, bool q1, bool q2, bool q3, bool q4, bool q5)
 {
-	//Default values. Do not initialize any axis
-	initAxis[0]=q1;
-	initAxis[1]=q2;
-	initAxis[2]=q3;
-	initAxis[3]=q4;
-	initAxis[4]=q5;
-	for (int i=0; i<5; i++) {
-		initAxisDone[i]=false;
-		AxisDir[i]=1;
-		initAxisThreshold[i]=0.6;
-		limitPosition[i]=0;
-	}
-	initAuto=true;
+  current=0.0;
+  //Default values. Do not initialize any axis
+  initAxis[0]=q1;
+  initAxis[1]=q2;
+  initAxis[2]=q3;
+  initAxis[3]=q4;
+  initAxis[4]=q5;
+  for (int i=0; i<5; i++) {
+    initAxisDone[i]=false;
+    AxisDir[i]=1;
+    initAxisThreshold[i]=0.6;
+    limitPosition[i]=0;
+  }
+  initAuto=true;
 
-	//Read from the parameter server
-	nh.param("initSlewThreshold", initAxisThreshold[0], initAxisThreshold[0]);
-	nh.param("initShoulderThreshold", initAxisThreshold[1], initAxisThreshold[1]);
-	nh.param("initElbowThreshold", initAxisThreshold[2], initAxisThreshold[2]);
-	nh.param("initWristThreshold", initAxisThreshold[3], initAxisThreshold[3]);
-	nh.param("initJawThreshold", initAxisThreshold[4], initAxisThreshold[4]);
+  //Read from the parameter server
+  nh.param("initSlewThreshold", initAxisThreshold[0], initAxisThreshold[0]);
+  nh.param("initShoulderThreshold", initAxisThreshold[1], initAxisThreshold[1]);
+  nh.param("initElbowThreshold", initAxisThreshold[2], initAxisThreshold[2]);
+  nh.param("initWristThreshold", initAxisThreshold[3], initAxisThreshold[3]);
+  nh.param("initJawThreshold", initAxisThreshold[4], initAxisThreshold[4]);
 
-	for (int i=0; i<5; i++) {
-		ROS_INFO_STREAM("Axis " << i << " threshold: " << initAxisThreshold[i]);
-	}
+  for (int i=0; i<5; i++) {
+    ROS_INFO_STREAM("Axis " << i << " threshold: " << initAxisThreshold[i]);
+  }
 
-	scale_=2000;
-	nh.param("scale", scale_, scale_);
-	nh.param("SlewDir", AxisDir[0], AxisDir[0]);
-	nh.param("ShoulderDir", AxisDir[1], AxisDir[1]);
-	nh.param("ElbowDir", AxisDir[2], AxisDir[2]);
-	nh.param("WristDir", AxisDir[3], AxisDir[3]);
-	nh.param("JawDir", AxisDir[4], AxisDir[4]);
+  scale_=2000;
+  nh.param("scale", scale_, scale_);
+  nh.param("SlewDir", AxisDir[0], AxisDir[0]);
+  nh.param("ShoulderDir", AxisDir[1], AxisDir[1]);
+  nh.param("ElbowDir", AxisDir[2], AxisDir[2]);
+  nh.param("WristDir", AxisDir[3], AxisDir[3]);
+  nh.param("JawDir", AxisDir[4], AxisDir[4]);
 
 
-	activeAxis=0;
-	//while (activeAxis<5 && !initAxis[activeAxis]) activeAxis++;
-	//if (activeAxis<5)
-	ROS_INFO_STREAM("Initializing joint " << activeAxis << ". Move the joint to the limit...");
+  activeAxis=0;
+  //while (activeAxis<5 && !initAxis[activeAxis]) activeAxis++;
+  //if (activeAxis<5)
+  ROS_INFO_STREAM("Initializing joint " << activeAxis << ". Move the joint to the limit...");
 
-	//publish joint velocity
-	vel_pub_ = nh.advertise<sensor_msgs::JointState>("/arm5e/command_ticks",1);
-	//subscribe to obtain joint feedback
-	js_sub_ = nh.subscribe<sensor_msgs::JointState>("/arm5e/joint_state_rticks", 1, &InitCSIP::stateCallback, this);
-	//service
-	setZeroClient = nh.serviceClient<arm5_controller::setZero>("setZero");
+  //publish joint velocity
+  vel_pub_ = nh.advertise<sensor_msgs::JointState>("/arm5e/command_ticks",1);
+  //subscribe to obtain joint feedback
+  js_sub_ = nh.subscribe<sensor_msgs::JointState>("/arm5e/joint_state_rticks", 1, &InitCSIP::stateCallback, this);
+  //service
+  setZeroClient = nh.serviceClient<arm5_controller::setZero>("setZero");
 }
 
 void InitCSIP::stateCallback(const sensor_msgs::JointState::ConstPtr& state)
