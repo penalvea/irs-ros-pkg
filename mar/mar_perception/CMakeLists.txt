@@ -18,6 +18,8 @@ find_package(PCL REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(orocos_kdl REQUIRED)
 
+set (CMAKE_CXX_FLAGS "-fPIC")
+
 
 
 catkin_package(

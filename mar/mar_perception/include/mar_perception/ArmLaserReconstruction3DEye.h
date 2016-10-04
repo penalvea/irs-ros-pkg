@@ -5,8 +5,6 @@
  *      Author: toni
  */
 
-
-
 #ifndef ARMLASERRECONSTRUCTION3DEYE_H_
 #define ARMLASERRECONSTRUCTION3DEYE_H_
 
@@ -24,45 +22,61 @@
 
 #include <boost/shared_ptr.hpp>
 
-class ArmLaserReconstruction3DEye: public Reconstruction3D {
+class ArmLaserReconstruction3DEye : public Reconstruction3D
+{
 
-	boost::shared_ptr<LaserPeakDetector> laser_detector_;
-	//boost::shared_ptr<Arm> arm_;
-	ARM5ArmPtr arm_;
-	boost::shared_ptr<ESMTracking> esm_;
-	boost::shared_ptr<MotionEstimator> mest_;
+  boost::shared_ptr<LaserPeakDetector> laser_detector_;
+  //boost::shared_ptr<Arm> arm_;
+  ARM5ArmPtr arm_;
+  boost::shared_ptr<ESMTracking> esm_;
+  boost::shared_ptr<MotionEstimator> mest_;
 
-	vpHomogeneousMatrix eMc;	    ///< camera frame wrt end-effector frame
-	vpHomogeneousMatrix eMl;		///< Laser frame wrt end-effector frame
-	vpHomogeneousMatrix cMl;		///< Laser frame wrt camerar frame
-	ros::Duration duration_;
-	int times_;
+  vpHomogeneousMatrix eMc;	    ///< camera frame wrt end-effector frame
+  vpHomogeneousMatrix eMl;		///< Laser frame wrt end-effector frame
+  vpHomogeneousMatrix cMl;		///< Laser frame wrt camerar frame
+  ros::Duration duration_;
+  int times_;
 
 public:
-	ArmLaserReconstruction3DEye(LaserPeakDetectorPtr laser_detector, ARM5ArmPtr arm): Reconstruction3D() {
-		laser_detector_=laser_detector;
-		arm_=arm;
-		times_=0;
-		//duration_=0;
+  ArmLaserReconstruction3DEye(LaserPeakDetectorPtr laser_detector, ARM5ArmPtr arm) :
+      Reconstruction3D()
+  {
+    laser_detector_ = laser_detector;
+    arm_ = arm;
+    times_ = 0;
+    //duration_=0;
 
-	}
+  }
 
+  void perceive();
 
-	void perceive();
+  /** Sets the relationship between the laser frame and the end-effector frame */
+  void setLaserToEef(vpHomogeneousMatrix eMl)
+  {
+    this->eMl = eMl;
+  }
 
+  /** Sets the relationship between the camera frame and the end-effector frame */
+  void setCameraToEef(vpHomogeneousMatrix eMc)
+  {
+    this->eMc = eMc;
+  }
 
-	/** Sets the relationship between the laser frame and the end-effector frame */
-	void setLaserToEef(vpHomogeneousMatrix eMl) {
-		this->eMl=eMl;
-	}
-
-	/** Sets the relationship between the camera frame and the end-effector frame */
-	void setCameraToEef(vpHomogeneousMatrix eMc){
-		this->eMc=eMc;
-	}
-
-	LaserPeakDetectorPtr getPeakDetector() {return laser_detector_;}
-	virtual ~ArmLaserReconstruction3DEye() {}
+  LaserPeakDetectorPtr getPeakDetector()
+  {
+    return laser_detector_;
+  }
+  virtual ~ArmLaserReconstruction3DEye()
+  {
+  }
+  int getIterations()
+  {
+    return times_;
+  }
+  ros::Duration getDuration()
+  {
+    return duration_;
+  }
 };
 
 typedef boost::shared_ptr<ArmLaserReconstruction3DEye> ArmLaserReconstruction3DEyePtr;

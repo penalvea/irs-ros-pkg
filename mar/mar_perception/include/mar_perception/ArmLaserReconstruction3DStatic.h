@@ -69,6 +69,8 @@ public:
 	}
 
 	LaserPeakDetectorPtr getPeakDetector() {return laser_detector_;}
+	int getIterations(){return times_;}
+	ros::Duration getDuration(){return duration_;}
 
 	virtual ~ArmLaserReconstruction3DStatic(){}
 };

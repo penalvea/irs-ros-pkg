@@ -30,6 +30,7 @@ protected:
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_;	///< The point cloud in PCL format
 
 	void buildPCLCloudFromPoints();
+	pcl::PointCloud<pcl::PointXYZ>::Ptr buildPCLCloudFromPointsBetweenIndexes(int index_min, int index_max);
 public:
 	Reconstruction3D(): CPerception() {
 		cloud_.reset();
@@ -37,14 +38,24 @@ public:
 	}
 
 	pcl::PointCloud<pcl::PointXYZ>::Ptr getCloud() {
-		if (!cloud_) buildPCLCloudFromPoints();
+		if (!cloud_)
+			buildPCLCloudFromPoints();
 		return cloud_;}
+	pcl::PointCloud<pcl::PointXYZ>::Ptr getLimitedCloud(int index_min, int index_max) {
+		pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
+		cloud=buildPCLCloudFromPointsBetweenIndexes(index_min, index_max);
+		return cloud;
+
+	}
 
 	/** Sense and accumulate 3D points into the cloud */
 	void perceive()=0;
 	virtual LaserPeakDetectorPtr getPeakDetector()=0;
+	virtual int getIterations()=0;
+	virtual ros::Duration getDuration()=0;
 
-	void reset() {points3d.clear();}
+	void reset() {points3d.clear();
+	cloud_.reset();}
 
 	void savePCD(std::string filename);
 
