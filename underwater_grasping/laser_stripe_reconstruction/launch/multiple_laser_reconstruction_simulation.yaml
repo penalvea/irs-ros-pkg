@@ -10,8 +10,8 @@ joint_state_topic: "/arm5e/joint_state_angle"
 joint_state_command_topic: "/arm5e/command_angle"
 
 #Joint values for initial and final scanning configurations
-scan_initial_posture: [0.0, 0.6, 0.7, 0.0, 0.3]
-scan_final_posture: [ 0.0, 0.6, 1.5, 0.0, 0.1]
+scan_initial_posture: [0.0, 0.12, 0.9, 0.0, 0.1]
+scan_final_posture: [ 0.0, 0.12, 1.8, 0.0, 0.1]
 
 #Names of cameras
 #cameras: ["stereo_down/left", "eye", "stereo_down/right", "stereo_real/left"]
@@ -54,11 +54,11 @@ stereo_down/right/base_name: "/home/toni/3DReconstructions/stereo_right_thread"
 
 
 #stereo_real/left
-stereo_real/left/image: "/stereo/left/image_raw"
+stereo_real/left/image: "/stereo/left/image_rect"
 stereo_real/left/camera_info: "/stereo/left/camera_info"
 stereo_real/left/reconstruction_type: "static"
-stereo_real/left/bMc: [-0.32347, 0.045,  0.07675, 0.0, 0.0, -1.57]
-stereo_real/left/eMl: [-0.02, 0.0, 0.12, 0.0, 0.0, 0.0]
+stereo_real/left/bMc: [-0.31347, 0.045, 0.07675, 0.0, 0.0, -1.57]
+stereo_real/left/eMl: [-0.092, 0.0, 0.0, 0.0, 0.0, 0.0]
 stereo_real/left/peak_detector_type: "last_image"
 stereo_real/left/min_radius_WS: 0.0
 stereo_real/left/max_radius_WS: 0.0
