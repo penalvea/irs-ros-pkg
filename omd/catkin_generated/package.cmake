@@ -1,0 +1,7 @@
+set(_CATKIN_CURRENT_PACKAGE "omd")
+set(omd_MAINTAINER "toni <toni@todo.todo>")
+set(omd_DEPRECATED "")
+set(omd_VERSION "0.0.0")
+set(omd_BUILD_DEPENDS )
+set(omd_RUN_DEPENDS )
+set(omd_BUILDTOOL_DEPENDS "catkin")
