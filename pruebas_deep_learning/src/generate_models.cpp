@@ -113,7 +113,7 @@ int main(){
 
 	/** cone **/
 
-		for(int r=4; r<=20; r+=6){
+		/*for(int r=4; r<=20; r+=6){
 			for(int h=4; h<=40; h+=6){
 				std::vector< std::vector< std::vector< int > > > cone;
 				for(int l=0; l<50; l++){
@@ -157,7 +157,49 @@ int main(){
 				name=name+ss2.str()+".pcd";
 				pcl::io::savePCDFileASCII(name, cloud);
 			}
+		}*/
+
+
+	/** cube **/
+
+	for(int r=4; r<=20; r+=6){
+		std::vector< std::vector< std::vector< int > > > cube;
+		for(int l=0; l<50; l++){
+			std::vector<std::vector<int> > vec_vec;
+			for(int m=0; m<50; m++){
+				std::vector<int> vec;
+				for(int n=0; n<50; n++){
+					vec.push_back(0);
+				}
+				vec_vec.push_back(vec);
+			}
+			cube.push_back(vec_vec);
 		}
+		pcl::PointCloud<pcl::PointXYZ> cloud;
+		int cont=1;
+		cloud.width=1;
+			for(int i=0; i<50; i++){
+				for(int j=0; j<50; j++){
+					for(int k=0; k<50; k++){
+					if(std::sqrt(((i-25)*(i-25))+((j-25)*(j-25))+((k-25)*(k-25)))<=r){
+						cube[i][j][k]=1;
+						cloud.height=cont;
+						cloud.points.resize(cont);
+						cloud.points[cont-1].x=i;
+						cloud.points[cont-1].y=j;
+						cloud.points[cont-1].z=k;
+						cont++;
+					}
+
+				}
+			}
+		}
+		std::string name="/home/toni/Escritorio/cube_";
+		std::ostringstream ss1;
+		ss1<<r;
+		name=name+ss1.str()+".pcd";
+		pcl::io::savePCDFileASCII(name, cloud);
+	}
 	return 0;
 }
 
