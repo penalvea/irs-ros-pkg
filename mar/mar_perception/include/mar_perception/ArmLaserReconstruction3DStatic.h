@@ -14,9 +14,7 @@
 #include <mar_core/CPerception.h>
 #include <mar_core/Arm.h>
 #include <mar_perception/LaserPeakDetector.h>
-#include <mar_perception/ESMTracking.h>
 #include <mar_perception/VirtualImage.h>
-#include <mar_perception/MotionEstimator.h>
 #include <mar_perception/Reconstruction3D.h>
 
 #include <boost/shared_ptr.hpp>
@@ -30,8 +28,6 @@ class ArmLaserReconstruction3DStatic: public Reconstruction3D {
 	boost::shared_ptr<LaserPeakDetector> laser_detector_;
 	//boost::shared_ptr<Arm> arm_;
 	ARM5ArmPtr arm_;
-	boost::shared_ptr<ESMTracking> esm_;
-	boost::shared_ptr<MotionEstimator> mest_;
 
 	vpHomogeneousMatrix bMc, cMb;	///< Camera wrt arm base and vice versa
 	vpHomogeneousMatrix eMl;                ///< Laser frame wrt end-effector frame
@@ -41,12 +37,12 @@ class ArmLaserReconstruction3DStatic: public Reconstruction3D {
 
 
 public:
-	ArmLaserReconstruction3DStatic(LaserPeakDetectorPtr laser_detector, ARM5ArmPtr arm, ESMTrackingPtr esm, MotionEstimatorPtr mest): Reconstruction3D() {
+/*	ArmLaserReconstruction3DStatic(LaserPeakDetectorPtr laser_detector, ARM5ArmPtr arm, ESMTrackingPtr esm, MotionEstimatorPtr mest): Reconstruction3D() {
 		laser_detector_=laser_detector;
 		arm_=arm;
 		esm_=esm;
 		mest_=mest;
-	}
+	}*/
 	ArmLaserReconstruction3DStatic(LaserPeakDetectorPtr laser_detector, ARM5ArmPtr arm): Reconstruction3D() {
 		laser_detector_=laser_detector;
 		arm_=arm;

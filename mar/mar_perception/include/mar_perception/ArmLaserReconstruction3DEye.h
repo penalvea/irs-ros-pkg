@@ -14,9 +14,7 @@
 #include <mar_core/CPerception.h>
 #include <mar_core/Arm.h>
 #include <mar_perception/LaserPeakDetector.h>
-#include <mar_perception/ESMTracking.h>
 #include <mar_perception/VirtualImage.h>
-#include <mar_perception/MotionEstimator.h>
 #include <mar_perception/Reconstruction3D.h>
 #include <mar_robot_arm5e/ARM5Arm.h>
 
@@ -28,8 +26,6 @@ class ArmLaserReconstruction3DEye : public Reconstruction3D
   boost::shared_ptr<LaserPeakDetector> laser_detector_;
   //boost::shared_ptr<Arm> arm_;
   ARM5ArmPtr arm_;
-  boost::shared_ptr<ESMTracking> esm_;
-  boost::shared_ptr<MotionEstimator> mest_;
 
   vpHomogeneousMatrix eMc;	    ///< camera frame wrt end-effector frame
   vpHomogeneousMatrix eMl;		///< Laser frame wrt end-effector frame

@@ -14,9 +14,8 @@
 #include <mar_core/CPerception.h>
 #include <mar_core/Arm.h>
 #include <mar_perception/LaserPeakDetector.h>
-#include <mar_perception/ESMTracking.h>
 #include <mar_perception/VirtualImage.h>
-#include <mar_perception/MotionEstimator.h>
+
 
 #include <boost/shared_ptr.hpp>
 

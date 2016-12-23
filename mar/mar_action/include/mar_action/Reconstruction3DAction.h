@@ -7,9 +7,7 @@
 
 #include <mar_perception/VirtualImage.h>
 #include <mar_core/Arm.h>
-#include <mar_perception/ESMTracking.h>
 #include <mar_perception/Reconstruction3D.h>
-#include <mar_perception/MotionEstimator.h>
 
 #include <visp/vpDisplay.h>
 #include <visp/vpColVector.h>
@@ -35,10 +33,8 @@ class Reconstruction3DAction : public CAction
 
   //Pointers to perception classes
   ArmPtr robot_;
-  ESMTrackingPtr tracker_;
   std::vector<Reconstruction3DPtr> rec_;
   //ArmLaserReconstruction3DEyePtr rec_eye_;
-  MotionEstimatorPtr mest_;
 
   vpColVector vp_scan_initial_posture_;
   vpColVector vp_scan_final_posture_;
@@ -56,13 +52,13 @@ class Reconstruction3DAction : public CAction
   ros::Subscriber benchmark_sub_;
 
 public:
-  Reconstruction3DAction(ArmPtr robot, ESMTrackingPtr tracker, MotionEstimatorPtr mest) :
+ /* Reconstruction3DAction(ArmPtr robot, ESMTrackingPtr tracker, MotionEstimatorPtr mest) :
       CAction(), robot_(robot), tracker_(tracker), mest_(mest), max_joint_velocity_(DEFAULT_MAX_JOINT_VELOCITY), position_tolerance_(
           DEFAULT_POSITION_TOLERANCE), fixed_base_(false), offline_(false), done_(false), publish_point_cloud_(false)
   {
     point_cloud_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("LaserReconstructionPointCloud", 1000);
     //benchmark_sub_=nh_.subscribe("/BenchmarkInfo", 100, Reconstruction3DAction::benchmarkCallback);
-  }
+  }*/
 
   Reconstruction3DAction() :
       CAction(), max_joint_velocity_(DEFAULT_MAX_JOINT_VELOCITY), position_tolerance_(DEFAULT_POSITION_TOLERANCE), fixed_base_(
@@ -72,13 +68,13 @@ public:
     //benchmark_sub_=nh_.subscribe("/BenchmarkInfo", 100, Reconstruction3DAction::benchmarkCallback);
   }
 
-  Reconstruction3DAction(ESMTrackingPtr tracker, MotionEstimatorPtr mest) :
+ /* Reconstruction3DAction(ESMTrackingPtr tracker, MotionEstimatorPtr mest) :
       CAction(), tracker_(tracker), mest_(mest), max_joint_velocity_(DEFAULT_MAX_JOINT_VELOCITY), position_tolerance_(
           DEFAULT_POSITION_TOLERANCE), fixed_base_(false), offline_(true), done_(false), publish_point_cloud_(false)
   {
     point_cloud_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("LaserReconstructionPointCloud", 1000);
     //benchmark_sub_=nh_.subscribe("/BenchmarkInfo", 100, Reconstruction3DAction::benchmarkCallback);
-  }
+  }*/
 
   Reconstruction3DAction(ArmPtr robot, std::vector<Reconstruction3DPtr> rec) :
       CAction(), robot_(robot), rec_(rec), max_joint_velocity_(DEFAULT_MAX_JOINT_VELOCITY), position_tolerance_(

@@ -10,7 +10,6 @@ find_package(catkin REQUIRED COMPONENTS
   mar_robot_arm5e
   mar_msgs
   mar_ros_bridge
-  esm_tracking
   visp_bridge
 )
 find_package(VISP REQUIRED)
@@ -34,7 +33,6 @@ catkin_package(
     mar_core
     mar_robot_arm5e
     mar_ros_bridge
-    esm_tracking
     visp_bridge
   DEPENDS
     orocos_kdl
@@ -43,20 +41,13 @@ catkin_package(
     OpenCV
 )
 
-#Library type definition needed for ESMlibrary (INRIA)
-if( CMAKE_SIZEOF_VOID_P EQUAL 8)
-  set( LIBRARY_TYPE STATIC)
-else( CMAKE_SIZEOF_VOID_P EQUAL 8)	
-  set( LIBRARY_TYPE SHARED )
-endif( CMAKE_SIZEOF_VOID_P EQUAL 8)
+
 
 add_definitions(${VISP_DEFINITIONS})
 link_directories(${VISP_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${catkin_LIBRARY_DIRS})
 include_directories(include ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${VISP_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
 
 add_library(${PROJECT_NAME} ${LIBRARY_TYPE}
-src/ESMTracking.cpp
-src/ESMMRTracking.cpp
 src/VirtualImage.cpp
 src/VispUtils.cpp
 src/PCLUtils.cpp
@@ -66,8 +57,6 @@ src/ArmLaserReconstruction3DStatic.cpp
 src/ArmLaserReconstruction3DEye.cpp
 src/PCGraspPlanning.cpp
 src/PCAutonomousGraspPlanning.cpp
-src/MotionEstimator.cpp
-src/PlanarDetector.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${VISP_LIBRARIES})
 

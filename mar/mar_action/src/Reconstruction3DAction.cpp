@@ -41,12 +41,12 @@ int Reconstruction3DAction::doAction()
   while (ros::ok() && !done_)
   {
     ros::spinOnce();
-    //Update perceptions
+   /* //Update perceptions
     if (!fixed_base_ && tracker_ && mest_)
     {
       tracker_->perceive();
       mest_->perceive();
-    }
+    }*/
     draw();
     for (int i = 0; i < rec_.size(); i++)
     {
