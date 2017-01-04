@@ -9,7 +9,12 @@ find_package(catkin REQUIRED COMPONENTS
   mar_ros_bridge
   tf
 )
-find_package(VISP REQUIRED)
+find_package(VISP REQUIRED )
+find_package(Qt5Test REQUIRED)
+find_package(Qt5Core REQUIRED)
+
+
+
 
 catkin_package(
   CATKIN_DEPENDS    
@@ -21,16 +26,16 @@ catkin_package(
 	tf
   DEPENDS
     VISP
+
 )
 add_definitions(${VISP_DEFINITIONS})
 link_directories(${VISP_LIBRARY_DIRS})
-include_directories(${catkin_INCLUDE_DIRS} ${VISP_INCLUDE_DIRS})
-
+include_directories(${catkin_INCLUDE_DIRS} ${VISP_INCLUDE_DIRS} )
 
 
 
 add_executable(multiple_laser_stripe_reconstruction src/multiple_laser_stripe_reconstruction.cpp)
-target_link_libraries(multiple_laser_stripe_reconstruction ${catkin_LIBRARIES})
+target_link_libraries(multiple_laser_stripe_reconstruction ${catkin_LIBRARIES}  Qt5::Test Qt5::Core)
 
 install(
   TARGETS

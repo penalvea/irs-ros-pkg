@@ -17,6 +17,7 @@ find_package(PCL REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(orocos_kdl REQUIRED)
 
+
 set (CMAKE_CXX_FLAGS "-fPIC")
 
 
@@ -39,6 +40,7 @@ catkin_package(
     VISP
     PCL
     OpenCV
+    Boost
 )
 
 
@@ -58,7 +60,7 @@ src/ArmLaserReconstruction3DEye.cpp
 src/PCGraspPlanning.cpp
 src/PCAutonomousGraspPlanning.cpp
 )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${VISP_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${VISP_LIBRARIES} ${Boost_LIBRARIES})
 
 
 install(

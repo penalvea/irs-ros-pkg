@@ -10,7 +10,7 @@ catkin_package(
   CATKIN_DEPENDS
     roscpp 
   DEPENDS
-    boost
+    Boost
     VISP
 )
 

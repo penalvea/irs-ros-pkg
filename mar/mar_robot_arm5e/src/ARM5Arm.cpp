@@ -89,7 +89,7 @@ void ARM5Arm::initKinematicSolvers() {
 	armhotstab_chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( 0.44278, 0.0 ,  0.0    , 5.0*M_PI/180     )));
 	armhotstab_chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( -0.083 /* gripper pos. changed */,  M_PI_2,  0.0    , 115*M_PI/180     )));
 	armhotstab_chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( 0.0, 0,  0.74938    , 0.0     )));
-	armhotstab_ivk_solver=new KDL::ChainIkSolverVel_pinv_red(armhotstab_chain);
+  armhotstab_ivk_solver=new KDL::ChainIkSolverVel_pinv_red(armhotstab_chain);
 }
 
 ARM5Arm::ARM5Arm() : current(0)

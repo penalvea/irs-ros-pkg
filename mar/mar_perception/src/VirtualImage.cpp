@@ -2,12 +2,12 @@
 #include <visp/vpImageConvert.h>
 
 VirtualImage::VirtualImage(ros::NodeHandle &nh, std::string image_topic, std::string info_topic, int subsample) {
-	it=new image_transport::ImageTransport(nh);
+  it=new image_transport::ImageTransport(nh);
 
 	image_sub=it->subscribe(image_topic, 1, &VirtualImage::imageCallback, this);	
 	image_info_sub=nh.subscribe<sensor_msgs::CameraInfo>(info_topic, 1, &VirtualImage::imageInfoCallback, this);	
 	ready_=false;
-	subsample_=subsample;
+  subsample_=subsample;
 }
 
 void VirtualImage::imageCallback(const sensor_msgs::ImageConstPtr& msg) {

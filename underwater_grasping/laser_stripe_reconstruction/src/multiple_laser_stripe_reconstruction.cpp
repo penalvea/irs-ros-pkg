@@ -21,6 +21,7 @@
 
 /** Makes a 3D reconstruction of a surface with a laser stripe emitter mounted on an arm and using a camera mounted on the same arm
  */
+
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "multiple_arm5e_laser_reconstruction");

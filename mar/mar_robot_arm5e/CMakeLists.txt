@@ -24,7 +24,7 @@ catkin_package(
     mar_core
     arm5_controller
   DEPENDS
-    boost
+    Boost
     orocos_kdl
 )
 

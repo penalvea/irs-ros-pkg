@@ -30,3 +30,6 @@ include_directories(
 
 add_executable(generate_models src/generate_models.cpp)
 target_link_libraries(generate_models ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+
+add_executable(rotate_pointcloud src/rotate_pointcloud.cpp)
+target_link_libraries(rotate_pointcloud ${catkin_LIBRARIES} ${PCL_LIBRARIES})

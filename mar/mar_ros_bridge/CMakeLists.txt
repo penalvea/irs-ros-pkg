@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(VISP REQUIRED)
 find_package(Boost REQUIRED)
 
+
 catkin_package(
   INCLUDE_DIRS include
   CATKIN_DEPENDS
@@ -20,7 +21,7 @@ catkin_package(
     roscpp
     kdl_conversions
   DEPENDS
-    boost
+    Boost
     VISP
 )
 add_definitions(${VISP_DEFINITIONS})
