@@ -6,63 +6,97 @@
  */
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
+#include <pcl/common/transforms.h>
+#include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/console/parse.h>
+#include <boost/thread/thread.hpp>
+
+
 
 int main() {
 
   /** CUBE **/
-  /*for(int i=4; i<=40; i+=6){
-          for(int j=4; j<=40; j+=6){
-                  for(int k=4; k<=40; k+=6){
-                          std::vector< std::vector< std::vector< int > > > cube;
-                          for(int l=0; l<50; l++){
-                                  std::vector<std::vector<int> > vec_vec;
-                                  for(int m=0; m<50; m++){
-                                          std::vector<int> vec;
-                                          for(int n=0; n<50; n++){
-                                                  vec.push_back(0);
-                                          }
-                                          vec_vec.push_back(vec);
-                                  }
-                                  cube.push_back(vec_vec);
-                          }
-                          pcl::PointCloud<pcl::PointXYZ> cloud;
-                          cloud.width=i*j*k;
-                          cloud.height=1;
-                          cloud.is_dense=false;
-                          cloud.points.resize(cloud.width*cloud.height);
-                          int cont=0;
-                          for(int l=-i/2; l<i/2; l++){
-                                  for(int m=-j/2; m<j/2; m++){
-                                          for(int n=-k/2; n<k/2; n++){
-                                                  cube[25+l][25+m][25+n]=1;
-
-                                                  cloud.points[cont].x=25+l;
-                                                  cloud.points[cont].y=25+m;
-                                                  cloud.points[cont].z=25+n;
-                                                  cont++;
-                                          }
-                                  }
-                          }
-
-                          std::string name="/home/toni/Escritorio/cube_";
-                          std::ostringstream ss1;
-                          ss1<<i;
-                          name=name+ss1.str()+"_";
-                          std::ostringstream ss2;
-                          ss2<<j;
-                          name=name+ss2.str()+"_";
-                          std::ostringstream ss3;
-                          ss3<<k;
-                          name=name+ss3.str()+".pcd";
-                          pcl::io::savePCDFileASCII(name, cloud);
-
-                  }
+  for(int i=10; i<=10; i+=6){
+    for(int j=20; j<=20; j+=6){
+      for(int k=30; k<=30; k+=6){
+        std::vector< std::vector< std::vector< int > > > cube;
+        for(int l=0; l<50; l++){
+          std::vector<std::vector<int> > vec_vec;
+          for(int m=0; m<50; m++){
+            std::vector<int> vec;
+            for(int n=0; n<50; n++){
+              vec.push_back(0);
+            }
+            vec_vec.push_back(vec);
           }
-  }*/
+          cube.push_back(vec_vec);
+        }
 
-  /** Cylinder **/
+        pcl::PointCloud<pcl::PointXYZ> cloud;
+        cloud.height=1;
+        cloud.is_dense=false;
+        cloud.points.resize(cloud.width*cloud.height);
 
-  /*for(int r=4; r<=20; r+=6){
+        int cont=0;
+        for(float l=(int)(-i/2); l<(int)(i/2); l+=0.1){
+          for(float m=(int)(-j/2); m<(int)(j/2); m+=0.1){
+            for(float n=(int)(-k/2); n<(int)(k/2); n+=0.1){
+              cont++;
+              cloud.width=cont;
+              cloud.points.resize(cont);
+              int x=l, y=m, z=n;
+              cube[25+x][25+y][25+z]=1;
+
+              cloud.points[cont-1].x=25+l;
+              cloud.points[cont-1].y=25+m;
+              cloud.points[cont-1].z=25+n;
+
+
+            }
+          }
+        }
+
+
+        std::string name="/home/toni/Escritorio/cube_";
+        std::ostringstream ss1;
+        ss1<<i;
+        name=name+ss1.str()+"_";
+        std::ostringstream ss2;
+        ss2<<j;
+        name=name+ss2.str()+"_";
+        std::ostringstream ss3;
+        ss3<<k;
+        name=name+ss3.str()+".pcd";
+        pcl::io::savePCDFileASCII(name, cloud);
+
+        pcl::visualization::PCLVisualizer::Ptr viewer(new pcl::visualization::PCLVisualizer("3D Viewer"));
+        viewer->setBackgroundColor(0,0,0);
+        int cont2=0;
+        for(int i=0; i<cube.size(); i++){
+          for(int j=0; j<cube[0].size(); j++){
+            for(int k=0; k<cube[0][0].size(); k++){
+              if(cube[i][j][k]==1){
+                std::ostringstream name;
+                name<<cont2;
+                cont2++;
+                viewer->addCube(i,i+1,j,j+1,k,k+1,0.5, 0.5, 0.5, name.str());
+              }
+
+            }
+          }
+        }
+        viewer->addCoordinateSystem(10.0);
+        viewer->initCameraParameters();
+        while(!viewer->wasStopped()){
+          viewer->spinOnce(100);
+          boost::this_thread::sleep(boost::posix_time::microseconds(100000));
+        }
+      }
+    }
+  }
+          /** Cylinder **/
+
+          /*for(int r=4; r<=20; r+=6){
           for(int h=4; h<=40; h+=6){
                   std::vector< std::vector< std::vector< int > > > cylinder;
                   for(int l=0; l<50; l++){
@@ -157,7 +191,7 @@ int main() {
 
   /** sphere **/
 
-  for (int r = 4; r <= 20; r += 6) {
+  /*for (int r = 4; r <= 20; r += 6) {
     std::vector<std::vector<std::vector<int> > > cube;
     for (int l = 0; l < 50; l++) {
       std::vector<std::vector<int> > vec_vec;
@@ -194,6 +228,6 @@ int main() {
     ss1 << r;
     name = name + ss1.str() + ".pcd";
     pcl::io::savePCDFileASCII(name, cloud);
-  }
+  }*/
   return 0;
 }
