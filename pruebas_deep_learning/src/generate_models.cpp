@@ -16,9 +16,9 @@
 int main() {
 
   /** CUBE **/
-  for(int i=10; i<=10; i+=6){
-    for(int j=20; j<=20; j+=6){
-      for(int k=30; k<=30; k+=6){
+  for(int i=39; i<=39; i+=6){
+    for(int j=8; j<=8; j+=6){
+      for(int k=32; k<=32; k+=6){
         std::vector< std::vector< std::vector< int > > > cube;
         for(int l=0; l<50; l++){
           std::vector<std::vector<int> > vec_vec;
@@ -38,9 +38,9 @@ int main() {
         cloud.points.resize(cloud.width*cloud.height);
 
         int cont=0;
-        for(float l=(int)(-i/2); l<(int)(i/2); l+=0.1){
-          for(float m=(int)(-j/2); m<(int)(j/2); m+=0.1){
-            for(float n=(int)(-k/2); n<(int)(k/2); n+=0.1){
+        for(float l=(int)(-i/2); l<(int)(i/2); l+=0.25){
+          for(float m=(int)(-j/2); m<(int)(j/2); m+=0.25){
+            for(float n=(int)(-k/2); n<(int)(k/2); n+=0.25){
               cont++;
               cloud.width=cont;
               cloud.points.resize(cont);
@@ -85,7 +85,7 @@ int main() {
             }
           }
         }
-        viewer->addCoordinateSystem(10.0);
+        viewer->addCoordinateSystem(50.0);
         viewer->initCameraParameters();
         while(!viewer->wasStopped()){
           viewer->spinOnce(100);
@@ -94,56 +94,56 @@ int main() {
       }
     }
   }
-          /** Cylinder **/
+  /** Cylinder **/
 
-          /*for(int r=4; r<=20; r+=6){
-          for(int h=4; h<=40; h+=6){
-                  std::vector< std::vector< std::vector< int > > > cylinder;
-                  for(int l=0; l<50; l++){
-                          std::vector<std::vector<int> > vec_vec;
-                          for(int m=0; m<50; m++){
-                                  std::vector<int> vec;
-                                  for(int n=0; n<50; n++){
-                                          vec.push_back(0);
-                                  }
-                                  vec_vec.push_back(vec);
-                          }
-                          cylinder.push_back(vec_vec);
-                  }
-                  pcl::PointCloud<pcl::PointXYZ> cloud;
-                  int cont=1;
-                  cloud.width=1;
-                  std::cout<<"r="<<r<<"h="<<h<<std::endl;
-                  for(int height=-h/2; height<h/2; height++){
-                          for(int i=0; i<50; i++){
-                                  for(int j=0; j<50; j++){
-                                          if(std::sqrt(((i-25)*(i-25))+((j-25)*(j-25)))<=r){
-                                                  cylinder[i][j][25+height]=1;
-                                                  cloud.height=cont;
-                                                  cloud.points.resize(cont);
-                                                  cloud.points[cont-1].x=i;
-                                                  cloud.points[cont-1].y=j;
-                                                  cloud.points[cont-1].z=25+height;
-                                                  cont++;
-                                          }
-
-                                  }
-                          }
-                  }
-                  std::string name="/home/toni/Escritorio/cylinder_";
-                  std::ostringstream ss1;
-                  ss1<<r;
-                  name=name+ss1.str()+"_";
-                  std::ostringstream ss2;
-                  ss2<<h;
-                  name=name+ss2.str()+".pcd";
-                  pcl::io::savePCDFileASCII(name, cloud);
+ /* for(int r=4; r<=20; r+=6){
+    for(int h=4; h<=40; h+=6){
+      std::vector< std::vector< std::vector< int > > > cylinder;
+      for(int l=0; l<50; l++){
+        std::vector<std::vector<int> > vec_vec;
+        for(int m=0; m<50; m++){
+          std::vector<int> vec;
+          for(int n=0; n<50; n++){
+            vec.push_back(0);
           }
+          vec_vec.push_back(vec);
+        }
+        cylinder.push_back(vec_vec);
+      }
+      pcl::PointCloud<pcl::PointXYZ> cloud;
+      int cont=1;
+      cloud.width=1;
+      std::cout<<"r="<<r<<"h="<<h<<std::endl;
+      for(float height=-h/2; height<h/2; height+=0.25){
+        for(float i=0; i<50; i+=0.25){
+          for(float j=0; j<50; j+=0.25){
+            if(std::sqrt(((i-25)*(i-25))+((j-25)*(j-25)))<=r){
+              cylinder[i][j][25+height]=1;
+              cloud.height=cont;
+              cloud.points.resize(cont);
+              cloud.points[cont-1].x=i;
+              cloud.points[cont-1].y=j;
+              cloud.points[cont-1].z=25+height;
+              cont++;
+            }
+
+          }
+        }
+      }
+      std::string name="/home/toni/Escritorio/cylinder_";
+      std::ostringstream ss1;
+      ss1<<r;
+      name=name+ss1.str()+"_";
+      std::ostringstream ss2;
+      ss2<<h;
+      name=name+ss2.str()+".pcd";
+      pcl::io::savePCDFileASCII(name, cloud);
+    }
   }*/
 
   /** cone **/
 
-  /*for(int r=4; r<=20; r+=6){
+ /* for(int r=4; r<=20; r+=6){
           for(int h=4; h<=40; h+=6){
                   std::vector< std::vector< std::vector< int > > > cone;
                   for(int l=0; l<50; l++){
@@ -161,10 +161,10 @@ int main() {
                   pcl::PointCloud<pcl::PointXYZ> cloud;
                   int cont=1;
                   cloud.width=1;
-                  for(int height=-h/2; height<h/2; height++){
+                  for(float height=-h/2; height<h/2; height+=0.25){
                           float radius_height=std::tan(angle)*((h/2)+height);
-                          for(int i=0; i<50; i++){
-                                  for(int j=0; j<50; j++){
+                          for(float i=0; i<50; i+=0.25){
+                                  for(float j=0; j<50; j+=0.25){
                                           if(std::sqrt(((i-25)*(i-25))+((j-25)*(j-25)))<=radius_height){
                                                   cone[i][j][25+height]=1;
                                                   cloud.height=cont;
@@ -207,9 +207,9 @@ int main() {
     pcl::PointCloud<pcl::PointXYZ> cloud;
     int cont = 1;
     cloud.width = 1;
-    for (int i = 0; i < 50; i++) {
-      for (int j = 0; j < 50; j++) {
-        for (int k = 0; k < 50; k++) {
+    for (float i = 0; i < 50; i+=0.25) {
+      for (float j = 0; j < 50; j+=0.25) {
+        for (float k = 0; k < 50; k+=0.25) {
           if (std::sqrt(((i - 25) * (i - 25)) + ((j - 25) * (j - 25)) +
                         ((k - 25) * (k - 25))) <= r) {
             cube[i][j][k] = 1;

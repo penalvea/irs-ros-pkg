@@ -33,3 +33,6 @@ target_link_libraries(generate_models ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
 add_executable(rotate_pointcloud src/rotate_pointcloud.cpp)
 target_link_libraries(rotate_pointcloud ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+
+add_executable(generate_dataset src/generate_dataset.cpp)
+target_link_libraries(generate_dataset ${catkin_LIBRARIES} ${PCL_LIBRARIES})
