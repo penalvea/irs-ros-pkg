@@ -26,7 +26,7 @@ public:
   vpHomogeneousMatrix desired_bMe, bMe;
   vpColVector next_joints;
   double q3, q4;
-  
+
 };
 
 

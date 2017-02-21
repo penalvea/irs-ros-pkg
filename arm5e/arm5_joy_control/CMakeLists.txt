@@ -18,9 +18,11 @@ include_directories(include ${catkin_INCLUDE_DIRS} ${VISP_INCLUDE_DIRS})
 
 add_executable(arm5_joy_control src/arm5_joy_control.cpp)
 add_executable(arm5_joy_cartesian_control src/arm5_joy_cartesian_control.cpp)
+add_executable(vehicle_cartesian_control src/vehicle_cartesian_control.cpp)
 
 target_link_libraries(arm5_joy_control ${catkin_LIBRARIES})
 target_link_libraries(arm5_joy_cartesian_control ${catkin_LIBRARIES})
+target_link_libraries(vehicle_cartesian_control ${catkin_LIBRARIES})
 
 install(
   TARGETS
