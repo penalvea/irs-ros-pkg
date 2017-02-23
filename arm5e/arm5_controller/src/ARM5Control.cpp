@@ -87,8 +87,8 @@ ARM5Control::ARM5Control()
   //ParamService = nh_.advertiseService("/arm5e/setParams", &ARM5Control::setParams_callback, this);
   
   //Serial message publishers. Uncomment to debug.
-  //message_r_pub = nh_.advertise<arm5_controller::ReadMessage>("/arm5e/read_message",1);
-  //message_s_pub = nh_.advertise<arm5_controller::SendMessage>("/arm5e/write_message",1);
+  message_r_pub = nh_.advertise<arm5_controller::ReadMessage>("/arm5e/read_message",1);
+  message_s_pub = nh_.advertise<arm5_controller::SendMessage>("/arm5e/write_message",1);
 
   //Start read thread
   //  pthread_t readt;
