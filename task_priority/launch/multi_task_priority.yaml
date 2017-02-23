@@ -1,0 +1,99 @@
+acceleration: 2
+max_joint_vel: 0.5
+sampling_duration: 0.1
+
+n_joints: 8
+
+max_joint_limit: [100,   100,  100,  100,  0.54, 1.57, 2.1529, 3.14]
+min_joint_limit: [-100, -100, -100, -100, -1.57, 0.0,  0.0,   -3.14]
+
+arm_joint_state_topic: /uwsim/joint_state
+arm_joint_command_topic: /uwsim/joint_state_command
+vehicle_tf: girona500
+world_tf: world
+vehicle_command_topic: /dataNavigator
+
+
+chain_names: [auv_arm, auv]
+
+auv_arm/joint_1: [TransX]
+auv_arm/joint_2: [TransY]
+auv_arm/joint_3: [TransZ]
+auv_arm/joint_4: [RotZ, 0.0, 0.0, 1.08, 3.1416]
+auv_arm/joint_5: [RotZ, 0.08052, 1.5708, 0.0, 0.0]
+auv_arm/joint_6: [RotZ, 0.44278, 0.0, 0.0, 0.1392]
+auv_arm/joint_7: [RotZ, -0.083, 1.5708, 0.0, 1.9722]
+auv_arm/joint_8: [RotZ, 0.0, 0.0, 0.49938, 0.0]
+
+auv_arm/chain_joint_relation: [0, 1, 2, 3, 4, 5, 6, 7]
+
+
+auv/joint_1: [TransX]
+auv/joint_2: [TransY]
+auv/joint_3: [TransZ]
+auv/joint_4: [RotZ]
+
+auv/chain_joint_relation: [0, 1, 2, 3]
+
+
+
+
+multitask_priority: [multitask3]
+
+multitask1/tasks: [task1, task2]
+multitask1/joint_priority_1: [0,1,2,3,4,5,6,7,8]
+
+
+multitask2/tasks: [ task3]
+multitask2/joint_priority_1: [0,1,2,3,4,5,6,7,8]
+
+multitask3/tasks: [ task_pose]
+multitask3/joint_priority_1: [0,1,2,3,4,5,6,7,8]
+
+
+task1/chain: auv_arm
+task1/mask_cartesian: [1, 1, 1, 0, 0, 0]
+task1/mask_joint: [1,1,1,0,0,0,0,0]
+task1/goal_type: Fixed
+task1/goal/desired_pose: [3.0, 0.1, 2.2, 0.0, 0.0, 0.0]
+task1/frame_inertial: True
+
+
+task2/chain: auv_arm
+task2/mask_cartesian: [0, 0, 0, 1, 1, 1]
+task2/mask_joint: [0,0,0,0,1,1,1,1]
+task2/goal_type: Fixed
+task2/goal/desired_pose: [0.0, 0.0, 0.0, 1.3, 0.9, 0.2]
+task2/frame_inertial: True
+
+
+
+task3/chain: auv_arm
+task3/mask_cartesian: [1, 1, 1, 1, 1, 1]
+task3/mask_joint: [1,1, 1,1,1,1,1,1]
+task3/goal_type: ROS_Twist
+task3/goal/topic: /commands
+task2/frame_inertial: False
+
+
+task4/chain: auv
+task4/mask_cartesian: [1, 1, 1, 1, 1, 1]
+task4/mask_joint: [1,1, 1,1,0,0,0,0]
+task4/goal_type: Fixed
+task4/goal/desired_pose: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+task4/frame_inertial: True
+
+
+task_pose/chain: auv_arm
+task_pose/mask_cartesian: [1, 1, 1, 1, 1, 1]
+task_pose/mask_joint: [1,1, 1,1,0,1,1,1]
+task_pose/goal_type: ROS_Pose
+task_pose/goal/topic: /task_priority_pose
+task_pose/frame_inertial: True
+
+
+
+
+
+
+
