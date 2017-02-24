@@ -12,9 +12,9 @@
   </node>
 
  <!-- Axes -->
-  <param name="X" value="0" type="int"/>
+  <param name="X" value="1" type="int"/>
   <param name="XDir" value="1" type="int"/>
-  <param name="Y" value="1" type="int"/>
+  <param name="Y" value="0" type="int"/>
   <param name="YDir" value="1" type="int"/>
   <param name="Z" value="4" type="int"/>
   <param name="ZDir" value="-1" type="int"/>
@@ -22,8 +22,8 @@
   <param name="YawDir" value="1" type="int"/>
   <param name="RollDir" value="1" type="int"/>
   <param name="PitchDir" value="1" type="int"/>
-  <param name="linear_scale" value="10" type="double"/>
-  <param name="angular_scale" value="10" type="double"/>
+  <param name="linear_scale" value="0.1" type="double"/>
+  <param name="angular_scale" value="0.1" type="double"/>
   
   <param name="topic" value="/commands" type="string" />
 
