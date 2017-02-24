@@ -9,11 +9,13 @@ int main(int argc, char **argv){
   ros::init(argc, argv, "multiple_task_priority_control");
   ros::NodeHandle nh;
 
-  double acceleration, max_joint_vel, sampling_duration;
+  double acceleration, max_joint_vel, max_cartesian_vel, sampling_duration;
   nh.getParam("acceleration", acceleration);
   ROS_INFO("Acceleration: %f", acceleration);
   nh.getParam("max_joint_vel", max_joint_vel);
   ROS_INFO("Max joint vel: %f", max_joint_vel);
+  nh.getParam("max_cartesian_vel", max_cartesian_vel);
+  ROS_INFO("Max cartesian vel: %f", max_cartesian_vel);
   nh.getParam("sampling_duration", sampling_duration);
   ROS_INFO("Sampling duration: %f", sampling_duration);
 
@@ -176,19 +178,19 @@ int main(int argc, char **argv){
         for(int k=0; k<6; k++){
           desired_pose_eigen(k,0)=desired_pose[k];
         }
-        GoalFixedPosePtr goal_fixed(new GoalFixedPose(desired_pose_eigen, chains[chain_id[task_chain]], task_mask_cartesian, chain_joint_relations[chain_id[task_chain]]));
+        GoalFixedPosePtr goal_fixed(new GoalFixedPose(desired_pose_eigen, chains[chain_id[task_chain]], task_mask_cartesian, chain_joint_relations[chain_id[task_chain]], max_cartesian_vel));
         goal=goal_fixed;
       }
       else if(goal_type=="ROS_Pose"){
         std::string goal_topic;
         nh.getParam(task_names[j]+"/goal/topic", goal_topic);
-        GoalROSPosePtr goal_ros_pose(new GoalROSPose(chains[chain_id[task_chain]], task_mask_cartesian, goal_topic, nh, chain_joint_relations[chain_id[task_chain]]));
+        GoalROSPosePtr goal_ros_pose(new GoalROSPose(chains[chain_id[task_chain]], task_mask_cartesian, goal_topic, nh, chain_joint_relations[chain_id[task_chain]], max_cartesian_vel));
         goal=goal_ros_pose;
       }
       else if(goal_type=="ROS_Twist"){
         std::string goal_topic;
         nh.getParam(task_names[j]+"/goal/topic", goal_topic);
-        GoalROSTwistPtr goal_ros_twist(new GoalROSTwist(task_mask_cartesian, goal_topic, nh));
+        GoalROSTwistPtr goal_ros_twist(new GoalROSTwist(task_mask_cartesian, goal_topic, nh, max_cartesian_vel));
         goal=goal_ros_twist;
       }
       else{

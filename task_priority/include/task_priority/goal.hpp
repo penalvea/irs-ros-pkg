@@ -11,6 +11,7 @@
 
 class Goal{
   bool initialized_;
+  float max_cartesian_vel_;
 public:
   Goal();
   virtual ~Goal();
@@ -18,6 +19,8 @@ public:
   Eigen::Vector3d quaternionsSubstraction(Eigen::Quaterniond quat_desired, Eigen::Quaterniond quat_current);
   void setInitialized(bool initialized);
   bool getInitialized();
+  void setMaxCartesianVel(float max_cartesian_vel);
+  Eigen::MatrixXd limitCaresianVel(Eigen::MatrixXd vels);
 };
 typedef boost::shared_ptr<Goal> GoalPtr;
 
@@ -28,7 +31,7 @@ class GoalFixedPose: public Goal{
   Eigen::MatrixXd goal_;
   std::vector<int> joints_relation_;
 public:
-  GoalFixedPose(Eigen::MatrixXd goal, KDL::Chain chain, std::vector<int> mask_cart, std::vector<int> joints_relation);
+  GoalFixedPose(Eigen::MatrixXd goal, KDL::Chain chain, std::vector<int> mask_cart, std::vector<int> joints_relation, float max_cartesian_vel);
   ~GoalFixedPose();
   Eigen::MatrixXd getGoal(std::vector<float> joints, std::vector<float> odom);
 };
@@ -44,7 +47,7 @@ class GoalROSPose: public Goal{
   ros::Subscriber pose_sub_;
   void poseCallback(const geometry_msgs::Pose::ConstPtr& msg);
 public:
-  GoalROSPose(KDL::Chain chain, std::vector<int> mask_cart, std::string pose_topic, ros::NodeHandle &nh, std::vector<int> joints_relation);
+  GoalROSPose(KDL::Chain chain, std::vector<int> mask_cart, std::string pose_topic, ros::NodeHandle &nh, std::vector<int> joints_relation, float max_cartesian_vel);
   ~GoalROSPose();
   Eigen::MatrixXd getGoal(std::vector<float> joints, std::vector<float> odom);
 };
@@ -59,7 +62,7 @@ class GoalROSTwist: public Goal{
   ros::Subscriber twist_sub_;
   void twistCallback(const geometry_msgs::Twist::ConstPtr& msg);
 public:
-  GoalROSTwist(std::vector<int> mask_cart, std::string twist_topic, ros::NodeHandle &nh);
+  GoalROSTwist(std::vector<int> mask_cart, std::string twist_topic, ros::NodeHandle &nh, float max_cartesian_vel);
   ~GoalROSTwist();
   Eigen::MatrixXd getGoal(std::vector<float> joints, std::vector<float> odom);
 };

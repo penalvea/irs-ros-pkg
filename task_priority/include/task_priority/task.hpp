@@ -75,7 +75,7 @@ public:
   Eigen::MatrixXd calculateMultiTaskVel(Eigen::MatrixXd last_vel, Eigen::MatrixXd T_k_complete);
   void setOdom(std::vector<float> odom);
   Eigen::MatrixXd getT_k_complete();
-  Eigen::MatrixXd limitJoints(Eigen::MatrixXd vels);
+  Eigen::MatrixXd limitJointsAndCartesian(Eigen::MatrixXd vels);
   bool goalsInitialized();
 };
 

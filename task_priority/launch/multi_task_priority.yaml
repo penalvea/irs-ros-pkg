@@ -1,5 +1,6 @@
 acceleration: 2
 max_joint_vel: 0.5
+max_cartesian_vel: 0.5
 sampling_duration: 0.1
 
 n_joints: 8
@@ -38,7 +39,7 @@ auv/chain_joint_relation: [0, 1, 2, 3]
 
 
 
-multitask_priority: [multitask3]
+multitask_priority: [joy]
 
 multitask1/tasks: [task1, task2]
 multitask1/joint_priority_1: [0,1,2,3,4,5,6,7,8]
@@ -49,6 +50,10 @@ multitask2/joint_priority_1: [0,1,2,3,4,5,6,7,8]
 
 multitask3/tasks: [ task_pose]
 multitask3/joint_priority_1: [0,1,2,3,4,5,6,7,8]
+
+joy/tasks: [ joy_task1]
+joy/joint_priority_1: [0,1,2,3,4,5,6,7]
+ 
 
 
 task1/chain: auv_arm
@@ -91,6 +96,20 @@ task_pose/goal_type: ROS_Pose
 task_pose/goal/topic: /task_priority_pose
 task_pose/frame_inertial: True
 
+
+joy_task1/chain: auv_arm
+joy_task1/mask_cartesian: [1, 1, 1, 0, 0, 0]
+joy_task1/mask_joint: [1,1, 1,1,1,1,1,1]
+joy_task1/goal_type: ROS_Twist
+joy_task1/goal/topic: /commands
+joy_task1/frame_inertial: False
+
+joy_task2/chain: auv
+joy_task2/mask_cartesian: [0, 0, 0, 0, 0, 1]
+joy_task2/mask_joint: [0,0, 0, 1,0,0,0,0]
+joy_task2/goal_type: Fixed
+joy_task2/goal/desired_pose: [0, 0, 0, 0, 0, 0]
+joy_task2/frame_inertial: False
 
 
 

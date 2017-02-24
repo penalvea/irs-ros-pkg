@@ -188,7 +188,7 @@ Eigen::MatrixXd MultiTask::calculateMultiTaskVel(Eigen::MatrixXd last_vel, Eigen
     Eigen::MatrixXd next_vel=last_vel+calculateJointsVel(error, joints_active);
     //std::cout<<"Vels antes limitar"<<std::endl;
     //std::cout<<next_vel<<std::endl;
-    next_vel=limitJoints(next_vel);
+    next_vel=limitJointsAndCartesian(next_vel);
     //std::cout<<"Vels despues limitar"<<std::endl;
     //std::cout<<next_vel;
     last_vel=next_vel;
@@ -220,7 +220,7 @@ void MultiTask::setMaxNegativeCartesianVelocity(std::vector<std::vector<float> >
   max_negative_cartesian_vel_=vels;
 }
 
-Eigen::MatrixXd MultiTask::limitJoints(Eigen::MatrixXd vels){
+Eigen::MatrixXd MultiTask::limitJointsAndCartesian(Eigen::MatrixXd vels){
   Eigen::MatrixXd jac(vels.rows(), vels.rows()), desired_vel(vels.rows(),1);
   jac.setZero();
   desired_vel.setZero();
@@ -248,10 +248,7 @@ Eigen::MatrixXd MultiTask::limitJoints(Eigen::MatrixXd vels){
         std::cout<<vels(i,0)<<"    ----->  "<<max_negative_joint_vel_[i]<<std::endl;
       }
     }
-    /*std::cout<<"desired_vel"<<std::endl;
-    std::cout<<desired_vel<<std::endl;
-    std::cout<<"jac"<<std::endl;
-    std::cout<<jac<<std::endl;*/
+
     Eigen::MatrixXd new_T_k_complete(jac.rows()+T_k_complete_.rows(), jac.cols());
     new_T_k_complete<<jac,T_k_complete_;
     Eigen::MatrixXd new_T_k_inverse=pinvMat(new_T_k_complete);
@@ -261,22 +258,10 @@ Eigen::MatrixXd MultiTask::limitJoints(Eigen::MatrixXd vels){
         new_T_k(i,j)=new_T_k_inverse(i,j);
       }
     }
-    /*std::cout<<"new_T_k"<<std::endl;
-    std::cout<<new_T_k<<std::endl;
-    std::cout<<"inverse jacobian"<<std::endl;
-    std::cout<<new_T_k*(pinvMat(jac*new_T_k))<<std::endl;
-    std::cout<<"velocidades a sumar"<<std::endl;
-    std::cout<<(new_T_k*(pinvMat(jac*new_T_k)))*desired_vel<<std::endl;
-    std::cout<<"velocidades antiguas"<<std::endl;
-    std::cout<<vels<<std::endl;*/
+
 
 
     vels=vels+(new_T_k*(pinvMat(jac*new_T_k)))*desired_vel;
-
-    /*std::cout<<"velocidades nueva"<<std::endl;
-    std::cout<<vels<<std::endl;*/
-
-    //sleep(10);
 
   }
 

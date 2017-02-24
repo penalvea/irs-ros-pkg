@@ -35,10 +35,6 @@ void Controller::jointsCallback(const sensor_msgs::JointStateConstPtr &msg){
 }
 
 float Controller::calculateMaxPositiveVel(float current_joint, float max_joint_value, float acceleration, float sampling_duration){
-  std::cout<<"calculate max positive vel"<<std::endl;
-  std::cout<<max_joint_value<<"   "<<current_joint<<"   "<<sampling_duration<<std::endl;
-  std::cout<<2*acceleration<<"    "<< max_joint_value-current_joint<<"    "<<2*acceleration*(max_joint_value-current_joint)<<std::endl;
-  std::cout<<(max_joint_value-current_joint)/sampling_duration<<"    "<<std::sqrt(2*acceleration*(max_joint_value-current_joint))<<std::endl;
   return std::max(std::min((max_joint_value-current_joint)/sampling_duration, std::sqrt(2*acceleration*(max_joint_value-current_joint))),(float)0.0);
 }
 
@@ -88,13 +84,11 @@ void Controller::goToGoal(){
       Eigen::MatrixXd vels(n_joints_,1);
       vels.setZero();
       for(int i=multitasks_.size()-1; i>=0; i--){
-        std::cout<<"Entro multitask"<<std::endl;
         multitasks_[i]->setCurrentJoints(current_joints_);
         multitasks_[i]->setOdom(odom);
         multitasks_[i]->setMaxPositiveJointVelocity(max_positive_joint_velocities);
         multitasks_[i]->setMaxNegativeJointVelocity(max_negative_joint_velocities);
         vels=multitasks_[i]->calculateMultiTaskVel(vels, T_k_complete);
-        std::cout<<vels<<std::endl;
         T_k_complete=multitasks_[i]->getT_k_complete();
       }
       vels=limitVels(vels);

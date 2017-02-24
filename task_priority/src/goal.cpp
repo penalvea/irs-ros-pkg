@@ -23,6 +23,25 @@ Eigen::Vector3d Goal::quaternionsSubstraction(Eigen::Quaterniond quat_desired, E
 
   return quat_current.w()*v1-quat_desired.w()*v2+v2_aux.cross(v1);
 }
+void Goal::setMaxCartesianVel(float max_cartesian_vel){
+  max_cartesian_vel_=max_cartesian_vel;
+}
+
+Eigen::MatrixXd Goal::limitCaresianVel(Eigen::MatrixXd vels){
+  float max=0;
+  for(int i=0; i<vels.rows(); i++){
+    if(std::abs(vels(i,0))>max){
+      max=std::abs(vels(i,0));
+    }
+  }
+  if(max>max_cartesian_vel_){
+    for(int i=0; i<vels.rows(); i++){
+      vels(i,0)=vels(i,0)*max_cartesian_vel_/max;
+    }
+  }
+  return vels;
+}
+
 void Goal::setInitialized(bool initialized){
   initialized_=initialized;
 }
@@ -33,7 +52,7 @@ bool Goal::getInitialized(){
 
 
 
-GoalFixedPose::GoalFixedPose(Eigen::MatrixXd goal, KDL::Chain chain, std::vector<int> mask_cart, std::vector<int> joints_relation):Goal(){
+GoalFixedPose::GoalFixedPose(Eigen::MatrixXd goal, KDL::Chain chain, std::vector<int> mask_cart, std::vector<int> joints_relation, float max_cartesian_vel):Goal(){
   KDL::Chain chain_odom;
   chain_odom.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::TransX)));
   chain_odom.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::TransY)));
@@ -48,6 +67,7 @@ GoalFixedPose::GoalFixedPose(Eigen::MatrixXd goal, KDL::Chain chain, std::vector
   goal_=goal;
   joints_relation_=joints_relation;
   setInitialized(true);
+  setMaxCartesianVel(max_cartesian_vel);
 }
 
 GoalFixedPose::~GoalFixedPose(){}
@@ -85,11 +105,12 @@ Eigen::MatrixXd GoalFixedPose::getGoal(std::vector<float> joints, std::vector<fl
       cartesian_vel(i,0)=0;
     }
   }
+  cartesian_vel=limitCaresianVel(cartesian_vel);
   return cartesian_vel;
 }
 
 
-GoalROSPose::GoalROSPose(KDL::Chain chain, std::vector<int> mask_cart, std::string pose_topic, ros::NodeHandle &nh, std::vector<int> joints_relation):Goal(){
+GoalROSPose::GoalROSPose(KDL::Chain chain, std::vector<int> mask_cart, std::string pose_topic, ros::NodeHandle &nh, std::vector<int> joints_relation, float max_cartesian_vel):Goal(){
   KDL::Chain chain_odom;
   chain_odom.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::TransX)));
   chain_odom.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::TransY)));
@@ -103,6 +124,7 @@ GoalROSPose::GoalROSPose(KDL::Chain chain, std::vector<int> mask_cart, std::stri
   mask_cart_=mask_cart;
   joints_relation_=joints_relation;
   nh_=nh;
+  setMaxCartesianVel(max_cartesian_vel);
 
   pose_sub_=nh_.subscribe<geometry_msgs::Pose>(pose_topic, 1, &GoalROSPose::poseCallback, this);
 }
@@ -143,12 +165,14 @@ Eigen::MatrixXd GoalROSPose::getGoal(std::vector<float> joints, std::vector<floa
       cartesian_vel(i,0)=0;
     }
   }
+  cartesian_vel=limitCaresianVel(cartesian_vel);
   return cartesian_vel;
 }
 
-GoalROSTwist::GoalROSTwist(std::vector<int> mask_cart, std::string twist_topic, ros::NodeHandle &nh):Goal(){
+GoalROSTwist::GoalROSTwist(std::vector<int> mask_cart, std::string twist_topic, ros::NodeHandle &nh, float max_cartesian_vel):Goal(){
   mask_cart_=mask_cart;
   nh_=nh;
+  setMaxCartesianVel(max_cartesian_vel);
 
   twist_sub_=nh_.subscribe<geometry_msgs::Twist>(twist_topic, 1, &GoalROSTwist::twistCallback, this);
 }
@@ -168,5 +192,6 @@ Eigen::MatrixXd GoalROSTwist::getGoal(std::vector<float> joints, std::vector<flo
   cartesian_vel(3,0)=goal_.angular.x;
   cartesian_vel(4,0)=goal_.angular.y;
   cartesian_vel(5,0)=goal_.angular.z;
+  cartesian_vel=limitCaresianVel(cartesian_vel);
   return cartesian_vel;
 }
