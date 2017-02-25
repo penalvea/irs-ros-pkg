@@ -46,6 +46,7 @@ int main(int argc, char **argv){
   std::map<std::string, int> chain_id;
   std::vector<KDL::Chain> chains;
   std::vector<std::vector<int> > chain_joint_relations;
+  std::vector<std::vector<float> > max_cartesian_limits, min_cartesian_limits;
   for(int i=0; i<chain_names.size(); i++){
 
     chain_id[chain_names[i]]=i;
@@ -126,6 +127,20 @@ int main(int argc, char **argv){
           return -1;
         }
         chain_joint_relations.push_back(chain_joint_relation);
+
+        std::vector<float> max_cartesian_limit, min_cartesian_limit;
+        if(!nh.getParam(chain_names[i]+"/max_cartesian_limit", max_cartesian_limit)){
+          ROS_ERROR("Every chain need the max_cartesian_limit");
+          return -1;
+        }
+
+        max_cartesian_limits.push_back(max_cartesian_limit);
+        if(!nh.getParam(chain_names[i]+"/min_cartesian_limit", min_cartesian_limit)){
+          ROS_ERROR("Every chain need the min_cartesian_limit");
+          return -1;
+        }
+        min_cartesian_limits.push_back(min_cartesian_limit);
+
         ROS_INFO("chain %s added", chain_names[i].c_str());
       }
     }
@@ -214,7 +229,7 @@ int main(int argc, char **argv){
   nh.getParam("world_tf", world_tf);
   nh.getParam("vehicle_command_topic", vehicle_command_topic);
 
-  ControllerPtr controller(new Controller(multitasks, n_joints, max_joint_limit, min_joint_limit, acceleration, max_joint_vel, sampling_duration, nh, arm_joint_state_topic, arm_joint_command_topic, vehicle_tf, world_tf, vehicle_command_topic));
+  ControllerPtr controller(new Controller(multitasks, n_joints, max_joint_limit, min_joint_limit, max_cartesian_limits, min_cartesian_limits, acceleration, max_joint_vel, sampling_duration, nh, arm_joint_state_topic, arm_joint_command_topic, vehicle_tf, world_tf, vehicle_command_topic, chains, chain_joint_relations));
   controller->goToGoal();
 
 

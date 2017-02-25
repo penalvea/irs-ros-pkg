@@ -1,10 +1,12 @@
 #include <task_priority/controller.hpp>
 
-Controller::Controller(std::vector<MultiTaskPtr> multitasks, int n_joints, std::vector<float> max_joint_limit, std::vector<float> min_joint_limit,float acceleration, float max_joint_vel, float sampling_duration, ros::NodeHandle nh, std::string arm_joint_state_topic, std::string arm_joint_command_topic, std::string vehicle_tf, std::string world_tf, std::string vehicle_command_topic){
+Controller::Controller(std::vector<MultiTaskPtr> multitasks, int n_joints, std::vector<float> max_joint_limit, std::vector<float> min_joint_limit, std::vector<std::vector<float> > max_cartesian_limits, std::vector<std::vector<float> > min_cartesian_limits, float acceleration, float max_joint_vel, float sampling_duration, ros::NodeHandle nh, std::string arm_joint_state_topic, std::string arm_joint_command_topic, std::string vehicle_tf, std::string world_tf, std::string vehicle_command_topic, std::vector<KDL::Chain> chains, std::vector<std::vector<int> > chain_joint_relations){
 multitasks_=multitasks;
 n_joints_=n_joints;
 max_joint_limit_=max_joint_limit;
 min_joint_limit_=min_joint_limit;
+max_cartesian_limits_=max_cartesian_limits;
+min_cartesian_limits_=min_cartesian_limits;
 acceleration_=acceleration;
 max_joint_vel_=max_joint_vel;
 sampling_duration_=sampling_duration;
@@ -14,6 +16,10 @@ nh_=nh;
 joints_init_=false;
 goal_init_=false;
 current_joints_.resize(n_joints);
+chains_=chains;
+chain_joint_relations_=chain_joint_relations;
+
+
 
 
 joints_sub_=nh_.subscribe<sensor_msgs::JointState>(arm_joint_state_topic, 1, &Controller::jointsCallback, this);
@@ -46,7 +52,6 @@ void Controller::goToGoal(){
   bool initialized=false;
 
   while(ros::ok() && !initialized){
-    std::cout<<"Joints init "<<joints_init_<<std::endl;
     if(joints_init_){
       initialized=true;
       for(int i=0; i<multitasks_.size(); i++){
@@ -80,6 +85,10 @@ void Controller::goToGoal(){
         max_positive_joint_velocities.push_back(calculateMaxPositiveVel(current_joints_[i], max_joint_limit_[i], acceleration_, sampling_duration_));
         max_negative_joint_velocities.push_back(calculateMaxNegativeVel(current_joints_[i], min_joint_limit_[i], acceleration_, sampling_duration_));
       }
+      std::vector<std::vector<float> > max_negative_cartesian_velocities, max_positive_cartesian_velocities;
+      std::vector<std::vector<std::vector<float> > > max_cartesian_vels=calculateMaxCartesianVels(current_joints_, odom);
+      max_positive_cartesian_velocities=max_cartesian_vels[0];
+      max_negative_cartesian_velocities=max_cartesian_vels[1];
       Eigen::MatrixXd T_k_complete;
       Eigen::MatrixXd vels(n_joints_,1);
       vels.setZero();
@@ -88,6 +97,8 @@ void Controller::goToGoal(){
         multitasks_[i]->setOdom(odom);
         multitasks_[i]->setMaxPositiveJointVelocity(max_positive_joint_velocities);
         multitasks_[i]->setMaxNegativeJointVelocity(max_negative_joint_velocities);
+        multitasks_[i]->setMaxPositiveCartesianVelocity(max_positive_cartesian_velocities);
+        multitasks_[i]->setMaxNegativeCartesianVelocity(max_negative_cartesian_velocities);
         vels=multitasks_[i]->calculateMultiTaskVel(vels, T_k_complete);
         T_k_complete=multitasks_[i]->getT_k_complete();
       }
@@ -164,3 +175,51 @@ void Controller::publishVels(Eigen::MatrixXd vels){
   joints_pub_.publish(joint_msg);
   ros::spinOnce();
 }
+
+
+std::vector<std::vector<std::vector<float> > > Controller::calculateMaxCartesianVels(std::vector<float> joints, std::vector<float> odom){
+  std::vector<std::vector<float> > max_negative_cartesian_vels, max_positive_cartesian_vels;
+  for(int i=0; i<chains_.size(); i++){
+    KDL::Chain chain_odom;
+    chain_odom.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::TransX)));
+    chain_odom.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::TransY)));
+    chain_odom.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::TransZ)));
+    chain_odom.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotX)));
+    chain_odom.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotY)));
+    chain_odom.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ)));
+    chain_odom.addChain(chains_[i]);
+    KDL::ChainFkSolverPos_recursive fk(chain_odom);
+
+    KDL::JntArray q(chain_odom.getNrOfJoints());
+    for(int j=0; j<odom.size(); j++){
+      q(j)=odom[j];
+
+    }
+    for(int j=0; j<chains_[i].getNrOfJoints(); j++){
+      q(j+odom.size())=joints[chain_joint_relations_[i][j]];
+    }
+
+    KDL::Frame frame;
+    fk.JntToCart(q, frame);
+    std::vector<float> max_negative_cartesian_vel, max_positive_cartesian_vel;
+
+    max_negative_cartesian_vel.push_back(calculateMaxNegativeVel(frame.p.x(), min_cartesian_limits_[i][0], acceleration_, sampling_duration_));
+    max_negative_cartesian_vel.push_back(calculateMaxNegativeVel(frame.p.y(), min_cartesian_limits_[i][1], acceleration_, sampling_duration_));
+    max_negative_cartesian_vel.push_back(calculateMaxNegativeVel(frame.p.z(), min_cartesian_limits_[i][2], acceleration_, sampling_duration_));
+    max_negative_cartesian_vels.push_back(max_negative_cartesian_vel);
+
+
+    max_positive_cartesian_vel.push_back(calculateMaxPositiveVel(frame.p.x(), max_cartesian_limits_[i][0], acceleration_, sampling_duration_));
+    max_positive_cartesian_vel.push_back(calculateMaxPositiveVel(frame.p.y(), max_cartesian_limits_[i][1], acceleration_, sampling_duration_));
+    max_positive_cartesian_vel.push_back(calculateMaxPositiveVel(frame.p.z(), max_cartesian_limits_[i][2], acceleration_, sampling_duration_));
+    max_positive_cartesian_vels.push_back(max_positive_cartesian_vel);
+
+
+
+  }
+  std::vector<std::vector<std::vector<float> > > max_vels;
+  max_vels.push_back(max_positive_cartesian_vels);
+  max_vels.push_back(max_negative_cartesian_vels);
+  return max_vels;
+}
+
