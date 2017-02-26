@@ -217,7 +217,7 @@ int main(int argc, char **argv){
       tasks.push_back(task);
 
     }
-  MultiTaskPtr multi(new MultiTask(tasks, chains, joint_priority));
+  MultiTaskPtr multi(new MultiTask(tasks, chains, chain_joint_relations, joint_priority));
   multitasks.push_back(multi);
   }
 

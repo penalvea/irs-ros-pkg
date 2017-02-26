@@ -49,12 +49,13 @@ class MultiTask{
   std::vector<float> odom_;
   float max_vel_;
   std::vector<KDL::Chain> chains_;
+  std::vector<std::vector<int> > chain_joint_relations_;
   std::vector<std::vector<float> > max_positive_cartesian_vel_, max_negative_cartesian_vel_;
   std::vector<std::vector<int> > joints_priority_;
   Eigen::MatrixXd pinvMat(Eigen::MatrixXd matrix);
 
 public:
-  MultiTask( std::vector<TaskPtr> tasks, std::vector<KDL::Chain> chains, std::vector<std::vector<int> > joints_priority);
+  MultiTask( std::vector<TaskPtr> tasks, std::vector<KDL::Chain> chains, std::vector<std::vector<int> > chain_joint_relations, std::vector<std::vector<int> > joints_priority);
   ~MultiTask();
   Eigen::MatrixXd getJacobian();
   std::vector<float> calculateCartesianVelocity();

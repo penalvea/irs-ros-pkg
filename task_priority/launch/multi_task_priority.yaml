@@ -37,13 +37,13 @@ auv/joint_3: [TransZ]
 auv/joint_4: [RotZ]
 
 auv/chain_joint_relation: [0, 1, 2, 3]
-auv/max_cartesian_limit: [20,20,20]
+auv/max_cartesian_limit: [1,1,1]
 auv/min_cartesian_limit: [-20,-20,-20]
 
 
 
 
-multitask_priority: [multitask1]
+multitask_priority: [joy]
 
 multitask1/tasks: [task1, task2]
 multitask1/joint_priority_1: [0,1,2,3,4,5,6,7,8]
@@ -102,7 +102,7 @@ task_pose/frame_inertial: True
 
 
 joy_task1/chain: auv_arm
-joy_task1/mask_cartesian: [1, 1, 1, 0, 0, 0]
+joy_task1/mask_cartesian: [1, 1, 1, 1, 1, 1]
 joy_task1/mask_joint: [1,1, 1,1,1,1,1,1]
 joy_task1/goal_type: ROS_Twist
 joy_task1/goal/topic: /commands
