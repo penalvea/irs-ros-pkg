@@ -41,11 +41,45 @@ void Controller::jointsCallback(const sensor_msgs::JointStateConstPtr &msg){
 }
 
 float Controller::calculateMaxPositiveVel(float current_joint, float max_joint_value, float acceleration, float sampling_duration){
+  if(current_joint>max_joint_value)
+    return 0.0;
   return std::max(std::min((max_joint_value-current_joint)/sampling_duration, std::sqrt(2*acceleration*(max_joint_value-current_joint))),(float)0.0);
 }
 
 float Controller::calculateMaxNegativeVel(float current_joint, float min_joint_value, float acceleration, float sampling_duration){
+  if(current_joint<min_joint_value)
+    return 0.0;
   return std::min(std::max((min_joint_value-current_joint)/sampling_duration, -std::sqrt(2*acceleration*(current_joint-min_joint_value))),(float)0.0);
+}
+
+float Controller::calculateMaxPositiveVel(float difference, float acceleration, float sampling_duration){
+  if(difference<0)
+    return 0.0;
+  return std::max(std::min(difference/sampling_duration, std::sqrt(2*acceleration*difference)),(float)0.0);
+}
+
+float Controller::calculateMaxNegativeVel(float difference, float acceleration, float sampling_duration){
+  if(difference>0)
+    return 0.0;
+  return std::min(std::max(difference/sampling_duration, -std::sqrt(2*acceleration*(-difference))),(float)0.0);
+}
+
+Eigen::Vector3d Controller::quaternionsSubstraction(Eigen::Quaterniond quat_desired, Eigen::Quaterniond quat_current){
+  Eigen::Vector3d v1(quat_desired.x(), quat_desired.y(), quat_desired.z());
+  Eigen::Vector3d v1_aux(quat_desired.x(), quat_desired.y(), quat_desired.z());
+  Eigen::Vector3d v2(quat_current.x(), quat_current.y(), quat_current.z());
+  Eigen::Vector3d v2_aux(quat_current.x(), quat_current.y(), quat_current.z());
+  v1_aux.cross(v2);
+  double norm=v1_aux.norm();
+  double angle=std::atan2(norm, v1.adjoint()*v2);
+  if(angle>(M_PI/2)+0.000000000001){
+    quat_desired.x()=-quat_desired.x();
+    quat_desired.y()=-quat_desired.y();
+    quat_desired.z()=-quat_desired.z();
+    quat_desired.w()=-quat_desired.w();
+  }
+
+  return quat_current.w()*v1-quat_desired.w()*v2+v2_aux.cross(v1);
 }
 
 void Controller::goToGoal(){
@@ -103,9 +137,9 @@ void Controller::goToGoal(){
         T_k_complete=multitasks_[i]->getT_k_complete();
       }
       vels=limitVels(vels);
-      std::cout<<"vels to publish "<<std::endl;
-      std::cout<<vels<<std::endl;
-      std::cout<<"----------------------------"<<std::endl;
+      //std::cout<<"vels to publish "<<std::endl;
+      //std::cout<<vels<<std::endl;
+      //std::cout<<"----------------------------"<<std::endl;
       publishVels(vels);
 
     }
@@ -206,14 +240,121 @@ std::vector<std::vector<std::vector<float> > > Controller::calculateMaxCartesian
     max_negative_cartesian_vel.push_back(calculateMaxNegativeVel(frame.p.x(), min_cartesian_limits_[i][0], acceleration_, sampling_duration_));
     max_negative_cartesian_vel.push_back(calculateMaxNegativeVel(frame.p.y(), min_cartesian_limits_[i][1], acceleration_, sampling_duration_));
     max_negative_cartesian_vel.push_back(calculateMaxNegativeVel(frame.p.z(), min_cartesian_limits_[i][2], acceleration_, sampling_duration_));
-    max_negative_cartesian_vels.push_back(max_negative_cartesian_vel);
 
+    double q_x, q_y, q_z, q_w;
+    frame.M.GetQuaternion(q_x, q_y, q_z, q_w);
+    Eigen::Quaterniond current_rotation(q_w, q_x, q_y, q_z);
+    Eigen::Matrix3d min_cartesian_mat;
+    double min_x, min_y, min_z;
+    if(min_cartesian_limits_[i][3]<-6.28){
+      min_x=0;
+    }
+    else{
+      min_x=min_cartesian_limits_[i][3];
+    }
+    if(min_cartesian_limits_[i][4]<-6.28){
+      min_y=0;
+    }
+    else{
+      min_y=min_cartesian_limits_[i][4];
+    }
+    if(min_cartesian_limits_[i][5]<-6.28){
+      min_z=0;
+    }
+    else{
+      min_z=min_cartesian_limits_[i][5];
+    }
+    min_cartesian_mat=Eigen::AngleAxisd(min_z, Eigen::Vector3d::UnitZ())*
+        Eigen::AngleAxisd(min_y, Eigen::Vector3d::UnitY())*
+        Eigen::AngleAxisd(min_z, Eigen::Vector3d::UnitX());
+    Eigen::Quaterniond quat_limit_min(min_cartesian_mat);
+    std::cout<<"quaternion min"<<std::endl;
+    std::cout<<quat_limit_min.x()<<" "<<quat_limit_min.y()<<" "<<quat_limit_min.z()<<" "<<quat_limit_min.w()<<std::endl;
+    std::cout<<"quaternion current"<<std::endl;
+    std::cout<<current_rotation.x()<<" "<<current_rotation.y()<<" "<<current_rotation.z()<<" "<<current_rotation.w()<<std::endl;
+    Eigen::Vector3d rot_dif=quaternionsSubstraction(quat_limit_min, current_rotation);
+    std::cout<<"diff"<<std::endl;
+    std::cout<<rot_dif<<std::endl;
+
+    std::cout<<"current_rotation"<<rot_dif<<std::endl;
+
+    if(min_cartesian_limits_[i][3]<-6.28){
+      max_negative_cartesian_vel.push_back(-1);
+    }
+    else{
+      max_negative_cartesian_vel.push_back(calculateMaxNegativeVel(rot_dif[0], acceleration_, sampling_duration_));
+    }
+    if(min_cartesian_limits_[i][4]<-6.28){
+      max_negative_cartesian_vel.push_back(-1);
+    }
+    else{
+      max_negative_cartesian_vel.push_back(calculateMaxNegativeVel(rot_dif[1], acceleration_, sampling_duration_));
+    }
+    if(min_cartesian_limits_[i][5]<-6.28){
+     max_negative_cartesian_vel.push_back(-1);
+    }
+    else{
+      max_negative_cartesian_vel.push_back(calculateMaxNegativeVel(rot_dif[2], acceleration_, sampling_duration_));
+    }
+    max_negative_cartesian_vels.push_back(max_negative_cartesian_vel);
 
     max_positive_cartesian_vel.push_back(calculateMaxPositiveVel(frame.p.x(), max_cartesian_limits_[i][0], acceleration_, sampling_duration_));
     max_positive_cartesian_vel.push_back(calculateMaxPositiveVel(frame.p.y(), max_cartesian_limits_[i][1], acceleration_, sampling_duration_));
     max_positive_cartesian_vel.push_back(calculateMaxPositiveVel(frame.p.z(), max_cartesian_limits_[i][2], acceleration_, sampling_duration_));
-    max_positive_cartesian_vels.push_back(max_positive_cartesian_vel);
 
+    Eigen::Matrix3d max_cartesian_mat;
+    double max_x, max_y, max_z;
+    if(max_cartesian_limits_[i][3]>6.28){
+      max_x=0;
+    }
+    else{
+      max_x=max_cartesian_limits_[i][3];
+    }
+    if(max_cartesian_limits_[i][4]>6.28){
+      max_y=0;
+    }
+    else{
+      max_y=max_cartesian_limits_[i][4];
+    }
+    if(max_cartesian_limits_[i][5]>6.28){
+      max_z=0;
+    }
+    else{
+      max_z=max_cartesian_limits_[i][5];
+    }
+    max_cartesian_mat=Eigen::AngleAxisd(max_z, Eigen::Vector3d::UnitZ())*
+        Eigen::AngleAxisd(max_y, Eigen::Vector3d::UnitY())*
+        Eigen::AngleAxisd(max_z, Eigen::Vector3d::UnitX());
+    Eigen::Quaterniond quat_limit_max(max_cartesian_mat);
+    std::cout<<"quaternion max"<<std::endl;
+    std::cout<<quat_limit_max.x()<<" "<<quat_limit_max.y()<<" "<<quat_limit_max.z()<<" "<<quat_limit_max.w()<<std::endl;
+    std::cout<<"quaternion current"<<std::endl;
+    std::cout<<current_rotation.x()<<" "<<current_rotation.y()<<" "<<current_rotation.z()<<" "<<current_rotation.w()<<std::endl;
+    rot_dif=quaternionsSubstraction(quat_limit_max, current_rotation);
+    std::cout<<"diff"<<std::endl;
+    std::cout<<rot_dif<<std::endl;
+
+    std::cout<<"current_rotation"<<rot_dif<<std::endl;
+
+    if(max_cartesian_limits_[i][3]>6.28){
+      max_positive_cartesian_vel.push_back(1);
+    }
+    else{
+      max_positive_cartesian_vel.push_back(calculateMaxPositiveVel(rot_dif[0], acceleration_, sampling_duration_));
+    }
+    if(max_cartesian_limits_[i][4]>6.28){
+      max_positive_cartesian_vel.push_back(1);
+    }
+    else{
+      max_positive_cartesian_vel.push_back(calculateMaxPositiveVel(rot_dif[1], acceleration_, sampling_duration_));
+    }
+    if(max_cartesian_limits_[i][5]>6.28){
+     max_positive_cartesian_vel.push_back(1);
+    }
+    else{
+      max_positive_cartesian_vel.push_back(calculateMaxPositiveVel(rot_dif[2], acceleration_, sampling_duration_));
+    }
+    max_positive_cartesian_vels.push_back(max_positive_cartesian_vel);
 
 
   }

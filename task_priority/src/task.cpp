@@ -242,7 +242,7 @@ Eigen::MatrixXd MultiTask::limitJointsAndCartesian(Eigen::MatrixXd vels){
   }
   desired_vel_joint.setZero();
 
-  Eigen::MatrixXd jac_cartesian(chains_.size()*3, vels.rows()),desired_vel_cartesian(chains_.size()*3,1);
+  Eigen::MatrixXd jac_cartesian(chains_.size()*6, vels.rows()),desired_vel_cartesian(chains_.size()*6,1);
   jac_cartesian.setZero();
   desired_vel_cartesian.setZero();
 
@@ -269,9 +269,12 @@ Eigen::MatrixXd MultiTask::limitJointsAndCartesian(Eigen::MatrixXd vels){
     jac_sovler.JntToJac(q, jac_chain);
 
     for(int j=0; j<chain_joint_relations_[i].size(); j++){
-     jac_cartesian(i*3,chain_joint_relations_[i][j])=jac_chain(0, j+odom_.size());
-     jac_cartesian(i*3+1,chain_joint_relations_[i][j])=jac_chain(1, j+odom_.size());
-     jac_cartesian(i*3+2,chain_joint_relations_[i][j])=jac_chain(2, j+odom_.size());
+     jac_cartesian(i*6,chain_joint_relations_[i][j])=jac_chain(0, j+odom_.size());
+     jac_cartesian(i*6+1,chain_joint_relations_[i][j])=jac_chain(1, j+odom_.size());
+     jac_cartesian(i*6+2,chain_joint_relations_[i][j])=jac_chain(2, j+odom_.size());
+     jac_cartesian(i*6+3,chain_joint_relations_[i][j])=jac_chain(3, j+odom_.size());
+     jac_cartesian(i*6+4,chain_joint_relations_[i][j])=jac_chain(4, j+odom_.size());
+     jac_cartesian(i*6+5,chain_joint_relations_[i][j])=jac_chain(5, j+odom_.size());
     }
   }
 
@@ -279,7 +282,7 @@ Eigen::MatrixXd MultiTask::limitJointsAndCartesian(Eigen::MatrixXd vels){
 
   bool finished=false;
   bool limit_cartesian=false;
-  std::vector<int> active_cartesians(chains_.size()*3,0);
+  std::vector<int> active_cartesians(chains_.size()*6,0);
   std::vector<int> active_joints(vels.rows(),0);
   while(!finished){
     finished=true;
@@ -288,34 +291,34 @@ Eigen::MatrixXd MultiTask::limitJointsAndCartesian(Eigen::MatrixXd vels){
 
     Eigen::MatrixXd cartesian_velocity=jac_cartesian*vels;
     for(int i=0; i<chains_.size(); i++){
-      for(int j=0; j<3; j++){
-          if(cartesian_velocity(i*3+j,0)>max_positive_cartesian_vel_[i][j]+0.000001){
-            active_cartesians[i*3+j]=1;
-            desired_vel_cartesian(i*3+j,0)=max_positive_cartesian_vel_[i][j]-cartesian_velocity(i*3+j);
-            std::cout<<"desired vel cartesian"<<std::endl;
-            std::cout<<desired_vel_cartesian<<std::endl;
+      for(int j=0; j<6; j++){
+          if(cartesian_velocity(i*6+j,0)>max_positive_cartesian_vel_[i][j]+0.000001){
+            active_cartesians[i*6+j]=1;
+            desired_vel_cartesian(i*6+j,0)=max_positive_cartesian_vel_[i][j]-cartesian_velocity(i*6+j);
+            //std::cout<<"desired vel cartesian"<<std::endl;
+            //std::cout<<desired_vel_cartesian<<std::endl;
             finished=false;
             limit_cartesian=true;
             std::fill(active_joints.begin(), active_joints.end(), 0);
             std::cout<<"Cartesian chain "<<i<<" axis "<<j<<" mayor que max_positive"<<std::endl;
-            std::cout<<cartesian_velocity(i*3+j)<<"    ----->  "<<max_positive_cartesian_vel_[i][j]<<std::endl;
+            std::cout<<cartesian_velocity(i*6+j)<<"    ----->  "<<max_positive_cartesian_vel_[i][j]<<std::endl;
           }
-          else if(cartesian_velocity(i*3+j,0)<max_negative_cartesian_vel_[i][j]-0.000001){
-            active_cartesians[i*3+j]=1;
-            desired_vel_cartesian(i*3+j,0)=max_negative_cartesian_vel_[i][j]-cartesian_velocity(i*3+j);
+          else if(cartesian_velocity(i*6+j,0)<max_negative_cartesian_vel_[i][j]-0.000001){
+            active_cartesians[i*6+j]=1;
+            desired_vel_cartesian(i*6+j,0)=max_negative_cartesian_vel_[i][j]-cartesian_velocity(i*6+j);
 
             finished=false;
             limit_cartesian=true;
             std::fill(active_joints.begin(), active_joints.end(), 0);
             std::cout<<"Cartesian chain "<<i<<" axis "<<j<<" menor que max_negative"<<std::endl;
-            std::cout<<cartesian_velocity(i*3+j)<<"    ----->  "<<max_negative_cartesian_vel_[i][j]<<std::endl;
+            std::cout<<cartesian_velocity(i*6+j)<<"    ----->  "<<max_negative_cartesian_vel_[i][j]<<std::endl;
           }
-          else if(active_cartesians[i*3+j]==1){
-            desired_vel_cartesian(i*3+j,0)=0;
+          else if(active_cartesians[i*6+j]==1){
+            desired_vel_cartesian(i*6+j,0)=0;
         }
       }
     }
-    std::cout<<"salgo"<<std::endl;
+
     if(!limit_cartesian){
       for(int i=0; i<vels.rows(); i++){
         if(vels(i,0)>max_positive_joint_vel_[i]+0.000001){
@@ -372,18 +375,18 @@ Eigen::MatrixXd MultiTask::limitJointsAndCartesian(Eigen::MatrixXd vels){
     Eigen::MatrixXd desired_vel(desired_vel_cartesian.rows()+ desired_vel_joint.rows(),1);
     desired_vel<<desired_vel_cartesian, desired_vel_joint;
 
-    std::cout<<"-----------------------------------------------"<<std::endl;
+    /*std::cout<<"-----------------------------------------------"<<std::endl;
     std::cout<<vels<<std::endl;
     std::cout<<desired_vel<<std::endl;
 
     std::cout<<(new_T_k*(pinvMat(jac*new_T_k)))*desired_vel<<std::endl;
 
-    std::cout<<"-----------------------------------------------"<<std::endl;
+    std::cout<<"-----------------------------------------------"<<std::endl;*/
 
 
     vels=vels+(new_T_k*(pinvMat(jac*new_T_k)))*desired_vel;
-    std::cout<<"new vel"<<std::endl;
-    std::cout<<vels<<std::endl;
+   /* std::cout<<"new vel"<<std::endl;
+    std::cout<<vels<<std::endl;*/
 
 
   }

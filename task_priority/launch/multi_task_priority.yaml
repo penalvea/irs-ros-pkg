@@ -27,8 +27,8 @@ auv_arm/joint_7: [RotZ, -0.083, 1.5708, 0.0, 1.9722]
 auv_arm/joint_8: [RotZ, 0.0, 0.0, 0.49938, 0.0]
 
 auv_arm/chain_joint_relation: [0, 1, 2, 3, 4, 5, 6, 7]
-auv_arm/max_cartesian_limit: [20,20,20]
-auv_arm/min_cartesian_limit: [-20,-20,-20]
+auv_arm/max_cartesian_limit: [20,20,20, 20, 0.6, 20]
+auv_arm/min_cartesian_limit: [-20,-20,-20, -20, 0.3, -20]
 
 
 auv/joint_1: [TransX]
@@ -37,8 +37,8 @@ auv/joint_3: [TransZ]
 auv/joint_4: [RotZ]
 
 auv/chain_joint_relation: [0, 1, 2, 3]
-auv/max_cartesian_limit: [1,1,1]
-auv/min_cartesian_limit: [-20,-20,-20]
+auv/max_cartesian_limit: [20,20,20, 6.28, 6.28, 6.28]
+auv/min_cartesian_limit: [-20,-20,-20, -6.28, -6.28, -6.28]
 
 
 

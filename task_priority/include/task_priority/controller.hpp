@@ -33,11 +33,15 @@ class Controller{
   Eigen::MatrixXd limitVels(Eigen::MatrixXd vels);
   float calculateMaxNegativeVel(float current_joint, float min_joint_value, float acceleration, float sampling_duration);
   float calculateMaxPositiveVel(float current_joint, float max_joint_value, float acceleration, float sampling_duration);
+  float calculateMaxNegativeVel(float difference, float acceleration, float sampling_duration);
+  float calculateMaxPositiveVel(float difference, float acceleration, float sampling_duration);
+  Eigen::Vector3d quaternionsSubstraction(Eigen::Quaterniond quat_desired, Eigen::Quaterniond quat_current);
   std::vector<std::vector<std::vector<float> > > calculateMaxCartesianVels(std::vector<float> joints, std::vector<float> odom);
 public:
   Controller(std::vector<MultiTaskPtr> multitasks, int n_joints, std::vector<float> max_joint_limit, std::vector<float> min_joint_limit, std::vector<std::vector<float> > max_cartesian_limits, std::vector<std::vector<float> > min_cartesian_limits, float acceleration, float max_joint_vel, float sampling_duration, ros::NodeHandle nh, std::string arm_joint_state_topic, std::string arm_joint_command_topic, std::string vehicle_tf, std::string world_tf, std::string vehicle_command_topic, std::vector<KDL::Chain> chains, std::vector<std::vector<int> > chain_joint_relations);
   ~Controller();
   void goToGoal();
+
 
 };
 typedef boost::shared_ptr<Controller> ControllerPtr;
