@@ -222,7 +222,7 @@ void MultiTask::setMaxNegativeCartesianVelocity(std::vector<std::vector<float> >
 }
 
 Eigen::MatrixXd MultiTask::limitJointsAndCartesian(Eigen::MatrixXd vels){
-  std::cout<<"Limit cartesian velocities"<<std::endl;
+ /* std::cout<<"Limit cartesian velocities"<<std::endl;
   for(int j=0; j<chains_.size(); j++){
     std::cout<<"Chain "<<j<<std::endl;
 
@@ -233,7 +233,7 @@ Eigen::MatrixXd MultiTask::limitJointsAndCartesian(Eigen::MatrixXd vels){
   std::cout<<"Limit joint velocities"<<std::endl;
   for(int i=0; i< max_positive_joint_vel_.size(); i++){
     std::cout<<max_positive_joint_vel_[i]<<"     "<<max_negative_joint_vel_[i]<<std::endl;
-  }
+  }*/
 
   Eigen::MatrixXd jac_joint(vels.rows(), vels.rows()), desired_vel_joint(vels.rows(),1);
   jac_joint.setZero();

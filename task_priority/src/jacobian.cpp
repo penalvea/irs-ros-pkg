@@ -140,3 +140,46 @@ void CartesianJacobian::setOdom(std::vector<float> odom){
   odom_=odom;
 }
 
+
+JointJacobian::JointJacobian(int n_joints, std::vector<int> joints_relation, std::vector<int> mask_joint)
+  :Jacobian(){
+
+  mask_joint_=mask_joint;
+  n_joints_=n_joints;
+  joints_relation_=joints_relation;
+
+}
+
+JointJacobian::~JointJacobian(){}
+
+bool JointJacobian::calculateJac(std::vector<float> joints){
+
+  Eigen::MatrixXd jacobian(n_joints_, n_joints_);
+  jacobian=Eigen::MatrixXd::Identity(n_joints_, n_joints_);
+  Eigen::MatrixXd jacobian_no_mask=jacobian;
+  if(mask_joint_.size()==jacobian.cols()){
+    for(int j=0; j<mask_joint_.size(); j++){
+      if(mask_joint_[j]==0){
+        for(int i=0; i<jacobian.rows(); i++){
+          jacobian(i,j)=0;
+        }
+      }
+    }
+  }
+
+  setJac(jacobian);
+  setJacNoMask(jacobian_no_mask);
+  return  true;
+
+
+}
+void JointJacobian::setMaskCartesian(std::vector<int> mask){
+}
+void JointJacobian::setMaskJoint(std::vector<int> mask){
+  mask_joint_=mask;
+}
+void JointJacobian::setOdom(std::vector<float> odom){
+}
+
+
+

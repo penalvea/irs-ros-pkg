@@ -46,5 +46,20 @@ public:
 typedef boost::shared_ptr<CartesianJacobian> CartesianJacobianPtr;
 
 
+class JointJacobian: public Jacobian{
+  int n_joints_;
+  std::vector<int> mask_joint_;
+  std::vector<int> joints_relation_;
+
+public:
+  JointJacobian(int n_joints, std::vector<int> joints_relation, std::vector<int> mask_joint);
+  ~JointJacobian();
+  bool calculateJac(std::vector<float> joints);
+  void setMaskCartesian(std::vector<int> mask);
+  void setMaskJoint(std::vector<int> mask);
+  void setOdom(std::vector<float> odom);
+};
+
+
 
 #endif // JACOBIAN_H

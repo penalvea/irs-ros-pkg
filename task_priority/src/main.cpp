@@ -141,7 +141,7 @@ int main(int argc, char **argv){
         }
         min_cartesian_limits.push_back(min_cartesian_limit);
 
-        ROS_INFO("chain %s added", chain_names[i].c_str());
+        ROS_INFO("chain %s added: %d joints", chain_names[i].c_str(), cont-1);
       }
     }
 

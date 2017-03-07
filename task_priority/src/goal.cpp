@@ -106,6 +106,13 @@ Eigen::MatrixXd GoalFixedPose::getGoal(std::vector<float> joints, std::vector<fl
     }
   }
   cartesian_vel=limitCaresianVel(cartesian_vel);
+  //std::cout<<"goal----cartpos"<<std::endl;
+  //std::cout<<goal_(0,0)<<"      "<<cartpos.p.x()<<std::endl;
+  //std::cout<<goal_(1,0)<<"      "<<cartpos.p.y()<<std::endl;
+  //std::cout<<goal_(2,0)<<"      "<<cartpos.p.z()<<std::endl;
+
+  //std::cout<<"cartesian_vel"<<std::endl;
+  //std::cout<<cartesian_vel<<std::endl;
   return cartesian_vel;
 }
 
@@ -131,7 +138,7 @@ GoalROSPose::GoalROSPose(KDL::Chain chain, std::vector<int> mask_cart, std::stri
 GoalROSPose::~GoalROSPose(){}
 
 void GoalROSPose::poseCallback(const geometry_msgs::Pose::ConstPtr &msg){
-  std::cout<<"recivo pose"<<std::endl;
+  std::cout<<"pose received"<<std::endl;
   goal_.orientation=msg->orientation;
   goal_.position=msg->position;
   setInitialized(true);

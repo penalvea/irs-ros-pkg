@@ -24,18 +24,20 @@ chain_joint_relations_=chain_joint_relations;
 
 joints_sub_=nh_.subscribe<sensor_msgs::JointState>(arm_joint_state_topic, 1, &Controller::jointsCallback, this);
 joints_pub_=nh_.advertise<sensor_msgs::JointState>(arm_joint_command_topic,1);
-vehicle_pub_=nh_.advertise<nav_msgs::Odometry>(vehicle_command_topic, 1);
+//vehicle_pub_=nh_.advertise<nav_msgs::Odometry>(vehicle_command_topic, 1);
+vehicle_pub_=nh_.advertise<auv_msgs::BodyVelocityReq>(vehicle_command_topic, 1);
 
 }
 
 Controller::~Controller(){}
 
 void Controller::jointsCallback(const sensor_msgs::JointStateConstPtr &msg){
-  for(int i=0; i<4; i++){
+  for(int i=0; i<5; i++){
     current_joints_[i]=0.0;
   }
-  for(int i=4; i<8; i++){
-    current_joints_[i]=msg->position[i-4];
+
+  for(int i=5; i<9; i++){
+    current_joints_[i]=msg->position[i-5];
   }
   joints_init_=true;
 }
@@ -190,6 +192,25 @@ void Controller::publishVels(Eigen::MatrixXd vels){
       }
   odom_msg.header.stamp=ros::Time::now();
 
+  auv_msgs::BodyVelocityReq vehicle_msg;
+
+  vehicle_msg.header.stamp=ros::Time::now();
+  vehicle_msg.header.frame_id="girona500";
+  vehicle_msg.goal.requester="irslab";
+  vehicle_msg.goal.id=0;
+  vehicle_msg.goal.priority=10;
+  vehicle_msg.twist.linear.x=0.5*vels(0,0);
+  vehicle_msg.twist.linear.y=0.5*vels(1,0);
+  vehicle_msg.twist.linear.z=0.3*vels(2,0);
+  vehicle_msg.twist.angular.x=0;
+  vehicle_msg.twist.angular.y=0;
+  vehicle_msg.twist.angular.z=0.5*vels(3,0);
+
+  vehicle_msg.disable_axis.roll=true;
+  vehicle_msg.disable_axis.pitch=true;
+
+
+
 
 
   sensor_msgs::JointState joint_msg;
@@ -199,13 +220,14 @@ void Controller::publishVels(Eigen::MatrixXd vels){
   joint_msg.name.push_back("JawRotate");
   joint_msg.name.push_back("JawOpening");
 
-  for(int i=4; i<8; i++){
-    joint_msg.velocity.push_back(vels(i,0));
+  for(int i=5; i<9; i++){
+    joint_msg.velocity.push_back(5*vels(i,0));
   }
   joint_msg.velocity.push_back(0);
   joint_msg.header.stamp=ros::Time::now();
 
-  vehicle_pub_.publish(odom_msg);
+  //vehicle_pub_.publish(odom_msg);
+  vehicle_pub_.publish(vehicle_msg);
   joints_pub_.publish(joint_msg);
   ros::spinOnce();
 }
@@ -232,14 +254,25 @@ std::vector<std::vector<std::vector<float> > > Controller::calculateMaxCartesian
     for(int j=0; j<chains_[i].getNrOfJoints(); j++){
       q(j+odom.size())=joints[chain_joint_relations_[i][j]];
     }
+    //for(int j=0; j<q.rows(); j++){
+     // std::cout<<q(j)<<"  ";
+    //}
+    //std::cout<<std::endl;
 
     KDL::Frame frame;
     fk.JntToCart(q, frame);
     std::vector<float> max_negative_cartesian_vel, max_positive_cartesian_vel;
+    //std::cout<<"Direct kinematics"<<std::endl;
+
+    //std::cout<<frame.p.x()<<" "<<frame.p.y()<<" "<<frame.p.z()<<std::endl;
+    double x_a, y_a, z_a, w_a;
+    frame.M.GetQuaternion(x_a, y_a, z_a, w_a);
+    //std::cout<<x_a<<" "<<y_a<<" "<<z_a<<" "<<w_a<<std::endl;
 
     max_negative_cartesian_vel.push_back(calculateMaxNegativeVel(frame.p.x(), min_cartesian_limits_[i][0], acceleration_, sampling_duration_));
     max_negative_cartesian_vel.push_back(calculateMaxNegativeVel(frame.p.y(), min_cartesian_limits_[i][1], acceleration_, sampling_duration_));
     max_negative_cartesian_vel.push_back(calculateMaxNegativeVel(frame.p.z(), min_cartesian_limits_[i][2], acceleration_, sampling_duration_));
+
 
     double q_x, q_y, q_z, q_w;
     frame.M.GetQuaternion(q_x, q_y, q_z, q_w);
@@ -268,15 +301,15 @@ std::vector<std::vector<std::vector<float> > > Controller::calculateMaxCartesian
         Eigen::AngleAxisd(min_y, Eigen::Vector3d::UnitY())*
         Eigen::AngleAxisd(min_z, Eigen::Vector3d::UnitX());
     Eigen::Quaterniond quat_limit_min(min_cartesian_mat);
-    std::cout<<"quaternion min"<<std::endl;
+    /*std::cout<<"quaternion min"<<std::endl;
     std::cout<<quat_limit_min.x()<<" "<<quat_limit_min.y()<<" "<<quat_limit_min.z()<<" "<<quat_limit_min.w()<<std::endl;
     std::cout<<"quaternion current"<<std::endl;
-    std::cout<<current_rotation.x()<<" "<<current_rotation.y()<<" "<<current_rotation.z()<<" "<<current_rotation.w()<<std::endl;
+    std::cout<<current_rotation.x()<<" "<<current_rotation.y()<<" "<<current_rotation.z()<<" "<<current_rotation.w()<<std::endl;*/
     Eigen::Vector3d rot_dif=quaternionsSubstraction(quat_limit_min, current_rotation);
-    std::cout<<"diff"<<std::endl;
-    std::cout<<rot_dif<<std::endl;
+    //std::cout<<"diff"<<std::endl;
+    //std::cout<<rot_dif<<std::endl;
 
-    std::cout<<"current_rotation"<<rot_dif<<std::endl;
+    //std::cout<<"current_rotation"<<rot_dif<<std::endl;
 
     if(min_cartesian_limits_[i][3]<-6.28){
       max_negative_cartesian_vel.push_back(-1);
@@ -326,15 +359,15 @@ std::vector<std::vector<std::vector<float> > > Controller::calculateMaxCartesian
         Eigen::AngleAxisd(max_y, Eigen::Vector3d::UnitY())*
         Eigen::AngleAxisd(max_z, Eigen::Vector3d::UnitX());
     Eigen::Quaterniond quat_limit_max(max_cartesian_mat);
-    std::cout<<"quaternion max"<<std::endl;
+    /*std::cout<<"quaternion max"<<std::endl;
     std::cout<<quat_limit_max.x()<<" "<<quat_limit_max.y()<<" "<<quat_limit_max.z()<<" "<<quat_limit_max.w()<<std::endl;
     std::cout<<"quaternion current"<<std::endl;
-    std::cout<<current_rotation.x()<<" "<<current_rotation.y()<<" "<<current_rotation.z()<<" "<<current_rotation.w()<<std::endl;
+    std::cout<<current_rotation.x()<<" "<<current_rotation.y()<<" "<<current_rotation.z()<<" "<<current_rotation.w()<<std::endl;*/
     rot_dif=quaternionsSubstraction(quat_limit_max, current_rotation);
-    std::cout<<"diff"<<std::endl;
-    std::cout<<rot_dif<<std::endl;
+   // std::cout<<"diff"<<std::endl;
+    //std::cout<<rot_dif<<std::endl;
 
-    std::cout<<"current_rotation"<<rot_dif<<std::endl;
+    //std::cout<<"current_rotation"<<rot_dif<<std::endl;
 
     if(max_cartesian_limits_[i][3]>6.28){
       max_positive_cartesian_vel.push_back(1);

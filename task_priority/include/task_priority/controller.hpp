@@ -6,6 +6,7 @@
 #include <sensor_msgs/JointState.h>
 #include <tf/transform_listener.h>
 #include <nav_msgs/Odometry.h>
+#include <auv_msgs/BodyVelocityReq.h>
 
 
 class Controller{
