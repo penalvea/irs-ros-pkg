@@ -1,4 +1,7 @@
 #include <task_priority/controller.hpp>
+#include <task_priority/TaskPriority_msg.h>
+
+
 
 Controller::Controller(std::vector<MultiTaskPtr> multitasks, int n_joints, std::vector<float> max_joint_limit, std::vector<float> min_joint_limit, std::vector<std::vector<float> > max_cartesian_limits, std::vector<std::vector<float> > min_cartesian_limits, float acceleration, float max_joint_vel, float sampling_duration, ros::NodeHandle nh, std::string arm_joint_state_topic, std::string arm_joint_command_topic, std::string vehicle_tf, std::string world_tf, std::string vehicle_command_topic, std::vector<KDL::Chain> chains, std::vector<std::vector<int> > chain_joint_relations){
 multitasks_=multitasks;
@@ -24,9 +27,10 @@ chain_joint_relations_=chain_joint_relations;
 
 joints_sub_=nh_.subscribe<sensor_msgs::JointState>(arm_joint_state_topic, 1, &Controller::jointsCallback, this);
 joints_pub_=nh_.advertise<sensor_msgs::JointState>(arm_joint_command_topic,1);
-//vehicle_pub_=nh_.advertise<nav_msgs::Odometry>(vehicle_command_topic, 1);
-vehicle_pub_=nh_.advertise<auv_msgs::BodyVelocityReq>(vehicle_command_topic, 1);
+vehicle_pub_=nh_.advertise<nav_msgs::Odometry>(vehicle_command_topic, 1);
+//vehicle_pub_=nh_.advertise<auv_msgs::BodyVelocityReq>(vehicle_command_topic, 1);
 
+status_pub_=nh_.advertise<task_priority::TaskPriority_msg>("/task_priority/status", 1);
 }
 
 Controller::~Controller(){}
@@ -221,14 +225,15 @@ void Controller::publishVels(Eigen::MatrixXd vels){
   joint_msg.name.push_back("JawOpening");
 
   for(int i=5; i<9; i++){
-    joint_msg.velocity.push_back(5*vels(i,0));
+    joint_msg.velocity.push_back(vels(i,0));
   }
   joint_msg.velocity.push_back(0);
   joint_msg.header.stamp=ros::Time::now();
 
-  //vehicle_pub_.publish(odom_msg);
-  vehicle_pub_.publish(vehicle_msg);
+  vehicle_pub_.publish(odom_msg);
+  //vehicle_pub_.publish(vehicle_msg);
   joints_pub_.publish(joint_msg);
+  publishStatus(vels);
   ros::spinOnce();
 }
 
@@ -395,5 +400,16 @@ std::vector<std::vector<std::vector<float> > > Controller::calculateMaxCartesian
   max_vels.push_back(max_positive_cartesian_vels);
   max_vels.push_back(max_negative_cartesian_vels);
   return max_vels;
+}
+
+void Controller::publishStatus(Eigen::MatrixXd vels){
+  task_priority::TaskPriority_msg msg;
+  for(int i=0; i<multitasks_.size(); i++){
+    msg.multi_task.push_back(multitasks_[i]->getMsg(vels));
+  }
+  msg.header.stamp=ros::Time::now();
+  msg.header.frame_id="task_priority";
+  status_pub_.publish(msg);
+
 }
 

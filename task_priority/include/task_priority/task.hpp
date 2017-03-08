@@ -6,11 +6,15 @@
 #include <boost/shared_ptr.hpp>
 #include <kdl/chainfksolver.hpp>
 #include <kdl/frames.hpp>
-#include "goal.hpp"
+#include "task_priority/goal.hpp"
+#include "task_priority/MultiTask_msg.h"
+#include "task_priority/Task_msg.h"
 
 
 class Task{
   CartesianJacobianPtr jac_;
+  JointJacobianPtr jac_joint_;
+
   CartesianTaskVelocityPtr task_velocity_;
   std::vector<int> mask_cartesian_;
   std::vector<int> mask_joint_;
@@ -18,20 +22,25 @@ class Task{
   std::vector<int> chain_joint_relation_;
   bool active_;
   GoalPtr goal_;
+  bool cartesian_;
+  std::string name_;
 
 
 
 public:
-  Task(const KDL::Chain& chain, std::vector<int> mask_cartesian, int n_joints, std::vector<int> mask_joint, std::vector<int> chain_joint_relation, GoalPtr goal, bool frame_inertial);
+  Task(const KDL::Chain& chain, std::vector<int> mask_cartesian, int n_joints, std::vector<int> mask_joint, std::vector<int> chain_joint_relation, GoalPtr goal, bool frame_inertial, bool cartesian, std::string name);
   ~Task();
   void activate();
   void deactivate();
   bool isActive();
   Eigen::MatrixXd calculateCartesianError(Eigen::MatrixXd current_joint_vel, std::vector<float> joints, std::vector<float> odom);
+  Eigen::MatrixXd calculateJointError(Eigen::MatrixXd current_joint_vel, std::vector<float> joints, std::vector<float> odom);
   Eigen::MatrixXd getJacobian();
   Eigen::MatrixXd getJacobianNoMask();
   void calculateJacobian(std::vector<float> current_joints, std::vector<float> odom);
   bool goalInitialized();
+  bool isCartesian();
+  task_priority::Task_msg getMsg(Eigen::MatrixXd vels);
 };
 typedef boost::shared_ptr<Task> TaskPtr;
 
@@ -52,10 +61,14 @@ class MultiTask{
   std::vector<std::vector<int> > chain_joint_relations_;
   std::vector<std::vector<float> > max_positive_cartesian_vel_, max_negative_cartesian_vel_;
   std::vector<std::vector<int> > joints_priority_;
+  std::string name_;
+
+
+
   Eigen::MatrixXd pinvMat(Eigen::MatrixXd matrix);
 
 public:
-  MultiTask( std::vector<TaskPtr> tasks, std::vector<KDL::Chain> chains, std::vector<std::vector<int> > chain_joint_relations, std::vector<std::vector<int> > joints_priority);
+  MultiTask( std::vector<TaskPtr> tasks, std::vector<KDL::Chain> chains, std::vector<std::vector<int> > chain_joint_relations, std::vector<std::vector<int> > joints_priority, std::string name);
   ~MultiTask();
   Eigen::MatrixXd getJacobian();
   std::vector<float> calculateCartesianVelocity();
@@ -78,6 +91,7 @@ public:
   Eigen::MatrixXd getT_k_complete();
   Eigen::MatrixXd limitJointsAndCartesian(Eigen::MatrixXd vels);
   bool goalsInitialized();
+  task_priority::MultiTask_msg getMsg(Eigen::MatrixXd vels);
 };
 
 typedef boost::shared_ptr<MultiTask> MultiTaskPtr;

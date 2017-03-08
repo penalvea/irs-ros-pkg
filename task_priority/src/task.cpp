@@ -1,14 +1,18 @@
 #include "task_priority/task.hpp"
 
-Task::Task(const KDL::Chain &chain, std::vector<int> mask_cartesian, int n_joints, std::vector<int> mask_joint, std::vector<int> chain_joint_relation, GoalPtr goal, bool frame_inertial){
+
+Task::Task(const KDL::Chain &chain, std::vector<int> mask_cartesian, int n_joints, std::vector<int> mask_joint, std::vector<int> chain_joint_relation, GoalPtr goal, bool frame_inertial, bool cartesian, std::string name){
   active_=true;
   chain_=chain;
   chain_joint_relation_=chain_joint_relation;
   mask_cartesian_=mask_cartesian;
   mask_joint_=mask_joint;
   jac_.reset(new CartesianJacobian(chain, n_joints, chain_joint_relation, mask_cartesian, mask_joint, frame_inertial));
+  jac_joint_.reset(new JointJacobian(n_joints, chain_joint_relation, mask_joint));
   task_velocity_.reset(new CartesianTaskVelocity());
   goal_=goal;
+  cartesian_=cartesian;
+  name_=name;
 
 }
 
@@ -34,7 +38,7 @@ Eigen::MatrixXd Task::calculateCartesianError(Eigen::MatrixXd current_joint_vel,
   Eigen::MatrixXd vel_error=task_velocity_->calculateCartesianVelocity(jac_->getJacNoMask()*current_joint_vel, goal_->getGoal(joints, odom));
   //std::cout<<vel_error<<std::endl;
 
-  for(int i=0; i<vel_error.size(); i++){
+  for(int i=0; i<vel_error.rows(); i++){
     if(mask_cartesian_[i]==0){
 
       vel_error(i,0)=0;
@@ -43,16 +47,33 @@ Eigen::MatrixXd Task::calculateCartesianError(Eigen::MatrixXd current_joint_vel,
   return vel_error;
 
 }
+Eigen::MatrixXd Task::calculateJointError(Eigen::MatrixXd current_joint_vel, std::vector<float> joints, std::vector<float> odom){
+  Eigen::MatrixXd vel_error=task_velocity_->calculateJointVelocity( current_joint_vel, goal_->getGoal(joints, odom));
+  for(int i=0; i<vel_error.rows(); i++){
+    if(mask_joint_[i]==0){
+      vel_error(i,0)=0;
+    }
+  }
+
+  return vel_error;
+}
 
 Eigen::MatrixXd Task::getJacobian(){
-  return jac_->getJac();
+  if(cartesian_)
+    return jac_->getJac();
+  else
+    return jac_joint_->getJac();
 }
 Eigen::MatrixXd Task::getJacobianNoMask(){
-  return jac_->getJacNoMask();
+  if(cartesian_)
+    return jac_->getJacNoMask();
+  else
+    return jac_joint_->getJacNoMask();
 }
 void Task::calculateJacobian(std::vector<float> current_joints, std::vector<float> odom){
   jac_->setOdom(odom);
   jac_->calculateJac(current_joints);
+  jac_joint_->calculateJac(current_joints);
 }
 
 
@@ -60,16 +81,30 @@ bool Task::goalInitialized(){
   return goal_->getInitialized();
 }
 
+bool Task::isCartesian(){
+  return cartesian_;
+}
+
+task_priority::Task_msg Task::getMsg(Eigen::MatrixXd vels){
+  task_priority::Task_msg msg;
+  msg.task_name=name_;
+  if(cartesian_)
+    msg.error=goal_->getMsg(jac_->getJacNoMask()*vels, mask_cartesian_);
+  else
+    msg.error=goal_->getMsg(vels, mask_joint_);
+
+  return msg;
+
+}
 
 
 
-
-
-MultiTask::MultiTask(std::vector<TaskPtr> tasks, std::vector<KDL::Chain> chains, std::vector<std::vector<int> > chain_joint_relations, std::vector<std::vector<int> > joints_priority){
+MultiTask::MultiTask(std::vector<TaskPtr> tasks, std::vector<KDL::Chain> chains, std::vector<std::vector<int> > chain_joint_relations, std::vector<std::vector<int> > joints_priority, std::string name){
   tasks_=tasks;
   chains_=chains;
   chain_joint_relations_=chain_joint_relations;
   joints_priority_=joints_priority;
+  name_=name;
 
 }
 MultiTask::~MultiTask(){}
@@ -113,9 +148,13 @@ void MultiTask::calculateJacobians(Eigen::MatrixXd T_k_complete){
 void MultiTask::adaptJacobiansTask(std::vector<int> joints_active){
   Eigen::MatrixXd T_k_complete_task=T_k_complete_;
   Eigen::MatrixXd J_k_task=J_k_;
+  //std::cout<<T_k_complete_task<<std::endl;
+  //std::cout<<"-------------------"<<std::endl;
+  //std::cout<<J_k_task<<std::endl;
+
   for(int j=0; j<joints_active.size(); j++){
     if(joints_active[j]==0){
-      for(int i=0; i<6; i++){
+      for(int i=0; i<J_k_task.rows(); i++){
         T_k_complete_task(i,j)=0;
         J_k_task(i,j)=0;
       }
@@ -153,11 +192,23 @@ void MultiTask::adaptJacobiansTask(std::vector<int> joints_active){
 }
 
 Eigen::MatrixXd MultiTask::calculateError(Eigen::MatrixXd last_vel){
-  Eigen::MatrixXd error=tasks_[0]->calculateCartesianError(last_vel, current_joints_, odom_);
+  Eigen::MatrixXd error;
+  if(tasks_[0]->isCartesian()){
+    error=tasks_[0]->calculateCartesianError(last_vel, current_joints_, odom_);
+  }
+  else{
+    error=tasks_[0]->calculateJointError(last_vel, current_joints_, odom_);
+  }
   Eigen::MatrixXd aux;
   for(int i=1; i<tasks_.size(); i++){
     aux=error;
-    Eigen::MatrixXd task_error=tasks_[i]->calculateCartesianError(last_vel, current_joints_, odom_);
+    Eigen::MatrixXd task_error;
+    if(tasks_[i]->isCartesian()){
+      task_error=tasks_[i]->calculateCartesianError(last_vel, current_joints_, odom_);
+    }
+    else{
+      task_error=tasks_[i]->calculateJointError(last_vel, current_joints_, odom_);
+    }
     error.resize(aux.rows()+task_error.rows(), task_error.cols());
     error<<aux,task_error;
   }
@@ -170,10 +221,8 @@ Eigen::MatrixXd MultiTask::calculateJointsVel(Eigen::MatrixXd error, std::vector
 }
 
 Eigen::MatrixXd MultiTask::calculateMultiTaskVel(Eigen::MatrixXd last_vel, Eigen::MatrixXd T_k_complete){
-  std::cout<<" n_tareas= "<<tasks_.size()<<std::endl;
   ros::spinOnce();
   calculateJacobians(T_k_complete);
-  std::cout<<"Joint priority size= "<<joints_priority_.size()<<std::endl;
   for(int i=0; i<joints_priority_.size(); i++){
     std::vector<int> joints_active(current_joints_.size(),0);
     for(int k=0; k<=i; k++){
@@ -181,11 +230,8 @@ Eigen::MatrixXd MultiTask::calculateMultiTaskVel(Eigen::MatrixXd last_vel, Eigen
         joints_active[joints_priority_[k][j]]=1;
       }
     }
-
     adaptJacobiansTask(joints_active);
     Eigen::MatrixXd error=calculateError(last_vel);
-   // std::cout<<"El error cartesiano es"<<std::endl;
-    //std::cout<<error<<std::endl;
     Eigen::MatrixXd next_vel=last_vel+calculateJointsVel(error, joints_active);
     //std::cout<<"Vels antes limitar"<<std::endl;
     //std::cout<<next_vel<<std::endl;
@@ -402,4 +448,13 @@ bool MultiTask::goalsInitialized(){
     initialized= initialized && tasks_[i]->goalInitialized();
   }
   return initialized;
+}
+
+task_priority::MultiTask_msg MultiTask::getMsg(Eigen::MatrixXd vels){
+  task_priority::MultiTask_msg msg;
+  msg.name=name_;
+  for(int i=0; i<tasks_.size(); i++){
+    msg.tasks.push_back(tasks_[i]->getMsg(vels));
+  }
+  return msg;
 }

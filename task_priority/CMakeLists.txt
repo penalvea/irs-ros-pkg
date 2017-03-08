@@ -11,7 +11,18 @@ find_package(catkin REQUIRED COMPONENTS
   tf_conversions
 )
 
+add_message_files(
+FILES
+TaskPriority_msg.msg
+Task_msg.msg
+MultiTask_msg.msg
+Error_msg.msg
+)
 
+generate_messages(
+    DEPENDENCIES
+    std_msgs
+    )
 
 
 catkin_package(
@@ -47,13 +58,7 @@ add_library(${PROJECT_NAME}
 #  ${PROJECT_NAME}
 #  ${catkin_LIBRARIES}
 #)
-add_message_files(
-FILES
-TaskPriority.msg
-Task.msg
-MultiTask.msg
-CartesianError.msg
-)
+
 
 
 add_executable(multi_task_priority src/main.cpp)

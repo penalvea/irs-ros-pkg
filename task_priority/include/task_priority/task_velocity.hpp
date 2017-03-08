@@ -11,8 +11,11 @@
 class CartesianTaskVelocity{
 public:
   CartesianTaskVelocity();
+
   ~CartesianTaskVelocity();
   Eigen::MatrixXd calculateCartesianVelocity(Eigen::MatrixXd current, Eigen::MatrixXd goal);
+  Eigen::MatrixXd calculateJointVelocity(Eigen::MatrixXd current, Eigen::MatrixXd goal);
+
 
 };
 typedef boost::shared_ptr<CartesianTaskVelocity> CartesianTaskVelocityPtr;

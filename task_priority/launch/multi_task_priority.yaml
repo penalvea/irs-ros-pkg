@@ -6,16 +6,16 @@ sampling_duration: 0.1
 n_joints: 9
 
 max_joint_limit: [100,   100,  100,  100, 100,  0.4, 1.37, 1.9529, 2.14]
-min_joint_limit: [-100, -100, -100, -100, -100, -1.3, 0.2,  0.2,   -2.14]
+min_joint_limit: [-100, -100, -100, -100, -100, -1.3, 0.1,  0.1,   -2.14]
 
-arm_joint_state_topic: /arm5e/joint_state_angle
-arm_joint_command_topic: /arm5e/command_angle
-#arm_joint_state_topic: /uwsim/joint_state
-#arm_joint_command_topic: /uwsim/joint_state_command
+#arm_joint_state_topic: /arm5e/joint_state_angle
+#arm_joint_command_topic: /arm5e/command_angle
+arm_joint_state_topic: /uwsim/joint_state
+arm_joint_command_topic: /uwsim/joint_state_command
 vehicle_tf: girona500
 world_tf: world
-vehicle_command_topic: /cola2_control/body_velocity_req
-#vehicle_command_topic: /dataNavigator
+#vehicle_command_topic: /cola2_control/body_velocity_req
+vehicle_command_topic: /dataNavigator
 
 
 chain_names: [auv_arm]
@@ -50,7 +50,7 @@ auv/min_cartesian_limit: [-20,-20,-20, -6.28, -6.28, -6.28]
 
 
 
-multitask_priority: [joy]
+multitask_priority: [rotate_z_multi, joints_position_multi]
 
 multitask1/tasks: [task1]
 multitask1/joint_priority_1: [5,6,7,8]
@@ -71,10 +71,18 @@ joy/joint_priority_2: [0,1,2,3]
 joy_end_effector/tasks: [end_effector_cartesian]
 joy_end_effector/joint_priority_1: [0,1,2,3,4,5,6,7]
 
- 
+joints_position_multi/tasks: [joints_position]
+joints_position_multi/joint_priority_1: [5,6,7,8]
+
+rotate_z_multi/tasks: [rotate_z]
+rotate_z_multi/joint_priority_1: [0,1,2,3,4,5,6,7,8]
+
+
+
 
 
 task1/chain: auv_arm
+task1/cartesian: True
 task1/mask_cartesian: [1, 1, 1, 1, 1, 1]
 task1/mask_joint: [1,1,1,1,0,0,1,1, 1]
 task1/goal_type: Fixed
@@ -83,6 +91,7 @@ task1/frame_inertial: True
 
 
 task2/chain: auv_arm
+task2/cartesian: True
 task2/mask_cartesian: [0, 0, 0, 1, 1, 1]
 task2/mask_joint: [0,0,0,0,1,1,1,1]
 task2/goal_type: Fixed
@@ -92,6 +101,7 @@ task2/frame_inertial: True
 
 
 task3/chain: auv_arm
+task3/cartesian: True
 task3/mask_cartesian: [1, 1, 1, 1, 1, 1]
 task3/mask_joint: [1,1, 1,1,0,1,1,1,1]
 task3/goal_type: Fixed
@@ -100,6 +110,7 @@ task3/frame_inertial: True
 
 
 task4/chain: auv
+task4/cartesian: True
 task4/mask_cartesian: [1, 1, 1, 1, 1, 1]
 task4/mask_joint: [1,1, 1,1,0,0,0,0]
 task4/goal_type: Fixed
@@ -108,6 +119,7 @@ task4/frame_inertial: True
 
 
 task_pose/chain: auv_arm
+task_pose/cartesian: True
 task_pose/mask_cartesian: [1, 1, 1, 1, 1, 1]
 task_pose/mask_joint: [1,1, 1,1,0,0,1,1,1]
 task_pose/goal_type: ROS_Pose
@@ -116,6 +128,7 @@ task_pose/frame_inertial: True
 
 
 joy_task1/chain: auv_arm
+joy_task1/cartesian: True
 joy_task1/mask_cartesian: [1, 1, 1, 1, 1, 1]
 joy_task1/mask_joint: [1,1, 1,1,0,0,1,1,1]
 joy_task1/goal_type: ROS_Twist
@@ -127,10 +140,28 @@ joy_task1/frame_inertial: False
 
 
 end_effector_cartesian/chain: auv_arm
+end_effector/cartesian: True
 end_effector_cartesian/mask_cartesian: [1, 1, 1, 0, 0, 0]
 end_effector_cartesian/mask_joint: [0,0, 0, 0,1,1,1,1]
 end_effector_cartesian/goal_type: ROS_Twist
 end_effector_cartesian/goal/topic: /commands
 end_effector_cartesian/frame_inertial: False
 
+joints_position/chain: auv_arm
+joints_position/cartesian: False
+joints_position/mask_cartesian: [1, 1, 1, 1, 1, 1]
+joints_position/mask_joint: [0,0, 0, 0,0,1,0,0,0]
+joints_position/goal_type: Joints
+joints_position/goal/joints_position: [0, 0, 0, 0, 0, 0.0, 0.0, 0.0, 0.0]
+joints_position/frame_inertial: True
+
+
+
+rotate_z/chain: auv_arm
+rotate_z/cartesian: True
+rotate_z/mask_cartesian: [0, 0, 0, 0, 0, 1]
+rotate_z/mask_joint: [0,0, 0,1,0,1,0,0,0]
+rotate_z/goal_type: Fixed
+rotate_z/goal/desired_pose: [0.0, 0, 0, 0, 0, 0]
+rotate_z/frame_inertial: True
 

@@ -59,6 +59,7 @@ public:
   void setMaskJoint(std::vector<int> mask);
   void setOdom(std::vector<float> odom);
 };
+typedef boost::shared_ptr<JointJacobian> JointJacobianPtr;
 
 
 

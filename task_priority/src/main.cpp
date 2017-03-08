@@ -161,6 +161,7 @@ int main(int argc, char **argv){
     std::vector<std::string> task_names;
 
     nh.getParam(multitask_priority[i]+"/tasks", task_names);
+    ROS_INFO("Multitask: %s", multitask_priority[i].c_str());
     std::vector<std::vector<int> > joint_priority;
 
     bool finished=false;
@@ -176,58 +177,102 @@ int main(int argc, char **argv){
       }
 
     }
+    ROS_INFO("    %d joint_priorities", cont-1);
     std::vector<TaskPtr> tasks;
     for(int j=0; j<task_names.size(); j++){
+      ROS_INFO("    Task: %s", task_names[j].c_str());
       std::string task_chain;
       nh.getParam(task_names[j]+"/chain", task_chain);
+      ROS_INFO("        Chain: %s", task_chain.c_str());
+      bool cartesian;
+      nh.getParam(task_names[j]+"/cartesian", cartesian);
+      ROS_INFO("        Cartesian: %d", cartesian);
       std::vector<int> task_mask_cartesian, task_mask_joint;
       nh.getParam(task_names[j]+"/mask_cartesian", task_mask_cartesian);
+      std::string msg;
+      for(int k=0; k<task_mask_cartesian.size(); k++){
+        msg+=boost::lexical_cast<std::string>(task_mask_cartesian[k])+" ";
+      }
+      ROS_INFO("        Mask Cartesian: %s", msg.c_str());
       nh.getParam(task_names[j]+"/mask_joint", task_mask_joint);
+      msg="";
+      for(int k=0; k<task_mask_joint.size(); k++){
+        msg+=boost::lexical_cast<std::string>(task_mask_joint[k])+" ";
+      }
+      ROS_INFO("        Mask Joint: %s", msg.c_str());
       std::string goal_type;
       nh.getParam(task_names[j]+"/goal_type", goal_type);
       GoalPtr goal;
       if(goal_type=="Fixed"){
+        ROS_INFO("        Goal: Fixed");
         std::vector<float> desired_pose;
         nh.getParam(task_names[j]+"/goal/desired_pose", desired_pose);
         Eigen::MatrixXd desired_pose_eigen(6,1);
         for(int k=0; k<6; k++){
           desired_pose_eigen(k,0)=desired_pose[k];
         }
+        msg="";
+        for(int k=0; k<desired_pose.size(); k++){
+          msg+=boost::lexical_cast<std::string>(desired_pose[k])+" ";
+        }
+        ROS_INFO("            Desired Pose: %s", msg.c_str());
         GoalFixedPosePtr goal_fixed(new GoalFixedPose(desired_pose_eigen, chains[chain_id[task_chain]], task_mask_cartesian, chain_joint_relations[chain_id[task_chain]], max_cartesian_vel));
         goal=goal_fixed;
       }
       else if(goal_type=="ROS_Pose"){
+        ROS_INFO("        Goal: ROS Pose");
         std::string goal_topic;
         nh.getParam(task_names[j]+"/goal/topic", goal_topic);
+        ROS_INFO("            ROS Node: %s", goal_topic.c_str());
         GoalROSPosePtr goal_ros_pose(new GoalROSPose(chains[chain_id[task_chain]], task_mask_cartesian, goal_topic, nh, chain_joint_relations[chain_id[task_chain]], max_cartesian_vel));
         goal=goal_ros_pose;
       }
       else if(goal_type=="ROS_Twist"){
+        ROS_INFO("        Goal: ROS Twist");
         std::string goal_topic;
         nh.getParam(task_names[j]+"/goal/topic", goal_topic);
+        ROS_INFO("            ROS Node: %s", goal_topic.c_str());
         GoalROSTwistPtr goal_ros_twist(new GoalROSTwist(task_mask_cartesian, goal_topic, nh, max_cartesian_vel));
         goal=goal_ros_twist;
       }
+      else if(goal_type=="Joints"){
+        ROS_INFO("        Goal: Joints");
+        std::vector<float> joints_position;
+        nh.getParam(task_names[j]+"/goal/joints_position", joints_position);
+        msg="";
+        for(int k=0; k<joints_position.size(); k++){
+          msg+=boost::lexical_cast<std::string>(joints_position[k])+" ";
+        }
+        ROS_INFO("            Desired Joints Position: %s", msg.c_str());
+        GoalJointsPositionPtr goal_joint(new GoalJointsPosition(joints_position));
+        goal=goal_joint;
+      }
       else{
-        ROS_ERROR("Goal must be Fixed, ROS_Pose or ROS_Twist");
+        ROS_ERROR("Goal must be Fixed, ROS_Pose, ROS_Twist or Joints");
       }
       bool frame_inertial;
       nh.getParam(task_names[j]+"/frame_inertial", frame_inertial);
-      TaskPtr task(new Task(chains[chain_id[task_chain]],task_mask_cartesian, n_joints, task_mask_joint, chain_joint_relations[chain_id[task_chain]], goal, frame_inertial ));
+      ROS_INFO("        Frame Inertial: %d", frame_inertial);
+      TaskPtr task(new Task(chains[chain_id[task_chain]],task_mask_cartesian, n_joints, task_mask_joint, chain_joint_relations[chain_id[task_chain]], goal, frame_inertial, cartesian, task_names[j] ));
       tasks.push_back(task);
 
     }
-  MultiTaskPtr multi(new MultiTask(tasks, chains, chain_joint_relations, joint_priority));
+  MultiTaskPtr multi(new MultiTask(tasks, chains, chain_joint_relations, joint_priority, multitask_priority[i]));
   multitasks.push_back(multi);
   }
 
 
   std::string arm_joint_state_topic, arm_joint_command_topic, vehicle_tf, world_tf, vehicle_command_topic;
   nh.getParam("arm_joint_state_topic", arm_joint_state_topic);
+  ROS_INFO("Joint State Topi: %s", arm_joint_state_topic.c_str());
   nh.getParam("arm_joint_command_topic", arm_joint_command_topic);
+  ROS_INFO("Command Joint Topic: %s", arm_joint_state_topic.c_str());
   nh.getParam("vehicle_tf", vehicle_tf);
+  ROS_INFO("Vehicle tf: %s", vehicle_tf.c_str());
   nh.getParam("world_tf", world_tf);
+  ROS_INFO("World tf: %s", world_tf.c_str());
   nh.getParam("vehicle_command_topic", vehicle_command_topic);
+  ROS_INFO("Command Vehicle Topic: %s", vehicle_command_topic.c_str());
 
   ControllerPtr controller(new Controller(multitasks, n_joints, max_joint_limit, min_joint_limit, max_cartesian_limits, min_cartesian_limits, acceleration, max_joint_vel, sampling_duration, nh, arm_joint_state_topic, arm_joint_command_topic, vehicle_tf, world_tf, vehicle_command_topic, chains, chain_joint_relations));
   controller->goToGoal();
