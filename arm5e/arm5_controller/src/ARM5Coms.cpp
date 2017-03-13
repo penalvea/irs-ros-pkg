@@ -48,7 +48,7 @@ void ARM5Coms::readMessage()
 	byte buffer[51];
 	//std::cerr << "Reading data..." << std::endl;
 	int bytes_read;
-	do {
+	/*do {
 		bytes_read=read(rs232_fd,buffer,51); 
 		//std::cerr << "Received package of " << bytes_read << " size." << std::endl;
 		//Ugly hack. Sometimes the arm stops sending back messages and moving until we send zero velocities
@@ -64,7 +64,35 @@ void ARM5Coms::readMessage()
 			sendMessage();
 		}
 		usleep(10000);
-	} while (bytes_read==-1);
+	} while (bytes_read==-1);*/
+
+
+	while(1){
+		bytes_read=read(rs232_fd, buffer, 1);
+		if(bytes_read == 1 && *buffer ==SOM)
+			break;
+		else{
+			Channel2.SpeedDemand(Channel2.disDemand()+1, 0xffff, 0x0fff);
+			Channel1.SpeedDemand(Channel1.disDemand()+1, 0xffff, 0x0fff);
+			Channel3.SpeedDemand(Channel3.disDemand()+1, 0xffff, 0x0fff);
+			Channel4.SpeedDemand(Channel4.disDemand()+1, 0xffff, 0x0fff);
+			Channel5.SpeedDemand(Channel5.disDemand()+1, 0xffff, 0x0fff);
+			sendMessage();
+			usleep(1000);
+		}
+	}
+
+	byte *ptr=buffer+1;
+	int bleft= datalength -1;
+	while(bleft>0){
+		bytes_read=read(rs232_fd, ptr, bleft);
+		if(bytes_read>0){
+			ptr+=bytes_read;
+			bleft-=bytes_read;
+		}
+	}
+	bytes_read=datalength;
+	
 
 	//printf("%02X %02X\n",buffer[0], buffer[50]);
         if (bytes_read==datalength)

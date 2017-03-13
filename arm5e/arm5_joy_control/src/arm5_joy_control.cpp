@@ -1,7 +1,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
 #include <sensor_msgs/Joy.h>
-#define CURRENT_THRESHOLD 1.0
+#define CURRENT_THRESHOLD 6.0
 
 class TeleopCSIP
 {

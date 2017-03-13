@@ -14,7 +14,7 @@ ARM5Control::ARM5Control()
 {
   coms= new ARM5Coms();
   std::cerr << "Opening port" << std::endl;
-  coms_fd=coms->OpenPort("/dev/ttyS0");
+  coms_fd=coms->OpenPort("/dev/ttyUSB4");
   std::cerr << "ARM5Control::ARM5Control Port opened with fd " << coms_fd << std::endl;
 
   coms->Channel1.ValuePID(0,0,0,255,4,0);
@@ -275,6 +275,7 @@ void ARM5Control::commandTicks(const sensor_msgs::JointState::ConstPtr& js)
 	ROS_ERROR("ARM5Control::commandTicks: Input JointState message contains more than 5 values.");
   }
 
+std::cout<<"tick received"<<std::endl;
 }
 
 void ARM5Control::commandlength(const sensor_msgs::JointState::ConstPtr& js)
