@@ -322,6 +322,16 @@ vpColVector ARM5Arm::armIK(vpHomogeneousMatrix &wMe){
 
 }
 vpColVector ARM5Arm::armIK(vpHomogeneousMatrix &wMe,vpColVector maxJointLimits, vpColVector minJointLimits) {
+vpColVector initial_joints(4);
+initial_joints[0]=0;
+initial_joints[1]=M_PI_4;
+initial_joints[2]=M_PI_4;
+initial_joints[3]=0;
+return armIK(wMe, maxJointLimits, minJointLimits, initial_joints);
+
+
+}
+vpColVector ARM5Arm::armIK(vpHomogeneousMatrix &wMe, vpColVector maxJointLimits, vpColVector minJointLimits, vpColVector initial_joints){
 	KDL::JntArray q(chain.getNrOfJoints());
 	KDL::JntArray q_init(chain.getNrOfJoints());
 	KDL::JntArray qmin(chain.getNrOfJoints());
@@ -367,10 +377,10 @@ vpColVector ARM5Arm::armIK(vpHomogeneousMatrix &wMe,vpColVector maxJointLimits, 
 	KDL::ChainIkSolverPos_NR_JL iksolver(chain, qmin, qmax, fksolver,iksolverv,100,1e-6);//Maximum 100 iterations, stop at accuracy 1e-6
 
 	//Initial guess
-	q_init(0)=0;
-	q_init(1)=M_PI_4;
-	q_init(2)=M_PI_4;
-	q_init(3)=0;
+  q_init(0)=initial_joints[0];
+  q_init(1)=initial_joints[1];
+  q_init(2)=initial_joints[2];
+  q_init(3)=initial_joints[3];
 
 	iksolver.CartToJnt(q_init,F_dest,q);
 

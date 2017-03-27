@@ -119,6 +119,7 @@ public:
 	/** Compute the IK of the arm for reaching a given frame wMe (=bMe) */
 	vpColVector armIK(vpHomogeneousMatrix &wMe);
 	vpColVector armIK(vpHomogeneousMatrix &wMe, vpColVector maxJointLimits, vpColVector minJointLimits);
+  vpColVector armIK(vpHomogeneousMatrix &wMe, vpColVector maxJointLimits, vpColVector minJointLimits, vpColVector initial_joints);
 
 
 	/** Compute the IK of the vehicle-arm for reaching a given frame wMe */
