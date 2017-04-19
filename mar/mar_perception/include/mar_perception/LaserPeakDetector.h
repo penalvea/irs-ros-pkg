@@ -1,7 +1,8 @@
 #ifndef LASERPEAKDETECTOR_H_
 #define LASERPEAKDETECTOR_H_
 
-#include <opencv2/imgproc/imgproc.hpp>
+//#include <opencv2/imgproc/imgproc.hpp>
+
 #include <visp/vpImageConvert.h>
 #include <visp/vpImage.h>
 #include <visp/vpColVector.h>
@@ -99,8 +100,8 @@ class SimpleSubPixelLaserPeakDetector : public LaserPeakDetector
   double tolerance_;
 
 public:
-  SimpleSubPixelLaserPeakDetector(VirtualImagePtr grabber, vpRGBa reference_color = vpRGBa(200, 255, 200),
-                                  double tolerance = 30) :
+  SimpleSubPixelLaserPeakDetector(VirtualImagePtr grabber, vpRGBa reference_color = vpRGBa(200, 200, 200),
+                                  double tolerance = 100) :
       LaserPeakDetector(grabber), reference_color_(reference_color), tolerance_(tolerance)
   {
   }

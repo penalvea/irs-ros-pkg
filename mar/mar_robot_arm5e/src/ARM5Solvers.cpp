@@ -63,7 +63,7 @@ int ChainIkSolverVel_pinv_red::CartToJnt(const JntArray& q_in, const Twist& v_in
 
 	//Remove grasp-redundant DOF's (Jr), and compute the pseudoinverses
 	vpMatrix Jr=J;
-	for (unsigned int r=3; r<6; r++) {
+	for (unsigned int r=6; r<6; r++) {
 		for (unsigned int c=0; c<jac.columns(); c++) {
 			Jr[r][c]=0;
 		}

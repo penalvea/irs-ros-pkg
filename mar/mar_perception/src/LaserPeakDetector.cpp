@@ -6,14 +6,13 @@
  */
 
 #include <mar_perception/LaserPeakDetector.h>
-#include <opencv2/highgui/highgui.hpp>
+//#include <opencv2/highgui/highgui.hpp>
 #include <stdlib.h>
 #include <tf/transform_broadcaster.h>
 #include <string>
 
 double LaserPeakDetector::getIntersectionPoint(vpHomogeneousMatrix bMc, vpHomogeneousMatrix bMl, int col, double radius)
 {
-
   //  Parametric equation of laser plane
 
   vpColVector normal_laser(3), point_laser(3);
@@ -113,12 +112,12 @@ double LaserPeakDetector::getIntersectionPoint(vpHomogeneousMatrix bMc, vpHomoge
 
   if (delta < 0)
   {
-    //std::cout<<"There is no intersection between the laser plane, the camera plane and the WS sphere"<<std::endl;
+    std::cout<<"There is no intersection between the laser plane, the camera plane and the WS sphere"<<std::endl;
   }
   else if (delta == 0)
   {
     double d1 = (-b) / (2 * a);
-    vpColVector final_point1(3), final_point2(3), final_point3(3);
+    vpColVector final_point1(3);;
     final_point1 = intersection_point1 + d1 * (intersection_point2 - intersection_point1);
     vpHomogeneousMatrix bMpoint1(final_point1[0], final_point1[1], final_point1[2], 0, 0, 0);
     vpHomogeneousMatrix cMpoint1 = bMc.inverse() * bMpoint1;
@@ -127,31 +126,45 @@ double LaserPeakDetector::getIntersectionPoint(vpHomogeneousMatrix bMc, vpHomoge
       return (cMpoint1[1][3] * grabber_->K.get_py() / cMpoint1[2][3]) + grabber_->K.get_v0();
     }
 
-    //std::cout<<"There is only a single intersection between the laser plane, the camera plane and the WS sphere"<<std::endl;
+    std::cout<<"There is only a single intersection between the laser plane, the camera plane and the WS sphere"<<std::endl;
   }
   else
   {
     double d1 = (-b - std::sqrt(delta)) / (2 * a);
     double d2 = (-b + std::sqrt(delta)) / (2 * a);
 
-    vpColVector final_point1(3), final_point2(3), final_point3(3);
+    std::cout<<"deltas "<<d1<<" "<<d2<<std::endl;
+
+    vpColVector final_point1(3), final_point2(3);
     final_point1 = intersection_point1 + d1 * (intersection_point2 - intersection_point1);
     final_point2 = intersection_point1 + d2 * (intersection_point2 - intersection_point1);
+    //std::cout<<"final points "<<final_point1<<" "<<final_point2<<std::endl;
 
     vpHomogeneousMatrix bMpoint1(final_point1[0], final_point1[1], final_point1[2], 0, 0, 0), bMpoint2(final_point2[0],
                                                                                                        final_point2[1],
                                                                                                        final_point2[2],
                                                                                                        0, 0, 0);
-    vpHomogeneousMatrix cMpoint1 = bMc.inverse() * bMpoint1;
-    vpHomogeneousMatrix cMpoint2 = bMc.inverse() * bMpoint2;
+    //std::cout<<"bMpoints "<<bMpoint1<<std::endl<<bMpoint2<<std::endl;
+    vpHomogeneousMatrix cMpoint3 = bMc.inverse() * bMpoint1;
+    vpHomogeneousMatrix cMpoint4 = bMc.inverse() * bMpoint2;
+    //std::cout<<bMc<<std::endl;
+    //std::cout<<bMc.inverse()<<std::endl;
+    vpHomogeneousMatrix bMc_inv=bMc.inverse();
+    //std::cout<<"bMc_inv "<<std::endl<<bMc_inv<<std::endl;
+    //std::cout<<"bMpoin1"<<std::endl<<bMpoint1<<std::endl;
+    //std::cout<<"cMpoint1"<<std::endl<<bMc_inv*bMpoint1<<std::endl;
+    //std::cout<<"bMc_inv "<<std::endl<<bMc_inv<<std::endl;
+    //std::cout<<"bMpoin2"<<std::endl<<bMpoint2<<std::endl;
+    //std::cout<<"cMpoint2"<<std::endl<<bMc_inv*bMpoint2<<std::endl;
 
-    if (cMpoint1[2][3] > 0)
+
+    if (cMpoint3[2][3] > 0)
     {
-      return (cMpoint1[1][3] * grabber_->K.get_py() / cMpoint1[2][3]) + grabber_->K.get_v0();
+      return (cMpoint3[1][3] * grabber_->K.get_py() / cMpoint3[2][3]) + grabber_->K.get_v0();
     }
-    else if (cMpoint2[2][3] > 0)
+    else if (cMpoint4[2][3] > 0)
     {
-      return (cMpoint2[1][3] * grabber_->K.get_py() / cMpoint2[2][3]) + grabber_->K.get_v0();
+      return (cMpoint4[1][3] * grabber_->K.get_py() / cMpoint4[2][3]) + grabber_->K.get_v0();
 
     }
   }
@@ -163,12 +176,14 @@ double LaserPeakDetector::getIntersectionPoint(vpHomogeneousMatrix bMc, vpHomoge
 
 void LaserPeakDetector::setLimits(vpHomogeneousMatrix bMc, vpHomogeneousMatrix bMl)
 {
+
   if (min_radius_ != -1 && max_radius_ != -1)
   {
     double left_min = getIntersectionPoint(bMc, bMl, 0, min_radius_);
     double right_min = getIntersectionPoint(bMc, bMl, grabber_->image.getCols(), min_radius_);
     double left_max = getIntersectionPoint(bMc, bMl, 0, max_radius_);
     double right_max = getIntersectionPoint(bMc, bMl, grabber_->image.getCols(), max_radius_);
+    std::cout<<left_min<<" "<<right_min<<" "<<left_max<<" "<<right_max<<std::endl;
 
     if (left_min != -1 && right_min != -1)
     {
@@ -240,15 +255,17 @@ void SimpleSubPixelLaserPeakDetector::perceive()
 {
   //For each two columns, search the peak according to the RGB color (most similar to reference_color_) in subpixel accuracy
   points.clear();
-  for (unsigned int c = 0; c < grabber_->image.getCols(); c++)
+  for (unsigned int c = 236; c < grabber_->image.getCols(); c++)
   {
     double similarity = 0;
     double mr = 0, mc = 0, nmatch = 0;
     int localsim;
-    for (unsigned int r = 0; r < grabber_->image.getRows(); r++)
+    //for (unsigned int r = 0; r < grabber_->image.getRows(); r++)
+    for (int r = limits_[0]; r <= limits_[1]; r++)
     {
       localsim = abs(grabber_->image(r, c).R - reference_color_.R) + abs(grabber_->image(r, c).G - reference_color_.G)
           + abs(grabber_->image(r, c).B - reference_color_.B);
+
       if (localsim < tolerance_)
       {
         similarity += localsim;
@@ -283,13 +300,15 @@ void LastImageSubPixelLaserPeakDetector::perceive()
   cv::cvtColor(restaBN, restaBN, CV_BGR2GRAY);
   cv::Mat show_image = Ig.clone(); //imagen para marcar los puntos del laser
 
-  for (unsigned int c = 0; c < grabber_->image.getCols(); c++)
+  for (unsigned int c = 250; c < grabber_->image.getCols(); c++)
   {
     float maxNB = -1;
     float maxNB_r = -1;
     float maxBN = -1;
     float maxBN_r = -1;
-    for (unsigned int r = 0; r < grabber_->image.getRows(); r++)
+    //for (unsigned int r = 0; r < grabber_->image.getRows(); r++)
+    for (int r = limits_[0]; r <= limits_[1]; r++)
+
     {
       if (restaNB.at<uchar>(r, c) > maxNB)
       {
@@ -371,7 +390,7 @@ void HSVSubPixelLaserPeakDetector::perceive()
   //cv::imshow("Display window", thresholding);
 
   //Laser detection
-  for (int j = 0; j < thresholding.cols; j++)
+  for (int j = 236; j < thresholding.cols; j++)
   {
     int up = -1, down = -1;
     for (int i = limits_[0]; i <= limits_[1]; i++)

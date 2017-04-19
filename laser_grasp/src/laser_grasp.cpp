@@ -82,7 +82,7 @@ LaserGrasp::LaserGrasp(ros::NodeHandle& nh, std::string point_cloud_path, std::s
 	cloud_indices_=segment_cloud(cloud_);
 	std::cout<<"indices="<<cloud_indices_.size()<<std::endl;
 	cloud_color_=color_cloud(cloud_);
-	pcl::io::savePCDFile("/home/toni/JC_point_cloud.pcd", *cloud_color_, false);
+	pcl::io::savePCDFile("/home/penalvea/JC_point_cloud.pcd", *cloud_color_, false);
 	viewer_=rgbVis(cloud_color_);
 
 	object_selected_=false;

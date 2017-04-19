@@ -19,6 +19,7 @@ int Reconstruction3DAction::doAction()
 	  vpColVector current_joints;
 	  robot_->getJointValues(current_joints);
 	  vp_scan_initial_posture_[4]=current_joints[4];
+    vp_scan_initial_posture_[3]=current_joints[3];
 	  while((vp_scan_initial_posture_-current_joints).euclideanNorm()>0.07 && ros::ok()){
 		  std::cout<<"Error: "<<(vp_scan_initial_posture_-current_joints).euclideanNorm()<<std::endl;
 		  robot_->setJointVelocity((vp_scan_initial_posture_-current_joints)*10.0);
@@ -29,6 +30,8 @@ int Reconstruction3DAction::doAction()
     //robot_->setJointValues(vp_scan_initial_posture_, true, 0.5);
   }
   int cont = 0;
+
+
   //The main loop. Acquire image, track template, detect peaks, estimate motion, and reconstruction, while
   //controlling the arm through the scan:
   vpHomogeneousMatrix eMl;
@@ -48,6 +51,8 @@ int Reconstruction3DAction::doAction()
       mest_->perceive();
     }*/
     draw();
+
+
     for (int i = 0; i < rec_.size(); i++)
     {
       rec_[i]->perceive();
@@ -113,6 +118,31 @@ void Reconstruction3DAction::draw()
     }
 
   }
+
+  if (publish_point_cloud_)
+  {
+    for (int i=0; i<rec_.size(); i++){
+
+
+    if (cont_points_[i] != rec_[i]->points3d.size())
+    {
+
+      sensor_msgs::PointCloud2 msg;
+      pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
+      cloud = rec_[i]->getLimitedCloud(cont_points_[i], rec_[i]->points3d.size());
+      cont_points_[i] = rec_[i]->points3d.size();
+
+
+      pcl::toROSMsg(*cloud, msg);
+      msg.header.stamp = ros::Time::now();
+      msg.header.frame_id = "arm5/kinematic_base";
+      point_cloud_pub_.publish(msg);
+      ros::spinOnce();
+    }
+    }
+  }
+
+
 
 }
 void Reconstruction3DAction::benchmarkCallback(const std_msgs::String::ConstPtr &msg)

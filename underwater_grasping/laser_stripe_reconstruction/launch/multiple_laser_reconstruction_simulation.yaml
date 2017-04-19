@@ -3,19 +3,41 @@ offline: false
 fixed: true
 draw: true
 
-publish_point_cloud: false
+publish_point_cloud: true
 
 #Arm topics
-joint_state_topic: "/arm5e/joint_state_angle"
-joint_state_command_topic: "/arm5e/command_angle"
+joint_state_topic: "/uwsim/joint_state"
+joint_state_command_topic: "/uwsim/joint_state_command"
 
 #Joint values for initial and final scanning configurations
-scan_initial_posture: [0.0, 0.12, 0.9, 0.0, 0.1]
-scan_final_posture: [ 0.0, 0.12, 1.8, 0.0, 0.1]
+scan_initial_posture: [0.0, 0.12, 0.1, 0.0, 0.1]
+scan_final_posture: [ 0.0, 0.12, 1.9, 0.0, 0.1]
 
 #Names of cameras
 #cameras: ["stereo_down/left", "eye", "stereo_down/right", "stereo_real/left"]
-cameras: [ "stereo_real/left"]
+cameras: [ "eye"]
+
+
+
+
+#eye
+eye/image: "/uwsim/eye"
+eye/camera_info: "/uwsim/eye_info"
+eye/reconstruction_type: "eye"
+eye/eMc: [0.041, 0.177, -0.163, -0.141, -0.141, 0.693, 0.693]
+eye/eMl: [-0.092, -0.000, -0.188, 0.0, 0.0, 0.0, 1.0]
+eye/peak_detector_type: "simple_subpixel"
+eye/min_radius_WS: 0.5
+eye/max_radius_WS: 0.5
+eye/base_name: "/home/penalvea/3DReconstructions/eye_simulation"
+
+
+
+
+
+
+
+
 
 #stereo_down/left
 stereo_down/left/image: "stereo_down/left/image_raw"
@@ -28,17 +50,6 @@ stereo_down/left/min_radius_WS: 0.5
 stereo_down/left/max_radius_WS: 2.0
 stereo_down/left/base_name: "/home/toni/3DReconstructions/stereo_left_thread"
 
-
-#eye
-eye/image: "uwsim/eye"
-eye/camera_info: "uwsim/eye_info"
-eye/reconstruction_type: "eye"
-eye/eMc: [0.041, 0.177, -0.163, -0.141, -0.141, 0.693, 0.693]
-eye/eMl: [-0.092, -0.000, -0.188, 0.0, 0.0, 0.0, 1.0]
-eye/peak_detector_type: "simulation"
-eye/min_radius_WS: 0.2
-eye/max_radius_WS: 2.0
-eye/base_name: "/home/toni/3DReconstructions/eye"
 
 
 #stereo_down/right

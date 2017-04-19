@@ -32,3 +32,5 @@ add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 add_executable(mainOptoforce6DSensor src/mainOptoforce6DSensor.cpp)
 target_link_libraries( mainOptoforce6DSensor ${PROJECT_NAME} ${catkin_LIBRARIES})
 
+add_executable(prueba src/prueba.cpp)
+target_link_libraries( prueba ${PROJECT_NAME} ${catkin_LIBRARIES})

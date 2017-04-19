@@ -46,6 +46,7 @@ class Reconstruction3DAction : public CAction
   bool offline_;	///< If offline, do not try to move the robot arm
   bool done_;
   bool publish_point_cloud_;
+  std::vector<int> cont_points_;
 
   ros::Publisher point_cloud_pub_;
   ros::NodeHandle nh_;
@@ -65,6 +66,7 @@ public:
           true), offline_(true), done_(false), publish_point_cloud_(false)
   {
     point_cloud_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("LaserReconstructionPointCloud", 1000);
+
     //benchmark_sub_=nh_.subscribe("/BenchmarkInfo", 100, Reconstruction3DAction::benchmarkCallback);
   }
 
@@ -83,6 +85,7 @@ public:
     point_cloud_pub_ = nh_.advertise<sensor_msgs::PointCloud2>("LaserReconstructionPointCloud", 1000);
     benchmark_sub_ = nh_.subscribe<std_msgs::String>("/BenchmarkInfo", 100, &Reconstruction3DAction::benchmarkCallback,
                                                      this);
+    cont_points_.resize(rec_.size(), 0);
   }
   static void threadReconstruction(Reconstruction3DPtr rec, Reconstruction3DAction *act)
   {
