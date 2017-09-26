@@ -37,6 +37,10 @@ include_directories(${catkin_INCLUDE_DIRS} ${VISP_INCLUDE_DIRS} )
 add_executable(multiple_laser_stripe_reconstruction src/multiple_laser_stripe_reconstruction.cpp)
 target_link_libraries(multiple_laser_stripe_reconstruction ${catkin_LIBRARIES}  Qt5::Test Qt5::Core)
 
+add_executable(multiple_laser_reconstruction_several_scans src/multiple_laser_reconstruction_several_scans.cpp)
+target_link_libraries(multiple_laser_reconstruction_several_scans ${catkin_LIBRARIES}  Qt5::Test Qt5::Core)
+
+
 install(
   TARGETS
 

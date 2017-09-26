@@ -1,0 +1,7 @@
+<launch>
+        <rosparam command="load" file="$(find laser_stripe_reconstruction)/launch/multiple_laser_reconstruction_several_scans.yaml" />
+
+        <node name="multiple_laser_reconstruction_several_scans" pkg="laser_stripe_reconstruction" type="multiple_laser_reconstruction_several_scans" output="screen" respawn="false"/>
+</launch>
+
+

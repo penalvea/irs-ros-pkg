@@ -20,7 +20,9 @@ void ARM5Arm::initKinematicSolvers() {
 	chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( 0.08052,  M_PI_2,  0.0    , 0.0     )));
 	chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( 0.44278, 0.0 ,  0.0    , 0.139277274     )));//7.98
 	chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( -0.083 ,  M_PI_2,  0.0    , 1.972222055     )));//127.02
-	chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( 0.0, 0,  0.56138    , 0.0     )));
+	//chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( 0.0, 0,  0.56138    , 0.0     )));
+	//chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( 0.0, 0,  0.49938    , 0.0     )));
+        chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::RotZ), KDL::Frame().DH( 0.0, 0,  0.54938    , 0.0     )));
 
 
 
@@ -305,12 +307,12 @@ vpColVector ARM5Arm::armIK(vpHomogeneousMatrix &wMe){
 	maxJointLimits[0]=30*M_PI/180;
 	maxJointLimits[1]=90*M_PI/180;
 	maxJointLimits[2]=145*M_PI/180;
-	maxJointLimits[3]=360*M_PI/180;
+  maxJointLimits[3]=180*M_PI/180;
 
 	minJointLimits[0]=-90*M_PI/180;
 	minJointLimits[1]=0*M_PI/180;
 	minJointLimits[2]=0*M_PI/180;
-	minJointLimits[3]=-360*M_PI/180;
+  minJointLimits[3]=-180*M_PI/180;
 	return armIK(wMe, maxJointLimits, minJointLimits);
 
 }
@@ -353,13 +355,13 @@ vpColVector ARM5Arm::armIK(vpHomogeneousMatrix &wMe, vpColVector maxJointLimits,
 	for (int i=0; i<3; i++) tvec.data[i]=wTe.data[i];
 	KDL::Frame F_dest(rot,tvec);
 
-	/*std::cout << "F_dest (wMe): " << std::endl;
+  std::cout << "F_dest (wMe): " << std::endl;
 	for (int i=0; i<4; i++) {
 		for (int j=0; j<4; j++) {
 			std::cout << F_dest(i,j) << " ";
 		}
 		std::cout << std::endl;
-	} */
+  }
 
 
 	//Kinematic solvers

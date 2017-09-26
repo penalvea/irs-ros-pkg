@@ -75,13 +75,17 @@ typedef boost::shared_ptr<LaserPeakDetector> LaserPeakDetectorPtr;
 class SimpleLaserPeakDetector : public LaserPeakDetector
 {
   vpRGBa reference_color_;
-  double tolerance_;
+  int tolerance_;
+  int r_, g_, b_;
 
 public:
-  SimpleLaserPeakDetector(VirtualImagePtr grabber, vpRGBa reference_color = vpRGBa(200, 255, 200),
-                          double tolerance = 30) :
+  SimpleLaserPeakDetector(VirtualImagePtr grabber, vpRGBa reference_color = vpRGBa(137, 206, 134),
+                          double tolerance = 137) :
       LaserPeakDetector(grabber), reference_color_(reference_color), tolerance_(tolerance)
   {
+    r_=int(reference_color_.R);
+    g_=int(reference_color_.G);
+    b_=int(reference_color_.B);
   }
 
   virtual void perceive();
@@ -97,13 +101,17 @@ typedef boost::shared_ptr<SimpleLaserPeakDetector> SimpleLaserPeakDetectorPtr;
 class SimpleSubPixelLaserPeakDetector : public LaserPeakDetector
 {
   vpRGBa reference_color_;
-  double tolerance_;
+  int tolerance_;
+  int r_, g_, b_;
 
 public:
-  SimpleSubPixelLaserPeakDetector(VirtualImagePtr grabber, vpRGBa reference_color = vpRGBa(200, 200, 200),
-                                  double tolerance = 100) :
+  SimpleSubPixelLaserPeakDetector(VirtualImagePtr grabber, vpRGBa reference_color = vpRGBa(103, 216, 107),
+                                  int tolerance = 185) :
       LaserPeakDetector(grabber), reference_color_(reference_color), tolerance_(tolerance)
   {
+    r_=int(reference_color_.R);
+    g_=int(reference_color_.G);
+    b_=int(reference_color_.B);
   }
 
   virtual void perceive();

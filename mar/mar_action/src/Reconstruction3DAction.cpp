@@ -20,7 +20,7 @@ int Reconstruction3DAction::doAction()
 	  robot_->getJointValues(current_joints);
 	  vp_scan_initial_posture_[4]=current_joints[4];
     vp_scan_initial_posture_[3]=current_joints[3];
-	  while((vp_scan_initial_posture_-current_joints).euclideanNorm()>0.07 && ros::ok()){
+    while((vp_scan_initial_posture_-current_joints).euclideanNorm()>0.03 && ros::ok()){
 		  std::cout<<"Error: "<<(vp_scan_initial_posture_-current_joints).euclideanNorm()<<std::endl;
 		  robot_->setJointVelocity((vp_scan_initial_posture_-current_joints)*10.0);
 		  robot_->getJointValues(current_joints);
@@ -64,9 +64,12 @@ int Reconstruction3DAction::doAction()
     //Make the scan motion: Send the arm to the final joint position with a suitable joint velocity
     if (!offline_)
     {
-      double scale = 1;
+      double scale = 2;
       vpColVector q;
       robot_->getJointValues(q);
+      vp_scan_initial_posture_[0]=q[0];
+      vp_scan_initial_posture_[3]=q[3];
+      vp_scan_initial_posture_[4]=q[4];
       if ((vp_scan_final_posture_ - q).infinityNorm() > max_joint_velocity_)
       {
         //scale to the maximum allowed velocity
@@ -74,6 +77,8 @@ int Reconstruction3DAction::doAction()
       }
       if ((vp_scan_final_posture_ - q).infinityNorm() < position_tolerance_)
         done_ = true;
+
+
       robot_->setJointVelocity((vp_scan_final_posture_ - q) * scale);
     }
 

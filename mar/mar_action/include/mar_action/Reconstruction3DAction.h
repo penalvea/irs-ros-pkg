@@ -19,7 +19,7 @@
 #include <std_msgs/String.h>
 
 /** Maximum joint velocity to send to the arm */
-#define DEFAULT_MAX_JOINT_VELOCITY 0.1
+#define DEFAULT_MAX_JOINT_VELOCITY 0.15
 
 /** Stops the scanning when the position error of the joint with the maximum error is below POSITION_TOLERANCE radians */
 #define DEFAULT_POSITION_TOLERANCE 0.02
