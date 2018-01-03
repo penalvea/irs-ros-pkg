@@ -36,6 +36,7 @@ add_library(laser_grasp
    src/cloud_registration.cpp
    src/best_grasp.cpp
    src/symmetry.cpp
+   src/grasp_planning_filter.cpp
  )
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES}  ${PCL_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
@@ -92,10 +93,37 @@ add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 #)
 
 
-add_executable(symmetry src/symmetry_node.cpp)
-add_dependencies(symmetry ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#add_executable(symmetry src/symmetry_node.cpp)
+#add_dependencies(symmetry ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-target_link_libraries(symmetry
-  ${catkin_LIBRARIES}
-  laser_grasp
+#target_link_libraries(symmetry
+#  ${catkin_LIBRARIES}
+#  laser_grasp
+#)
+
+#add_executable(solid src/solid.cpp)
+#add_dependencies(solid ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+#target_link_libraries(solid
+#  ${catkin_LIBRARIES}
+#  laser_grasp
+#)
+
+#add_executable(prueba src/prueba.cpp)
+#add_dependencies(prueba ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+#target_link_libraries(prueba
+#  ${catkin_LIBRARIES}
+# laser_grasp
+#)
+
+
+add_executable(grasp_planning_filter src/grasp_planning_filter_node.cpp)
+add_dependencies(grasp_planning_filter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(grasp_planning_filter
+ ${catkin_LIBRARIES}
+ laser_grasp
 )
+
+

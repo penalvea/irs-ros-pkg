@@ -28,15 +28,6 @@ void Symmetry::showCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud){
   }
   viewer.close();
 
-
-
-
-
-
-
-
-
-
 }
 
 pcl::PointCloud<pcl::PointXYZRGB>::Ptr Symmetry::color_cloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int r, int g, int b){
@@ -226,7 +217,7 @@ pcl::PointXYZ Symmetry::projectionPlanePoint(pcl::PointXYZ point, pcl::ModelCoef
 
 void Symmetry::calculateSymmetry(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
   pcl::PointCloud<pcl::PointXYZ>::Ptr downsampled_cloud=downsampleCloud(cloud);
-  showCloud(downsampled_cloud);
+  //showCloud(downsampled_cloud);
   std::pair<pcl::PointIndices::Ptr, pcl::ModelCoefficients::Ptr> plane=getPlane(downsampled_cloud);
   pcl::PointIndices::Ptr plane_inliers=plane.first;
   pcl::ModelCoefficients::Ptr coefficients=plane.second;
@@ -246,7 +237,7 @@ void Symmetry::calculateSymmetry(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
   extract.filter(*cloud_plane);
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_plane_color=color_cloud(cloud_plane, 255, 0, 0);
   *cloud_plane_color+=*cloud_no_plane_color;
-  showCloud(cloud_plane_color);
+  //showCloud(cloud_plane_color);
 
   std::vector<pcl::PointIndices> objects_indices=segmentCloud(cloud_no_plane);
 
@@ -381,7 +372,7 @@ for(int i=0; i<object->points.size(); i++){
 }
 std::cout<<maxi_x<<" "<<maxi_y<<" "<<maxi_z<<" "<<mini_x<<" "<<mini_y<<" "<<mini_z<<std::endl;
 
-float offset=0.01;
+float offset=0.002;
 maxi_x+=offset;
 maxi_y+=offset;
 maxi_z+=offset;
@@ -418,6 +409,8 @@ std::cout<<"nuvo objeto creado"<<std::endl;
   object->width=object->points.size();
   showCloud(object);
   //showClouds(object, cloud);
+  object=downsampleCloud(object);
+  showCloud(object);
 
   for(float i=-0.01; i<0.01; i+=0.002){
     pcl::PointXYZ normal_new;
@@ -591,38 +584,55 @@ std::cout<<"nuvo objeto creado"<<std::endl;
     point_opp_normal.y=point_center_plane.y-normal.y;
     point_opp_normal.z=point_center_plane.z-normal.z;
 
-    for(int i=0; i<object->points.size(); i++){
+    std::cout<<"Hemos calculado el nuevo punto medio"<<std::endl;
+
+    for(int j=0; j<object->points.size(); j++){
       pcl::PointXYZ p_front_aux;
-      p_front_aux.x=point_normal.x-object->points[i].x;
-      p_front_aux.y=point_normal.y-object->points[i].y;
-      p_front_aux.z=point_normal.z-object->points[i].z;
+      p_front_aux.x=point_normal.x-object->points[j].x;
+      p_front_aux.y=point_normal.y-object->points[j].y;
+      p_front_aux.z=point_normal.z-object->points[j].z;
       float dist_front=std::sqrt(std::pow(p_front_aux.x,2)+std::pow(p_front_aux.y,2)+std::pow(p_front_aux.z,2));
 
       pcl::PointXYZ p_back_aux;
-      p_back_aux.x=point_opp_normal.x-object->points[i].x;
-      p_back_aux.y=point_opp_normal.y-object->points[i].y;
-      p_back_aux.z=point_opp_normal.z-object->points[i].z;
+      p_back_aux.x=point_opp_normal.x-object->points[j].x;
+      p_back_aux.y=point_opp_normal.y-object->points[j].y;
+      p_back_aux.z=point_opp_normal.z-object->points[j].z;
       float dist_back=std::sqrt(std::pow(p_back_aux.x,2)+std::pow(p_back_aux.y,2)+std::pow(p_back_aux.z,2));
+
+      //std::cout<<"decidimos is esta debajo o arriba del plano"<<std::endl;
 
       if((dist_front<dist_back && best_front) || (dist_front>dist_back && !best_front)){
 
         pcl::PointXYZ symmetric_point;
-        pcl::PointXYZ proj=projectionPlanePoint(object->points[i], best_plane);
-        symmetric_point.x=proj.x-(object->points[i].x-proj.x);
-        symmetric_point.y=proj.y-(object->points[i].y-proj.y);
-        symmetric_point.z=proj.z-(object->points[i].z-proj.z);
+        pcl::PointXYZ proj=projectionPlanePoint(object->points[j], best_plane);
+        //std::cout<<"hemos calculado la proyeccion"<<std::endl;
+        symmetric_point.x=proj.x-(object->points[j].x-proj.x);
+        symmetric_point.y=proj.y-(object->points[j].y-proj.y);
+        symmetric_point.z=proj.z-(object->points[j].z-proj.z);
 
-        symmetric_object->points.push_back(object->points[i]);
+        //std::cout<<"añadimos los puntos"<<std::endl;
+
+        symmetric_object->points.push_back(object->points[j]);
         symmetric_object->points.push_back(symmetric_point);
+        //std::cout<<"puntos añadidos"<<std::endl;
 
       }
     }
+    std::cout<<"Todos los puntos añadidos"<<std::endl;
     symmetric_object->width=symmetric_object->points.size();
     symmetric_object->height=1;
+    std::cout<<"Voy a guardar"<<std::endl;
+    std::ostringstream buff;
+    buff<<i;
+    std::string s=buff.str();
+    std::string  path="/home/penalvea/3DReconstructions/symmetries/"+s+".pcd";
+     std::cout<<"path"<<std::endl;
+
+    pcl::io::savePCDFile(path, *symmetric_object);
+    pcl::io::savePCDFile(path, *color_cloud(symmetric_object, 255, 0, 0));
 
 
-
-    pcl::visualization::PCLVisualizer viewer2("Cloud2");
+    /*pcl::visualization::PCLVisualizer viewer2("Cloud2");
     viewer2.addPointCloud<pcl::PointXYZ>(symmetric_object);
 
     viewer2.addPlane(*best_plane, point_center_plane.x, point_center_plane.y, point_center_plane.z, "plane2");
@@ -638,6 +648,7 @@ std::cout<<"nuvo objeto creado"<<std::endl;
     }
     viewer2.close();
 
+  }*/
   }
 
   return;
